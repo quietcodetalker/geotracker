@@ -8,7 +8,7 @@ $$ language 'plpgsql';
 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    username varchar(16) UNIQUE,
+    username varchar(16) UNIQUE CHECK (LENGTH(username) >= 4 AND username ~ '^[a-zA-Z0-9]+$'),
     created_at timestamp DEFAULT current_timestamp NOT NULL,
     updated_at timestamp DEFAULT current_timestamp NOT NULL
 );
