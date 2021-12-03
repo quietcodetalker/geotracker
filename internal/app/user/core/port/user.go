@@ -20,7 +20,6 @@ type SetUserLocationResponse struct {
 
 // UserService represents user service.
 type UserService interface {
-	// SetUserLocation sets user's location by given username.
 	SetUserLocation(ctx context.Context, req SetUserLocationRequest) (SetUserLocationResponse, error)
 }
 
@@ -33,11 +32,7 @@ type SetUserLocationArg struct {
 
 // UserRepository represents user repository.
 type UserRepository interface {
-	// GetByUsername returns user with given username.
-	// If user is not found returns ErrNotFound error.
 	GetByUsername(ctx context.Context, username string) (domain.User, error)
 
-	// SetUserLocation gets User by given username and updates Location by user ID
-	//with provided coordinates within a single database transaction.
 	SetUserLocation(ctx context.Context, arg SetUserLocationArg) (domain.Location, error)
 }
