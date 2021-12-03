@@ -14,7 +14,5 @@ type SetLocationArg struct {
 
 // LocationRepository represents location repository.
 type LocationRepository interface {
-	// SetLocation sets user's location by given user ID.
-	// Returns updated location entity.
 	SetLocation(ctx context.Context, arg SetLocationArg) (domain.Location, error)
 }
