@@ -33,6 +33,5 @@ type SetUserLocationArg struct {
 // UserRepository represents user repository.
 type UserRepository interface {
 	GetByUsername(ctx context.Context, username string) (domain.User, error)
-
 	SetUserLocation(ctx context.Context, arg SetUserLocationArg) (domain.Location, error)
 }
