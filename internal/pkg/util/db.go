@@ -1,6 +1,10 @@
 package util
 
-import "database/sql"
+import (
+	"database/sql"
+
+	_ "github.com/lib/pq"
+)
 
 // OpenDB tries to connect to db and ping it.
 func OpenDB(driver string, source string) (*sql.DB, error) {
