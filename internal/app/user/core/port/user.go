@@ -5,8 +5,8 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/user/core/domain"
 )
 
-// SetLocationRequest is a param object of user service SetLocation method.
-type SetLocationRequest struct {
+// SetUserLocationRequest is a param object of user service SetUserLocation method.
+type SetUserLocationRequest struct {
 	Username  string  `json:"username" validate:"required,validusername"`
 	Latitude  float64 `json:"latitude" validate:"required,gte=-180,lte=180"`
 	Longitude float64 `json:"longitude" validate:"required,gte=-180,lte=180"`
@@ -31,8 +31,8 @@ type SetUserLocationArg struct {
 	Longitude float64 `json:"longitude"`
 }
 
-// UserRepo represents user repository.
-type UserRepo interface {
+// UserRepository represents user repository.
+type UserRepository interface {
 	// GetByUsername returns user with given username.
 	// If user is not found returns ErrNotFound error.
 	GetByUsername(ctx context.Context, username string) (domain.User, error)
