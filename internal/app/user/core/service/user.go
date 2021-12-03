@@ -12,7 +12,7 @@ func NewUserService() port.UserService {
 	return &userService{}
 }
 
-// SetLocation sets user's location.
-func (u userService) SetLocation(ctx context.Context, req port.SetLocationRequest) error {
+// SetUserLocation sets user's location.
+func (s *userService) SetUserLocation(ctx context.Context, req port.SetUserLocationRequest) (port.SetUserLocationResponse, error) {
 	panic("implement me")
 }
