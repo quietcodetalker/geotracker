@@ -6,8 +6,13 @@ import (
 
 // UserConfig stores all configuration of user application
 type UserConfig struct {
-	DBDriver string `mapstructure:"DB_DRIVER"`
-	DBSource string `mapstructure:"DB_SOURCE"`
+	DBDriver   string `mapstructure:"DB_DRIVER"`
+	DBHost     string `mapstructure:"DB_HOST"`
+	DBPort     string `mapstructure:"DB_PORT"`
+	DBUser     string `mapstructure:"DB_USER"`
+	DBPassword string `mapstructure:"DB_PASSWORD"`
+	DBName     string `mapstructure:"DB_NAME"`
+	DBSSLMode  string `mapstructure:"DB_SSLMODE"`
 }
 
 // LoadConfig parses configuration and stores the result in
@@ -28,4 +33,16 @@ func LoadConfig(name string, path string, config interface{}) error {
 
 	err = viper.Unmarshal(config)
 	return err
+}
+
+// LoadUserConfig TODO: add description
+func LoadUserConfig(name string, path string) (UserConfig, error) {
+	var cfg UserConfig
+
+	err := LoadConfig(name, path, &cfg)
+	if err != nil {
+		return UserConfig{}, err
+	}
+
+	return cfg, nil
 }
