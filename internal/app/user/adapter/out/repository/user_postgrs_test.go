@@ -10,6 +10,101 @@ import (
 	"time"
 )
 
+func (s *PostgresTestSuite) Test_PostgresQueries_CreateUser() {
+	createUserArgs := []port.CreateUserArg{
+		{
+			Username: "user1",
+		},
+		{
+			Username: "user2",
+		},
+	}
+
+	users := s.seedUsers(createUserArgs)
+
+	testCases := []struct {
+		name   string
+		arg    port.CreateUserArg
+		hasErr bool
+		isErr  error
+		asErr  error
+		assert func(t *testing.T, user domain.User, err error)
+	}{
+		{
+			name:   "OK",
+			arg:    port.CreateUserArg{Username: "user3"},
+			hasErr: false,
+			assert: func(t *testing.T, user domain.User, err error) {
+				require.Equal(t, "user3", user.Username)
+				for _, u := range users {
+					require.NotEqual(t, u.ID, user.ID)
+				}
+			},
+		},
+		{
+			name:   "ErrConstraint_UserAlreadyExists",
+			arg:    port.CreateUserArg{Username: users[0].Username},
+			hasErr: true,
+			isErr:  port.ErrAlreadyExists,
+			assert: func(t *testing.T, user domain.User, err error) {
+				require.Empty(t, user)
+			},
+		},
+		{
+			name:   "ErrConstraint_InvalidUsername_TooShort",
+			arg:    port.CreateUserArg{Username: "u"},
+			hasErr: true,
+			isErr:  port.ErrInvalidUsername,
+			assert: func(t *testing.T, user domain.User, err error) {
+				require.Empty(t, user)
+			},
+		},
+		{
+			name:   "ErrConstraint_InvalidUsername_TooLong",
+			arg:    port.CreateUserArg{Username: "u"},
+			hasErr: true,
+			isErr:  port.ErrInvalidUsername,
+			assert: func(t *testing.T, user domain.User, err error) {
+				require.Empty(t, user)
+			},
+		},
+		{
+			name:   "ErrConstraint_InvalidUsername_DoesNotMatchPattern",
+			arg:    port.CreateUserArg{Username: "user3_"},
+			hasErr: true,
+			isErr:  port.ErrInvalidUsername,
+			assert: func(t *testing.T, user domain.User, err error) {
+				require.Empty(t, user)
+			},
+		},
+	}
+
+	repo := repository.NewPostgresRepository(s.db)
+
+	for _, tc := range testCases {
+		tc := tc
+
+		s.T().Run(tc.name, func(t *testing.T) {
+			user, err := repo.CreateUser(context.Background(), tc.arg)
+
+			if !tc.hasErr {
+				require.NoError(t, err)
+			} else {
+				require.Error(t, err)
+				if tc.isErr != nil {
+					require.ErrorIs(t, err, tc.isErr)
+				}
+				if tc.asErr != nil {
+					require.ErrorAs(t, err, tc.asErr)
+				}
+			}
+			if tc.assert != nil {
+				tc.assert(t, user, err)
+			}
+		})
+	}
+}
+
 func (s *PostgresTestSuite) Test_PostgresQueries_GetUserByUsername() {
 	createUserArgs := []port.CreateUserArg{
 		{
