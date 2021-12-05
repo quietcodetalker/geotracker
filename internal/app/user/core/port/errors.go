@@ -12,6 +12,9 @@ var (
 	// ErrAttemptedSettingLocationOfNonExistentUser error means that User with UserID that
 	// SetLocation was called with does not exist.
 	ErrAttemptedSettingLocationOfNonExistentUser = errors.New("attempted setting location of non-existent user")
+
+	// ErrAlreadyExists error means that the entity the a client attempted to create already exists.
+	ErrAlreadyExists = errors.New("already exists")
 )
 
 type InvalidLocationErrorViolation struct {
