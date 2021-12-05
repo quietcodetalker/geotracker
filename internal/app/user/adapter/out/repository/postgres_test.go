@@ -23,8 +23,6 @@ type PostgresTestSuite struct {
 	m  *migrate.Migrate
 }
 
-const databaseTestName = "test_db"
-
 func (s *PostgresTestSuite) SetupSuite() {
 	var err error
 
