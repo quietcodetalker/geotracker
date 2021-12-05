@@ -90,5 +90,9 @@ func (s *PostgresTestSuite) TearDownSuite() {
 }
 
 func TestPostgresTestSuite(t *testing.T) {
+	// Skip tests when using "-short" flag.
+	if testing.Short() {
+		t.Skip("Skipping long-running tests")
+	}
 	suite.Run(t, new(PostgresTestSuite))
 }
