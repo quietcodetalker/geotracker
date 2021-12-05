@@ -7,6 +7,12 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/user/core/port"
 )
 
+const (
+	ConstraintLocationsUserIdFkey     = "locations_user_id_fkey"
+	ConstraintLocationsLatitudeValid  = "locations_latitude_valid"
+	ConstraintLocationsLongitudeValid = "locations_longitude_valid"
+)
+
 type postgresRepository struct {
 	*postgresQueries
 	db *sql.DB
