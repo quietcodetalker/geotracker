@@ -8,6 +8,9 @@ import (
 )
 
 const (
+	ConstraintUsersUsernameKey   = "users_username_key"
+	ConstraintUsersUsernameValid = "users_username_valid"
+
 	ConstraintLocationsUserIdFkey     = "locations_user_id_fkey"
 	ConstraintLocationsLatitudeValid  = "locations_latitude_valid"
 	ConstraintLocationsLongitudeValid = "locations_longitude_valid"
