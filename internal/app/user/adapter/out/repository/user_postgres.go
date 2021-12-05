@@ -3,7 +3,9 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
+	"github.com/lib/pq"
 	"gitlab.com/spacewalker/locations/internal/app/user/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/user/core/port"
 )
@@ -28,6 +30,15 @@ func (q *postgresQueries) CreateUser(ctx context.Context, arg port.CreateUserArg
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	); err != nil {
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) {
+			switch pqErr.Constraint {
+			case ConstraintUsersUsernameKey:
+				return domain.User{}, port.ErrAlreadyExists
+			case ConstraintUsersUsernameValid:
+				return domain.User{}, port.ErrInvalidUsername
+			}
+		}
 		return domain.User{}, err
 	}
 
