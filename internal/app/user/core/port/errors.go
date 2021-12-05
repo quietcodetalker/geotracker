@@ -15,6 +15,9 @@ var (
 
 	// ErrAlreadyExists error means that the entity a client attempted to create already exists.
 	ErrAlreadyExists = errors.New("already exists")
+
+	// ErrInvalidUsername error means that a client attempted to set invalid username.
+	ErrInvalidUsername = errors.New("invalid username")
 )
 
 type InvalidLocationErrorViolation struct {
