@@ -14,6 +14,8 @@ type DBTX interface {
 }
 
 const (
-	userTable     = "users"
-	locationTable = "locations"
+	// UserTable is users table name.
+	UserTable = "users"
+	// LocationTable is locations table name.
+	LocationTable = "locations"
 )
