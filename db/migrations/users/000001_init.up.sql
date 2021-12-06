@@ -19,15 +19,14 @@ CREATE TABLE users (
 
 CREATE TABLE locations (
     user_id INT,
-    latitude NUMERIC(11, 8) NOT NULL,
-    longitude NUMERIC(10, 8) NOT NULL,
+    point POINT,
     created_at timestamp DEFAULT current_timestamp NOT NULL,
     updated_at timestamp DEFAULT current_timestamp NOT NULL,
 
     CONSTRAINT locations_pkey PRIMARY KEY (user_id),
     CONSTRAINT locations_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id),
-    CONSTRAINT locations_latitude_valid CHECK (latitude >= -180 AND latitude <= 180),
-    CONSTRAINT locations_longitude_valid CHECK (longitude >= -90 AND longitude <= 90)
+    CONSTRAINT locations_longitude_valid CHECK (point[0] >= -90 AND point[0] <= 90),
+    CONSTRAINT locations_latitude_valid CHECK (point[1] >= -180 AND point[1] <= 180)
 );
 
 CREATE TRIGGER update_updated_at BEFORE UPDATE
