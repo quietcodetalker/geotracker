@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"github.com/lib/pq"
@@ -9,15 +10,33 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/user/core/port"
 )
 
+type PostgresPoint domain.Point
+
+// Value returns value in format that satisfies driver.Driver interface.
+func (p PostgresPoint) Value() (driver.Value, error) {
+	return fmt.Sprintf("(%v,%v)", p[0], p[1]), nil
+}
+
+// Scan parses raw value retrieved from database and if succeeded assign itself parsed values.
+func (p *PostgresPoint) Scan(src interface{}) error {
+	val, ok := src.([]byte)
+	if !ok {
+		return fmt.Errorf("value contains unexpected type")
+	}
+	_, err := fmt.Sscanf(string(val), "(%f,%f)", &p[0], &p[1])
+
+	return err
+}
+
 var setLocationQuery = fmt.Sprintf(
 	`
 INSERT INTO %s
-(user_id, latitude, longitude)
-VALUES ($1, $2, $3)
+(user_id, point)
+VALUES ($1, $2)
 ON CONFLICT ON CONSTRAINT locations_pkey 
 DO
-	UPDATE SET latitude = EXCLUDED.latitude, longitude = EXCLUDED.longitude
-RETURNING user_id, latitude, longitude, created_at, updated_at
+	UPDATE SET point = EXCLUDED.point
+RETURNING user_id, point, created_at, updated_at
 `,
 	LocationTable,
 )
@@ -26,10 +45,10 @@ RETURNING user_id, latitude, longitude, created_at, updated_at
 // Returns updated location entity.
 func (q *postgresQueries) SetLocation(ctx context.Context, arg port.SetLocationArg) (domain.Location, error) {
 	var location domain.Location
-	if err := q.db.QueryRowContext(ctx, setLocationQuery, arg.UserID, arg.Latitude, arg.Longitude).Scan(
+	var pgPoint PostgresPoint
+	if err := q.db.QueryRowContext(ctx, setLocationQuery, arg.UserID, PostgresPoint(arg.Point)).Scan(
 		&location.UserID,
-		&location.Latitude,
-		&location.Longitude,
+		&pgPoint,
 		&location.CreatedAt,
 		&location.UpdatedAt,
 	); err != nil {
@@ -43,7 +62,7 @@ func (q *postgresQueries) SetLocation(ctx context.Context, arg port.SetLocationA
 					Violations: []port.InvalidLocationErrorViolation{
 						{
 							Subject: "latitude",
-							Value:   arg.Latitude,
+							Value:   arg.Point.Latitude(),
 						},
 					},
 				}
@@ -52,7 +71,7 @@ func (q *postgresQueries) SetLocation(ctx context.Context, arg port.SetLocationA
 					Violations: []port.InvalidLocationErrorViolation{
 						{
 							Subject: "longitude",
-							Value:   arg.Longitude,
+							Value:   arg.Point.Longitude(),
 						},
 					},
 				}
@@ -60,6 +79,8 @@ func (q *postgresQueries) SetLocation(ctx context.Context, arg port.SetLocationA
 		}
 		return domain.Location{}, err
 	}
+
+	location.Point = domain.Point(pgPoint)
 
 	return location, nil
 }

@@ -52,9 +52,9 @@ func (s *PostgresTestSuite) seedUsers(args []port.CreateUserArg) []domain.User {
 var seedLocationsQuery = fmt.Sprintf(
 	`
 INSERT INTO %s
-(user_id, latitude, longitude)
-VALUES ($1, $2, $3)
-RETURNING user_id, latitude, longitude, created_at, updated_at
+(user_id, point)
+VALUES ($1, $2)
+RETURNING user_id, point, created_at, updated_at
 `,
 	repository.LocationTable,
 )
@@ -73,16 +73,17 @@ func (s *PostgresTestSuite) seedLocations(args []port.SetLocationArg) []domain.L
 
 	for _, arg := range args {
 		var location domain.Location
+		var pgPoint repository.PostgresPoint
 
-		err := stmt.QueryRow(arg.UserID, arg.Latitude, arg.Longitude).Scan(
+		err := stmt.QueryRow(arg.UserID, repository.PostgresPoint(arg.Point)).Scan(
 			&location.UserID,
-			&location.Latitude,
-			&location.Longitude,
+			&pgPoint,
 			&location.CreatedAt,
 			&location.UpdatedAt,
 		)
 		require.NoError(s.T(), err)
 
+		location.Point = domain.Point(pgPoint)
 		locations = append(locations, location)
 	}
 

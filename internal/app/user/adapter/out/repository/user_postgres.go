@@ -91,9 +91,8 @@ func (r *postgresRepository) SetUserLocation(ctx context.Context, arg port.SetUs
 		}
 
 		location, err = q.SetLocation(ctx, port.SetLocationArg{
-			UserID:    user.ID,
-			Latitude:  arg.Latitude,
-			Longitude: arg.Longitude,
+			UserID: user.ID,
+			Point:  arg.Point,
 		})
 		if err != nil {
 			return err

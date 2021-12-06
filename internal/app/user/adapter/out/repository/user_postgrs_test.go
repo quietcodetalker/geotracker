@@ -187,9 +187,8 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 
 	setLocationArgs := []port.SetLocationArg{
 		{
-			UserID:    users[0].ID,
-			Latitude:  1.0,
-			Longitude: 1.0,
+			UserID: users[0].ID,
+			Point:  domain.Point{1.0, 1.0},
 		},
 	}
 	locations := s.seedLocations(setLocationArgs)
@@ -205,17 +204,16 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 		{
 			name: "OK_UserExist_LocationExist",
 			arg: port.SetUserLocationArg{
-				Username:  users[0].Username,
-				Latitude:  locations[0].Latitude + 1.0,
-				Longitude: locations[0].Longitude + 1.0,
+				Username: users[0].Username,
+				Point:    domain.Point{locations[0].Point.Longitude() + 1.0, locations[0].Point.Latitude() + 1.0},
 			},
 			hasErr: false,
 			isErr:  nil,
 			asErr:  nil,
 			assert: func(t *testing.T, location domain.Location) {
 				require.Equal(t, users[0].ID, location.UserID)
-				require.Equal(t, locations[0].Latitude+1.0, location.Latitude)
-				require.Equal(t, locations[0].Longitude+1.0, location.Longitude)
+				require.Equal(t, locations[0].Point.Latitude()+1.0, location.Point.Latitude())
+				require.Equal(t, locations[0].Point.Longitude()+1.0, location.Point.Longitude())
 				require.WithinDuration(t, locations[0].CreatedAt, location.CreatedAt, time.Second)
 				require.WithinDuration(t, locations[0].UpdatedAt, location.UpdatedAt, time.Second)
 			},
@@ -223,17 +221,16 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 		{
 			name: "OK_UserExist_LocationDoesNotExist",
 			arg: port.SetUserLocationArg{
-				Username:  users[1].Username,
-				Latitude:  1.0,
-				Longitude: 1.0,
+				Username: users[1].Username,
+				Point:    domain.Point{1.0, 1.0},
 			},
 			hasErr: false,
 			isErr:  nil,
 			asErr:  nil,
 			assert: func(t *testing.T, location domain.Location) {
 				require.Equal(t, users[1].ID, location.UserID)
-				require.Equal(t, 1.0, location.Latitude)
-				require.Equal(t, 1.0, location.Longitude)
+				require.Equal(t, 1.0, location.Point.Latitude())
+				require.Equal(t, 1.0, location.Point.Longitude())
 				require.WithinDuration(t, time.Now(), location.CreatedAt, time.Second)
 				require.WithinDuration(t, time.Now(), location.UpdatedAt, time.Second)
 			},
@@ -241,9 +238,8 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 		{
 			name: "OK_UserDoesNotExist_LocationDoesNotExist",
 			arg: port.SetUserLocationArg{
-				Username:  "user3",
-				Latitude:  1.0,
-				Longitude: 1.0,
+				Username: "user3",
+				Point:    domain.Point{1.0, 1.0},
 			},
 			hasErr: false,
 			isErr:  nil,
@@ -252,8 +248,8 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 				for _, u := range users {
 					require.NotEqual(t, u.ID, location.UserID)
 				}
-				require.Equal(t, 1.0, location.Latitude)
-				require.Equal(t, 1.0, location.Longitude)
+				require.Equal(t, 1.0, location.Point.Latitude())
+				require.Equal(t, 1.0, location.Point.Longitude())
 				require.WithinDuration(t, time.Now(), location.CreatedAt, time.Second)
 				require.WithinDuration(t, time.Now(), location.UpdatedAt, time.Second)
 			},

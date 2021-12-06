@@ -30,9 +30,8 @@ type CreateUserArg struct {
 
 // SetUserLocationArg is a param object of user repository SetUserLocation method.
 type SetUserLocationArg struct {
-	Username  string  `json:"username"`
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
+	Username string       `json:"username"`
+	Point    domain.Point `json:"point"`
 }
 
 // UserRepository represents user repository.
