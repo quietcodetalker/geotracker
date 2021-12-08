@@ -34,9 +34,24 @@ type SetUserLocationArg struct {
 	Point    domain.Point `json:"point"`
 }
 
+// ListUsersInRadiusArg TODO: add description
+type ListUsersInRadiusArg struct {
+	Point     domain.Point
+	Radius    float64
+	PageToken int
+	PageSize  int
+}
+
+// ListUsersInRadiusRes TODO: add description
+type ListUsersInRadiusRes struct {
+	Users         []domain.User
+	NextPageToken int
+}
+
 // UserRepository represents user repository.
 type UserRepository interface {
 	CreateUser(ctx context.Context, arg CreateUserArg) (domain.User, error)
 	GetByUsername(ctx context.Context, username string) (domain.User, error)
 	SetUserLocation(ctx context.Context, arg SetUserLocationArg) (domain.Location, error)
+	ListUsersInRadius(ctx context.Context, arg ListUsersInRadiusArg) (ListUsersInRadiusRes, error)
 }

@@ -106,3 +106,61 @@ func (r *postgresRepository) SetUserLocation(ctx context.Context, arg port.SetUs
 
 	return location, nil
 }
+
+var listUsersInRadiusQuery = fmt.Sprintf(
+	`
+SELECT u.id, u.username, u.created_at, u.updated_at
+FROM %s u
+INNER JOIN %s l ON l.user_id = u.id
+WHERE ($1<@>l.point) * 1609.344 <= $2 AND u.id > $3
+LIMIT $4
+`,
+	UserTable,
+	LocationTable,
+)
+
+// GetUsersInRadius retrieve users in given radius with coordinates.
+func (q *postgresQueries) ListUsersInRadius(ctx context.Context, arg port.ListUsersInRadiusArg) (port.ListUsersInRadiusRes, error) {
+	var users []domain.User
+
+	// Fetch PageSize + 1 (extra marker element)
+	// If such element happens to be retrieved it means that next page can be (probably) retrieved as well.
+	rows, err := q.db.QueryContext(ctx, listUsersInRadiusQuery, PostgresPoint(arg.Point), arg.Radius, arg.PageToken, arg.PageSize+1)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return port.ListUsersInRadiusRes{}, port.ErrNotFound
+		}
+		return port.ListUsersInRadiusRes{}, err
+	}
+	defer rows.Close()
+
+	hasNextPage := false
+	counter := 0
+	for rows.Next() {
+		counter++
+		if counter > arg.PageSize { // Next page exists.
+			hasNextPage = true
+			break // Do not scan extra marker element.
+		}
+
+		var user domain.User
+		if err = rows.Scan(
+			&user.ID,
+			&user.Username,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+		); err != nil {
+			return port.ListUsersInRadiusRes{}, err
+		}
+		users = append(users, user)
+	}
+
+	result := port.ListUsersInRadiusRes{
+		Users: users,
+	}
+	if hasNextPage {
+		result.NextPageToken = users[len(users)-1].ID
+	}
+
+	return result, nil
+}
