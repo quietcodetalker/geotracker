@@ -23,9 +23,8 @@ type GetUsersInRadiusResponse struct {
 
 // SetLocationArg is a param object of user repository SetLocation method.
 type SetLocationArg struct {
-	UserID    int     `json:"user_id"`
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
+	UserID int          `json:"user_id"`
+	Point  domain.Point `json:"point"`
 }
 
 // LocationRepository represents location repository.
