@@ -6,6 +6,7 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/user/adapter/out/repository"
 	"gitlab.com/spacewalker/locations/internal/app/user/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/user/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	"testing"
 	"time"
 )
@@ -274,6 +275,264 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 				}
 			}
 			tc.assert(t, location)
+		})
+	}
+}
+
+func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
+	createUserArgs := []port.CreateUserArg{
+		{Username: "user0"},
+		{Username: "user1"},
+		{Username: "user2"},
+		{Username: "user3"},
+		{Username: "user4"},
+		{Username: "user5"},
+		{Username: "user6"},
+		{Username: "user7"},
+		{Username: "user8"},
+		{Username: "user9"},
+		{Username: "user10"},
+	}
+
+	users := s.seedUsers(createUserArgs)
+
+	setLocationArgs := []port.SetLocationArg{
+		{
+			UserID: users[0].ID,
+			Point: domain.Point{
+				0.0 + util.RandomFloat64(-0.01, 0.01),
+				0.0 + util.RandomFloat64(-0.01, 0.01),
+			},
+		},
+		{
+			UserID: users[1].ID,
+			Point: domain.Point{
+				0.0 + util.RandomFloat64(-0.01, 0.01),
+				-90.0 + util.RandomFloat64(0.0, 0.01),
+			},
+		},
+		{
+			UserID: users[2].ID,
+			Point: domain.Point{
+				0.0 + util.RandomFloat64(-0.01, 0.01),
+				90.0 + util.RandomFloat64(-0.01, 0.0),
+			},
+		},
+		{
+			UserID: users[3].ID,
+			Point: domain.Point{
+				180.0 + util.RandomFloat64(-0.01, 0.0),
+				0.0 + util.RandomFloat64(-0.01, 0.01),
+			},
+		},
+		{
+			UserID: users[4].ID,
+			Point: domain.Point{
+				-180.0 + util.RandomFloat64(0.0, 0.01),
+				0.0 + util.RandomFloat64(-0.01, 0.01),
+			},
+		},
+		{
+			UserID: users[5].ID,
+			Point: domain.Point{
+				90.0 + util.RandomFloat64(-0.01, 0.01),
+				0.0 + util.RandomFloat64(-0.01, 0.01),
+			},
+		},
+		{
+			UserID: users[6].ID,
+			Point: domain.Point{
+				-90.0 + util.RandomFloat64(-0.01, 0.01),
+				0.0 + util.RandomFloat64(-0.01, 0.01),
+			},
+		},
+		{
+			UserID: users[7].ID,
+			Point: domain.Point{
+				180.0 + util.RandomFloat64(-0.01, 0.0),
+				-90.0 + util.RandomFloat64(0.0, 0.01),
+			},
+		},
+		{
+			UserID: users[8].ID,
+			Point: domain.Point{
+				-180.0 + util.RandomFloat64(0.0, 0.01),
+				-90.0 + util.RandomFloat64(0.0, 0.01),
+			},
+		},
+		{
+			UserID: users[9].ID,
+			Point: domain.Point{
+				180.0 + util.RandomFloat64(-0.01, 0.0),
+				90.0 + util.RandomFloat64(-0.01, 0.0),
+			},
+		},
+		{
+			UserID: users[10].ID,
+			Point: domain.Point{
+				180.0 + util.RandomFloat64(-0.01, 0.0),
+				-90.0 + util.RandomFloat64(0.0, 0.01),
+			},
+		},
+	}
+
+	s.seedLocations(setLocationArgs)
+
+	testCases := []struct {
+		name                  string
+		in                    port.ListUsersInRadiusArg
+		hasErr                bool
+		isErr                 error
+		asErr                 error
+		expectedUsers         []domain.User
+		expectedNextPageToken int
+	}{
+		{
+			name: "OK_0",
+			in: port.ListUsersInRadiusArg{
+				Point:     domain.Point{0.0, 0.0},
+				Radius:    10000.0,
+				PageSize:  5,
+				PageToken: 0,
+			},
+			hasErr:        false,
+			expectedUsers: users[0:1],
+		},
+		{
+			name: "OK_1",
+			in: port.ListUsersInRadiusArg{
+				Point:     domain.Point{0.0, -90.0},
+				Radius:    10000.0,
+				PageSize:  5,
+				PageToken: 0,
+			},
+			hasErr: false,
+			expectedUsers: []domain.User{
+				users[1],
+				users[7],
+				users[8],
+				users[10],
+			},
+			expectedNextPageToken: 0,
+		},
+		{
+			name: "OK_2",
+			in: port.ListUsersInRadiusArg{
+				Point:     domain.Point{0.0, 90.0},
+				Radius:    10000.0,
+				PageSize:  5,
+				PageToken: 0,
+			},
+			hasErr: false,
+			expectedUsers: []domain.User{
+				users[2],
+				users[9],
+			},
+		},
+		{
+			name: "OK_3",
+			in: port.ListUsersInRadiusArg{
+				Point:     domain.Point{180.0, 0.0},
+				Radius:    10000.0,
+				PageSize:  5,
+				PageToken: 0,
+			},
+			hasErr: false,
+			expectedUsers: []domain.User{
+				users[3],
+				users[4],
+			},
+		},
+		{
+			name: "OK_4",
+			in: port.ListUsersInRadiusArg{
+				Point:     domain.Point{90.0, 0.0},
+				Radius:    10000.0,
+				PageSize:  5,
+				PageToken: 0,
+			},
+			hasErr: false,
+			expectedUsers: []domain.User{
+				users[5],
+			},
+		},
+		{
+			name: "OK_5",
+			in: port.ListUsersInRadiusArg{
+				Point:     domain.Point{-90.0, 0.0},
+				Radius:    10000.0,
+				PageSize:  5,
+				PageToken: 0,
+			},
+			hasErr: false,
+			expectedUsers: []domain.User{
+				users[6],
+			},
+		},
+		{
+			name: "OK_6",
+			in: port.ListUsersInRadiusArg{
+				Point:     domain.Point{45.0, 45.0},
+				Radius:    10.0,
+				PageSize:  5,
+				PageToken: 0,
+			},
+			hasErr:                false,
+			expectedUsers:         nil,
+			expectedNextPageToken: 0,
+		},
+		{
+			name: "OK_Pagination_1",
+			in: port.ListUsersInRadiusArg{
+				Point:     domain.Point{0.0, -90.0},
+				Radius:    10000.0,
+				PageSize:  2,
+				PageToken: 0,
+			},
+			hasErr: false,
+			expectedUsers: []domain.User{
+				users[1],
+				users[7],
+			},
+			expectedNextPageToken: users[7].ID,
+		},
+		{
+			name: "OK_Pagination_2",
+			in: port.ListUsersInRadiusArg{
+				Point:     domain.Point{0.0, -90.0},
+				Radius:    10000.0,
+				PageSize:  1,
+				PageToken: users[1].ID,
+			},
+			hasErr: false,
+			expectedUsers: []domain.User{
+				users[7],
+			},
+			expectedNextPageToken: users[7].ID,
+		},
+	}
+
+	repo := repository.NewPostgresRepository(s.db)
+
+	for _, tc := range testCases {
+		tc := tc
+		s.T().Run(tc.name, func(t *testing.T) {
+			res, err := repo.ListUsersInRadius(context.Background(), tc.in)
+
+			require.Equal(t, tc.expectedUsers, res.Users)
+			require.Equal(t, tc.expectedNextPageToken, res.NextPageToken)
+
+			if !tc.hasErr {
+				require.NoError(t, err)
+			} else {
+				require.Error(t, err)
+				if tc.isErr != nil {
+					require.ErrorIs(t, err, tc.isErr)
+				}
+				if tc.asErr != nil {
+					require.ErrorAs(t, err, tc.asErr)
+				}
+			}
 		})
 	}
 }
