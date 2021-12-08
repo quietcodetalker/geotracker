@@ -68,6 +68,7 @@ func (s *PostgresTestSuite) TearDownTest() {
 	`
 	rows, err := s.db.Query(query)
 	require.NoError(s.T(), err)
+	defer rows.Close()
 
 	for rows.Next() {
 		var tableName string
