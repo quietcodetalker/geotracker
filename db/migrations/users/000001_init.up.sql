@@ -28,8 +28,8 @@ CREATE TABLE locations (
 
     CONSTRAINT locations_pkey PRIMARY KEY (user_id),
     CONSTRAINT locations_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id),
-    CONSTRAINT locations_longitude_valid CHECK (point[0] >= -90 AND point[0] <= 90),
-    CONSTRAINT locations_latitude_valid CHECK (point[1] >= -180 AND point[1] <= 180)
+    CONSTRAINT locations_longitude_valid CHECK (point[0] >= -180 AND point[0] <= 180),
+    CONSTRAINT locations_latitude_valid CHECK (point[1] >= -90 AND point[1] <= 90)
 );
 
 CREATE TRIGGER update_updated_at BEFORE UPDATE
