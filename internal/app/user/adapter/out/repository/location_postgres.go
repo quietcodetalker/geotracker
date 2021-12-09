@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"database/sql/driver"
 	"errors"
 	"fmt"
@@ -57,6 +58,64 @@ func (q *postgresQueries) SetLocation(ctx context.Context, arg port.SetLocationA
 			switch pqErr.Constraint {
 			case ConstraintLocationsUserIdFkey:
 				return domain.Location{}, port.ErrAttemptedSettingLocationOfNonExistentUser
+			case ConstraintLocationsLatitudeValid:
+				return domain.Location{}, &port.InvalidLocationError{
+					Violations: []port.InvalidLocationErrorViolation{
+						{
+							Subject: "latitude",
+							Value:   arg.Point.Latitude(),
+						},
+					},
+				}
+			case ConstraintLocationsLongitudeValid:
+				return domain.Location{}, &port.InvalidLocationError{
+					Violations: []port.InvalidLocationErrorViolation{
+						{
+							Subject: "longitude",
+							Value:   arg.Point.Longitude(),
+						},
+					},
+				}
+			}
+		}
+		return domain.Location{}, err
+	}
+
+	location.Point = domain.Point(pgPoint)
+
+	return location, nil
+}
+
+var updateLocationyUserIDQuery = fmt.Sprintf(
+	`
+UPDATE %s
+SET point = $2
+WHERE user_id = $1
+RETURNING user_id, point, created_at, updated_at
+`,
+	LocationTable,
+)
+
+// UpdateLocationByUserID TODO: add description
+func (q *postgresQueries) UpdateLocationByUserID(ctx context.Context, arg port.UpdateLocationByUserIDArg) (domain.Location, error) {
+	var location domain.Location
+	var pgPoint PostgresPoint
+
+	row := q.db.QueryRowContext(ctx, updateLocationyUserIDQuery, arg.UserID, PostgresPoint(arg.Point))
+
+	if err := row.Scan(
+		&location.UserID,
+		&pgPoint,
+		&location.CreatedAt,
+		&location.UpdatedAt,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return domain.Location{}, port.ErrNotFound
+		}
+
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) {
+			switch pqErr.Constraint {
 			case ConstraintLocationsLatitudeValid:
 				return domain.Location{}, &port.InvalidLocationError{
 					Violations: []port.InvalidLocationErrorViolation{
