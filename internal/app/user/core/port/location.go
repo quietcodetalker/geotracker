@@ -21,7 +21,7 @@ type LocationService interface {
 type GetUsersInRadiusResponse struct {
 }
 
-// SetLocationArg is a param object of user repository SetLocation method.
+// SetLocationArg is a param object of location repository SetLocation method.
 type SetLocationArg struct {
 	UserID int          `json:"user_id"`
 	Point  domain.Point `json:"point"`
