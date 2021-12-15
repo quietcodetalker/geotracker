@@ -17,7 +17,7 @@ CREATE TABLE users (
 
     CONSTRAINT users_pkey PRIMARY KEY (id),
     CONSTRAINT users_username_key UNIQUE (username),
-    CONSTRAINT users_username_valid CHECK (LENGTH(username) >= 4 AND username ~ '^[a-zA-Z0-9]+$')
+    CONSTRAINT users_username_valid CHECK (username ~ '^[a-zA-Z0-9]{4,16}$')
 );
 
 CREATE TABLE locations (
