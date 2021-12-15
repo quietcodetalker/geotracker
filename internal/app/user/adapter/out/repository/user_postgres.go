@@ -32,6 +32,11 @@ func (q *postgresQueries) CreateUser(ctx context.Context, arg port.CreateUserArg
 	); err != nil {
 		var pqErr *pq.Error
 		if errors.As(err, &pqErr) {
+			switch pqErr.Code.Name() {
+			case "string_data_right_truncation":
+				return domain.User{}, port.ErrInvalidUsername
+			}
+
 			switch pqErr.Constraint {
 			case ConstraintUsersUsernameKey:
 				return domain.User{}, port.ErrAlreadyExists
