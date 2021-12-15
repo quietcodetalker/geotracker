@@ -16,4 +16,12 @@ func init() {
 	if err = validate.RegisterValidation("validusername", validation.ValidateUsername); err != nil {
 		log.Panicf("failed to register validation: %v", err)
 	}
+
+	if err = validate.RegisterValidation("validlongitude", validation.ValidateLongitude); err != nil {
+		log.Panicf("failed to register validation: %v", err)
+	}
+
+	if err = validate.RegisterValidation("validlatitude", validation.ValidateLatitude); err != nil {
+		log.Panicf("failed to register validation: %v", err)
+	}
 }
