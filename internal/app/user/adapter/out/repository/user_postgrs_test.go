@@ -62,7 +62,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_CreateUser() {
 		},
 		{
 			name:   "ErrConstraint_InvalidUsername_TooLong",
-			arg:    port.CreateUserArg{Username: "u"},
+			arg:    port.CreateUserArg{Username: "uuuuuuuuuuuuuuuuu"},
 			hasErr: true,
 			isErr:  port.ErrInvalidUsername,
 			assert: func(t *testing.T, user domain.User, err error) {
