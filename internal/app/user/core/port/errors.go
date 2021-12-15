@@ -2,7 +2,6 @@ package port
 
 import (
 	"errors"
-	"fmt"
 )
 
 var (
@@ -20,6 +19,7 @@ var (
 	ErrInvalidUsername = errors.New("invalid username")
 )
 
+// TODO add description
 type InvalidLocationErrorViolation struct {
 	Subject string
 	Value   float64
@@ -30,5 +30,11 @@ type InvalidLocationError struct {
 }
 
 func (e *InvalidLocationError) Error() string {
-	return fmt.Sprintf("invalid location")
+	return "invalid location"
+}
+
+type InvalidArgumentError struct{}
+
+func (e *InvalidArgumentError) Error() string {
+	return "invalid argument"
 }
