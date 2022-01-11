@@ -13,4 +13,7 @@ migrate_users_down:
 migrate_transitions_down:
 	migrate -database ${TRANSITIONS_DB_URL} -path db/migrations/transitions down
 
-.PHONY: migrate_users_up migrate_users_down migrate_transitions_up migrate_transitions_down
+protoc_gen:
+	sh ./scripts/protoc-gen.sh
+
+.PHONY: migrate_users_up migrate_users_down migrate_transitions_up migrate_transitions_down protoc_gen
