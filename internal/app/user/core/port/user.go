@@ -1,3 +1,5 @@
+//go:generate mockgen -destination=mock/mock_user.go -package=mock . UserRepository,UserService
+
 package port
 
 import (
