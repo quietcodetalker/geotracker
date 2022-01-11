@@ -42,10 +42,10 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 	}
 
 	testCases := []struct {
-		name      string
-		arg       port.SetUserLocationRequest
-		buildStus func(repo *mock.MockUserRepository)
-		assert    func(t *testing.T, res domain.Location, err error)
+		name       string
+		arg        port.SetUserLocationRequest
+		buildStubs func(repo *mock.MockUserRepository)
+		assert     func(t *testing.T, res domain.Location, err error)
 	}{
 		{
 			name: "OK",
@@ -54,7 +54,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: point.Longitude(),
 				Latitude:  point.Latitude(),
 			},
-			buildStus: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository) {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -91,7 +91,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: -180.0,
 				Latitude:  -90.0,
 			},
-			buildStus: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository) {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -128,7 +128,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: 180.0,
 				Latitude:  90.0,
 			},
-			buildStus: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository) {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -165,7 +165,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: 0.0,
 				Latitude:  0.0,
 			},
-			buildStus: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository) {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -202,7 +202,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: -180.01,
 				Latitude:  point.Latitude(),
 			},
-			buildStus: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository) {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -223,7 +223,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: 180.01,
 				Latitude:  point.Latitude(),
 			},
-			buildStus: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository) {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -244,7 +244,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: point.Longitude(),
 				Latitude:  -90.01,
 			},
-			buildStus: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository) {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -265,7 +265,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: point.Longitude(),
 				Latitude:  90.01,
 			},
-			buildStus: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository) {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -286,7 +286,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: point.Longitude(),
 				Latitude:  point.Latitude(),
 			},
-			buildStus: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository) {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -307,7 +307,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: point.Longitude(),
 				Latitude:  point.Latitude(),
 			},
-			buildStus: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository) {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -328,7 +328,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: point.Longitude(),
 				Latitude:  point.Latitude(),
 			},
-			buildStus: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository) {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -351,7 +351,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 			defer ctrl.Finish()
 
 			repo := mock.NewMockUserRepository(ctrl)
-			tc.buildStus(repo)
+			tc.buildStubs(repo)
 
 			svc := service.NewUserService(repo)
 
