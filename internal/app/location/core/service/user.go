@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"gitlab.com/spacewalker/locations/internal/app/user/core/domain"
-	"gitlab.com/spacewalker/locations/internal/app/user/core/port"
+	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
+	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
 )
 
 type userService struct {

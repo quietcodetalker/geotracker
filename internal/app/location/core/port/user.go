@@ -4,7 +4,7 @@ package port
 
 import (
 	"context"
-	"gitlab.com/spacewalker/locations/internal/app/user/core/domain"
+	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 )
 
 // SetUserLocationRequest is a param object of user service SetUserLocation method.

@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"gitlab.com/spacewalker/locations/internal/app/user/adapter/in/handler"
-	"gitlab.com/spacewalker/locations/internal/app/user/adapter/out/repository"
-	"gitlab.com/spacewalker/locations/internal/app/user/core/service"
+	"gitlab.com/spacewalker/locations/internal/app/location/adapter/in/handler"
+	"gitlab.com/spacewalker/locations/internal/app/location/adapter/out/repository"
+	"gitlab.com/spacewalker/locations/internal/app/location/core/service"
 	"gitlab.com/spacewalker/locations/internal/pkg/config"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	"log"

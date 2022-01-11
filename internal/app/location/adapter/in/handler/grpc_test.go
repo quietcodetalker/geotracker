@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
-	"gitlab.com/spacewalker/locations/internal/app/user/adapter/in/handler"
-	"gitlab.com/spacewalker/locations/internal/app/user/core/port"
-	"gitlab.com/spacewalker/locations/internal/app/user/core/port/mock"
+	"gitlab.com/spacewalker/locations/internal/app/location/adapter/in/handler"
+	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/app/location/core/port/mock"
 	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/location"
 	"testing"
 )

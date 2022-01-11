@@ -3,9 +3,9 @@ package repository_test
 import (
 	"context"
 	"github.com/stretchr/testify/require"
-	"gitlab.com/spacewalker/locations/internal/app/user/adapter/out/repository"
-	"gitlab.com/spacewalker/locations/internal/app/user/core/domain"
-	"gitlab.com/spacewalker/locations/internal/app/user/core/port"
+	"gitlab.com/spacewalker/locations/internal/app/location/adapter/out/repository"
+	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
+	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
 	"testing"
 	"time"
 )

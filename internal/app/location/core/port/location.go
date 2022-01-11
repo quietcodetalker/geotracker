@@ -2,7 +2,7 @@ package port
 
 import (
 	"context"
-	"gitlab.com/spacewalker/locations/internal/app/user/core/domain"
+	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 )
 
 // GetUsersInRadiusRequest TODO: add description

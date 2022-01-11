@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"gitlab.com/spacewalker/locations/internal/app/user/core/port"
+	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
 )
 
 const (

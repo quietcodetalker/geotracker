@@ -2,7 +2,7 @@ package handler
 
 import (
 	"context"
-	"gitlab.com/spacewalker/locations/internal/app/user/core/port"
+	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
 	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/location"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
