@@ -42,7 +42,7 @@ func (s *PostgresTestSuite) SetupSuite() {
 	)
 
 	s.db, err = util.OpenDB(
-		"postgres",
+		cfg.DBDriver,
 		dbSource,
 	)
 	require.NoError(s.T(), err)
