@@ -135,7 +135,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_SetLocation() {
 			name: "ErrCheck_LongitudeLessThenMin",
 			arg: port.SetLocationArg{
 				UserID: users[0].ID,
-				Point:  domain.Point{-91.0, 1.0},
+				Point:  domain.Point{-181.0, 1.0},
 			},
 			hasErr: true,
 			isErr:  nil,
@@ -147,7 +147,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_SetLocation() {
 					Violations: []port.InvalidLocationErrorViolation{
 						{
 							Subject: "longitude",
-							Value:   -91.00,
+							Value:   -181.00,
 						},
 					},
 				}, *invalidLocationError)
@@ -157,7 +157,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_SetLocation() {
 			name: "ErrCheck_LongitudeGreaterThenMax",
 			arg: port.SetLocationArg{
 				UserID: users[0].ID,
-				Point:  domain.Point{91.0, 1.0},
+				Point:  domain.Point{181.0, 1.0},
 			},
 			hasErr: true,
 			isErr:  nil,
@@ -169,7 +169,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_SetLocation() {
 					Violations: []port.InvalidLocationErrorViolation{
 						{
 							Subject: "longitude",
-							Value:   91.00,
+							Value:   181.00,
 						},
 					},
 				}, *invalidLocationError)
