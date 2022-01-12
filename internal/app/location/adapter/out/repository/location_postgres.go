@@ -44,7 +44,7 @@ RETURNING user_id, point, created_at, updated_at
 
 // SetLocation sets user's location by given user ID.
 // Returns updated location entity.
-func (q *postgresQueries) SetLocation(ctx context.Context, arg port.SetLocationArg) (domain.Location, error) {
+func (q *postgresQueries) SetLocation(ctx context.Context, arg port.LocationRepositorySetLocationRequest) (domain.Location, error) {
 	var location domain.Location
 	var pgPoint PostgresPoint
 	if err := q.db.QueryRowContext(ctx, setLocationQuery, arg.UserID, PostgresPoint(arg.Point)).Scan(
@@ -97,7 +97,7 @@ RETURNING user_id, point, created_at, updated_at
 )
 
 // UpdateLocationByUserID TODO: add description
-func (q *postgresQueries) UpdateLocationByUserID(ctx context.Context, arg port.UpdateLocationByUserIDArg) (domain.Location, error) {
+func (q *postgresQueries) UpdateLocationByUserID(ctx context.Context, arg port.LocationRepositoryUpdateLocationByUserIDRequest) (domain.Location, error) {
 	var location domain.Location
 	var pgPoint PostgresPoint
 

@@ -186,7 +186,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 	}
 	users := s.seedUsers(createUserArgs)
 
-	setLocationArgs := []port.SetLocationArg{
+	setLocationArgs := []port.LocationRepositorySetLocationRequest{
 		{
 			UserID: users[0].ID,
 			Point:  domain.Point{1.0, 1.0},
@@ -196,7 +196,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 
 	testCases := []struct {
 		name   string
-		arg    port.SetUserLocationArg
+		arg    port.UserRepositorySetUserLocationRequest
 		hasErr bool
 		isErr  error
 		asErr  error
@@ -204,7 +204,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 	}{
 		{
 			name: "OK_UserExist_LocationExist",
-			arg: port.SetUserLocationArg{
+			arg: port.UserRepositorySetUserLocationRequest{
 				Username: users[0].Username,
 				Point:    domain.Point{locations[0].Point.Longitude() + 1.0, locations[0].Point.Latitude() + 1.0},
 			},
@@ -221,7 +221,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 		},
 		{
 			name: "OK_UserExist_LocationDoesNotExist",
-			arg: port.SetUserLocationArg{
+			arg: port.UserRepositorySetUserLocationRequest{
 				Username: users[1].Username,
 				Point:    domain.Point{1.0, 1.0},
 			},
@@ -238,7 +238,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 		},
 		{
 			name: "OK_UserDoesNotExist_LocationDoesNotExist",
-			arg: port.SetUserLocationArg{
+			arg: port.UserRepositorySetUserLocationRequest{
 				Username: "user3",
 				Point:    domain.Point{1.0, 1.0},
 			},
@@ -296,7 +296,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 
 	users := s.seedUsers(createUserArgs)
 
-	setLocationArgs := []port.SetLocationArg{
+	setLocationArgs := []port.LocationRepositorySetLocationRequest{
 		{
 			UserID: users[0].ID,
 			Point: domain.Point{
@@ -380,7 +380,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 
 	testCases := []struct {
 		name                  string
-		in                    port.ListUsersInRadiusArg
+		in                    port.UserRepositoryListUsersInRadiusRequest
 		hasErr                bool
 		isErr                 error
 		asErr                 error
@@ -389,7 +389,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 	}{
 		{
 			name: "OK_0",
-			in: port.ListUsersInRadiusArg{
+			in: port.UserRepositoryListUsersInRadiusRequest{
 				Point:     domain.Point{0.0, 0.0},
 				Radius:    10000.0,
 				PageSize:  5,
@@ -400,7 +400,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 		},
 		{
 			name: "OK_1",
-			in: port.ListUsersInRadiusArg{
+			in: port.UserRepositoryListUsersInRadiusRequest{
 				Point:     domain.Point{0.0, -90.0},
 				Radius:    10000.0,
 				PageSize:  5,
@@ -417,7 +417,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 		},
 		{
 			name: "OK_2",
-			in: port.ListUsersInRadiusArg{
+			in: port.UserRepositoryListUsersInRadiusRequest{
 				Point:     domain.Point{0.0, 90.0},
 				Radius:    10000.0,
 				PageSize:  5,
@@ -431,7 +431,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 		},
 		{
 			name: "OK_3",
-			in: port.ListUsersInRadiusArg{
+			in: port.UserRepositoryListUsersInRadiusRequest{
 				Point:     domain.Point{180.0, 0.0},
 				Radius:    10000.0,
 				PageSize:  5,
@@ -445,7 +445,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 		},
 		{
 			name: "OK_4",
-			in: port.ListUsersInRadiusArg{
+			in: port.UserRepositoryListUsersInRadiusRequest{
 				Point:     domain.Point{90.0, 0.0},
 				Radius:    10000.0,
 				PageSize:  5,
@@ -458,7 +458,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 		},
 		{
 			name: "OK_5",
-			in: port.ListUsersInRadiusArg{
+			in: port.UserRepositoryListUsersInRadiusRequest{
 				Point:     domain.Point{-90.0, 0.0},
 				Radius:    10000.0,
 				PageSize:  5,
@@ -471,7 +471,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 		},
 		{
 			name: "OK_6",
-			in: port.ListUsersInRadiusArg{
+			in: port.UserRepositoryListUsersInRadiusRequest{
 				Point:     domain.Point{45.0, 45.0},
 				Radius:    10.0,
 				PageSize:  5,
@@ -483,7 +483,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 		},
 		{
 			name: "OK_Pagination_1",
-			in: port.ListUsersInRadiusArg{
+			in: port.UserRepositoryListUsersInRadiusRequest{
 				Point:     domain.Point{0.0, -90.0},
 				Radius:    10000.0,
 				PageSize:  2,
@@ -498,7 +498,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 		},
 		{
 			name: "OK_Pagination_2",
-			in: port.ListUsersInRadiusArg{
+			in: port.UserRepositoryListUsersInRadiusRequest{
 				Point:     domain.Point{0.0, -90.0},
 				Radius:    10000.0,
 				PageSize:  1,

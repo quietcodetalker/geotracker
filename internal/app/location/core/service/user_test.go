@@ -43,13 +43,13 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 
 	testCases := []struct {
 		name       string
-		arg        port.SetUserLocationRequest
+		arg        port.UserServiceSetUserLocationRequest
 		buildStubs func(repo *mock.MockUserRepository)
 		assert     func(t *testing.T, res domain.Location, err error)
 	}{
 		{
 			name: "OK",
-			arg: port.SetUserLocationRequest{
+			arg: port.UserServiceSetUserLocationRequest{
 				Username:  username,
 				Longitude: point.Longitude(),
 				Latitude:  point.Latitude(),
@@ -58,7 +58,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
-						gomock.Eq(port.SetUserLocationArg{
+						gomock.Eq(port.UserRepositorySetUserLocationRequest{
 							Username: username,
 							Point:    point,
 						}),
@@ -86,7 +86,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 		},
 		{
 			name: "OK",
-			arg: port.SetUserLocationRequest{
+			arg: port.UserServiceSetUserLocationRequest{
 				Username:  username,
 				Longitude: -180.0,
 				Latitude:  -90.0,
@@ -95,7 +95,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
-						gomock.Eq(port.SetUserLocationArg{
+						gomock.Eq(port.UserRepositorySetUserLocationRequest{
 							Username: username,
 							Point:    domain.Point{-180.0, -90.0},
 						}),
@@ -123,7 +123,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 		},
 		{
 			name: "OK",
-			arg: port.SetUserLocationRequest{
+			arg: port.UserServiceSetUserLocationRequest{
 				Username:  username,
 				Longitude: 180.0,
 				Latitude:  90.0,
@@ -132,7 +132,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
-						gomock.Eq(port.SetUserLocationArg{
+						gomock.Eq(port.UserRepositorySetUserLocationRequest{
 							Username: username,
 							Point:    domain.Point{180.0, 90.0},
 						}),
@@ -160,7 +160,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 		},
 		{
 			name: "OK",
-			arg: port.SetUserLocationRequest{
+			arg: port.UserServiceSetUserLocationRequest{
 				Username:  username,
 				Longitude: 0.0,
 				Latitude:  0.0,
@@ -169,7 +169,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
-						gomock.Eq(port.SetUserLocationArg{
+						gomock.Eq(port.UserRepositorySetUserLocationRequest{
 							Username: username,
 							Point:    domain.Point{0, 0},
 						}),
@@ -197,7 +197,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 		},
 		{
 			name: "Err_InvalidLongitude_LessThanMin",
-			arg: port.SetUserLocationRequest{
+			arg: port.UserServiceSetUserLocationRequest{
 				Username:  username,
 				Longitude: -180.01,
 				Latitude:  point.Latitude(),
@@ -218,7 +218,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 		},
 		{
 			name: "Err_InvalidLongitude_GreaterThanMax",
-			arg: port.SetUserLocationRequest{
+			arg: port.UserServiceSetUserLocationRequest{
 				Username:  username,
 				Longitude: 180.01,
 				Latitude:  point.Latitude(),
@@ -239,7 +239,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 		},
 		{
 			name: "Err_InvalidLatitude_LessThanMin",
-			arg: port.SetUserLocationRequest{
+			arg: port.UserServiceSetUserLocationRequest{
 				Username:  username,
 				Longitude: point.Longitude(),
 				Latitude:  -90.01,
@@ -260,7 +260,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 		},
 		{
 			name: "Err_InvalidLatitude_GreaterThanMax",
-			arg: port.SetUserLocationRequest{
+			arg: port.UserServiceSetUserLocationRequest{
 				Username:  username,
 				Longitude: point.Longitude(),
 				Latitude:  90.01,
@@ -281,7 +281,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 		},
 		{
 			name: "Err_InvalidUsername_TooShort",
-			arg: port.SetUserLocationRequest{
+			arg: port.UserServiceSetUserLocationRequest{
 				Username:  "u",
 				Longitude: point.Longitude(),
 				Latitude:  point.Latitude(),
@@ -302,7 +302,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 		},
 		{
 			name: "Err_InvalidUsername_TooLong",
-			arg: port.SetUserLocationRequest{
+			arg: port.UserServiceSetUserLocationRequest{
 				Username:  "uuuuuuuuuuuuuuuuu",
 				Longitude: point.Longitude(),
 				Latitude:  point.Latitude(),
@@ -323,7 +323,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 		},
 		{
 			name: "Err_InvalidUsername_DoesNotMatchPattern",
-			arg: port.SetUserLocationRequest{
+			arg: port.UserServiceSetUserLocationRequest{
 				Username:  "user1_",
 				Longitude: point.Longitude(),
 				Latitude:  point.Latitude(),

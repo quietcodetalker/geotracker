@@ -59,7 +59,7 @@ RETURNING user_id, point, created_at, updated_at
 	repository.LocationTable,
 )
 
-func (s *PostgresTestSuite) seedLocations(args []port.SetLocationArg) []domain.Location {
+func (s *PostgresTestSuite) seedLocations(args []port.LocationRepositorySetLocationRequest) []domain.Location {
 	locations := make([]domain.Location, 0, len(args))
 
 	tx, err := s.db.Begin()

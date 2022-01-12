@@ -57,7 +57,7 @@ func (h *GRPCHandler) SetUserLocation(
 	ctx context.Context,
 	request *pb.SetUserLocationRequest,
 ) (*pb.SetUserLocationResponse, error) {
-	response, err := h.service.SetUserLocation(ctx, port.SetUserLocationRequest{
+	response, err := h.service.SetUserLocation(ctx, port.UserServiceSetUserLocationRequest{
 		Username:  request.GetUsername(),
 		Latitude:  request.GetLatitude(),
 		Longitude: request.GetLongitude(),

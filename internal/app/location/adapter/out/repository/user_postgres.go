@@ -80,7 +80,7 @@ func (q *postgresQueries) GetByUsername(ctx context.Context, username string) (d
 
 // SetUserLocation gets User by given username and updates Location by user ID
 //with provided coordinates within a single database transaction.
-func (r *postgresRepository) SetUserLocation(ctx context.Context, arg port.SetUserLocationArg) (domain.Location, error) {
+func (r *postgresRepository) SetUserLocation(ctx context.Context, arg port.UserRepositorySetUserLocationRequest) (domain.Location, error) {
 	var location domain.Location
 
 	err := r.execTx(ctx, func(q *postgresQueries) error {
@@ -95,7 +95,7 @@ func (r *postgresRepository) SetUserLocation(ctx context.Context, arg port.SetUs
 			return err
 		}
 
-		location, err = q.SetLocation(ctx, port.SetLocationArg{
+		location, err = q.SetLocation(ctx, port.LocationRepositorySetLocationRequest{
 			UserID: user.ID,
 			Point:  arg.Point,
 		})
@@ -125,7 +125,7 @@ LIMIT $4
 )
 
 // GetUsersInRadius retrieve users in given radius with coordinates.
-func (q *postgresQueries) ListUsersInRadius(ctx context.Context, arg port.ListUsersInRadiusArg) (port.ListUsersInRadiusRes, error) {
+func (q *postgresQueries) ListUsersInRadius(ctx context.Context, arg port.UserRepositoryListUsersInRadiusRequest) (port.UserRepositoryListUsersInRadiusResponse, error) {
 	var users []domain.User
 
 	// Fetch PageSize + 1 (extra marker element)
@@ -133,9 +133,9 @@ func (q *postgresQueries) ListUsersInRadius(ctx context.Context, arg port.ListUs
 	rows, err := q.db.QueryContext(ctx, listUsersInRadiusQuery, PostgresPoint(arg.Point), arg.Radius, arg.PageToken, arg.PageSize+1)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return port.ListUsersInRadiusRes{}, port.ErrNotFound
+			return port.UserRepositoryListUsersInRadiusResponse{}, port.ErrNotFound
 		}
-		return port.ListUsersInRadiusRes{}, err
+		return port.UserRepositoryListUsersInRadiusResponse{}, err
 	}
 	defer rows.Close()
 
@@ -155,12 +155,12 @@ func (q *postgresQueries) ListUsersInRadius(ctx context.Context, arg port.ListUs
 			&user.CreatedAt,
 			&user.UpdatedAt,
 		); err != nil {
-			return port.ListUsersInRadiusRes{}, err
+			return port.UserRepositoryListUsersInRadiusResponse{}, err
 		}
 		users = append(users, user)
 	}
 
-	result := port.ListUsersInRadiusRes{
+	result := port.UserRepositoryListUsersInRadiusResponse{
 		Users: users,
 	}
 	if hasNextPage {

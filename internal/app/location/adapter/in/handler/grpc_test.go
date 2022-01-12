@@ -29,14 +29,14 @@ func Test_GRPCHandler_SetUserLocation(t *testing.T) {
 				svc.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
-						gomock.Eq(port.SetUserLocationRequest{
+						gomock.Eq(port.UserServiceSetUserLocationRequest{
 							Username:  "test",
 							Latitude:  1.0,
 							Longitude: 1.0,
 						}),
 					).
 					Times(1).
-					Return(port.SetUserLocationResponse{
+					Return(port.UserServiceSetUserLocationResponse{
 						Latitude:  1.0,
 						Longitude: 1.0,
 					}, nil)

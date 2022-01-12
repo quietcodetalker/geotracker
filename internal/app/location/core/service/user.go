@@ -18,21 +18,21 @@ func NewUserService(repo port.UserRepository) port.UserService {
 }
 
 // SetUserLocation sets user's location by given username.
-func (s *userService) SetUserLocation(ctx context.Context, req port.SetUserLocationRequest) (port.SetUserLocationResponse, error) {
+func (s *userService) SetUserLocation(ctx context.Context, req port.UserServiceSetUserLocationRequest) (port.UserServiceSetUserLocationResponse, error) {
 	if err := validate.Struct(req); err != nil {
 		// TODO: check different errors?
-		return port.SetUserLocationResponse{}, &port.InvalidArgumentError{}
+		return port.UserServiceSetUserLocationResponse{}, &port.InvalidArgumentError{}
 	}
 
-	location, err := s.repo.SetUserLocation(ctx, port.SetUserLocationArg{
+	location, err := s.repo.SetUserLocation(ctx, port.UserRepositorySetUserLocationRequest{
 		Username: req.Username,
 		Point:    domain.Point{req.Longitude, req.Latitude},
 	})
 	if err != nil {
-		return port.SetUserLocationResponse{}, err
+		return port.UserServiceSetUserLocationResponse{}, err
 	}
 
-	return port.SetUserLocationResponse{
+	return port.UserServiceSetUserLocationResponse{
 		Latitude:  location.Point.Latitude(),
 		Longitude: location.Point.Longitude(),
 	}, nil
