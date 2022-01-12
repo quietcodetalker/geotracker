@@ -10,7 +10,7 @@ type userService struct {
 	repo port.UserRepository
 }
 
-// NewUserService creates instance of UserService and returns it's pointer.
+// NewUserService creates instance of UserService and returns its pointer.
 func NewUserService(repo port.UserRepository) port.UserService {
 	return &userService{
 		repo: repo,
