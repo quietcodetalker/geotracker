@@ -47,7 +47,7 @@ func (s *PostgresTestSuite) SetupSuite() {
 	)
 	require.NoError(s.T(), err)
 
-	migrationsPath := "file://" + path.Join(rootDir, "db/migrations/users")
+	migrationsPath := "file://" + path.Join(rootDir, "db/migrations/locations")
 
 	driver, err := postgres.WithInstance(s.db, &postgres.Config{})
 	require.NoError(s.T(), err)
