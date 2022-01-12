@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
 	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/location"
 	"google.golang.org/grpc"
@@ -62,12 +63,28 @@ func (h *GRPCHandler) SetUserLocation(
 		Longitude: request.GetLongitude(),
 	})
 	if err != nil {
-		// TODO: handle different errors and return respective statuses
-		return &pb.SetUserLocationResponse{}, status.Errorf(codes.Internal, "")
+		return &pb.SetUserLocationResponse{}, grpcErr(err)
 	}
 
 	return &pb.SetUserLocationResponse{
 		Longitude: response.Longitude,
 		Latitude:  response.Latitude,
 	}, status.Error(codes.OK, "")
+}
+
+func grpcErr(err error) error {
+	var invalidArgumentError *port.InvalidArgumentError
+
+	if err != nil {
+		switch {
+		case errors.As(err, &invalidArgumentError):
+			fallthrough
+		case errors.Is(err, port.ErrInvalidUsername):
+			return status.Error(codes.FailedPrecondition, err.Error())
+		default:
+			return status.Error(codes.Internal, "internal error")
+		}
+	}
+
+	return nil
 }
