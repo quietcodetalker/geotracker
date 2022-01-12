@@ -25,16 +25,20 @@ type InvalidLocationErrorViolation struct {
 	Value   float64
 }
 
+// TODO add description
 type InvalidLocationError struct {
 	Violations []InvalidLocationErrorViolation
 }
 
+// TODO add description
 func (e *InvalidLocationError) Error() string {
 	return "invalid location"
 }
 
+// TODO add description
 type InvalidArgumentError struct{}
 
+// TODO add description
 func (e *InvalidArgumentError) Error() string {
 	return "invalid argument"
 }
