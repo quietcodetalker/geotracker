@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/go-playground/validator/v10"
+	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
 	"gitlab.com/spacewalker/locations/internal/pkg/validation"
 	"log"
 )
@@ -24,4 +25,10 @@ func init() {
 	if err = validate.RegisterValidation("validlatitude", validation.ValidateLatitude); err != nil {
 		log.Panicf("failed to register validation: %v", err)
 	}
+
+	if err = validate.RegisterValidation("validgeopoint", validation.ValidateGeoPoint); err != nil {
+		log.Panicf("failed to register validation: %v", err)
+	}
+
+	validate.RegisterStructValidation(validation.ValidateListMethod, port.UserServiceListUsersInRadiusRequest{})
 }
