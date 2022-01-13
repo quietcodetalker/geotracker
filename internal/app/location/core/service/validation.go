@@ -30,5 +30,9 @@ func init() {
 		log.Panicf("failed to register validation: %v", err)
 	}
 
+	if err = validate.RegisterValidation("valid_page_token", validation.ValidatePageToken); err != nil {
+		log.Panicf("failed to register validation: %v", err)
+	}
+
 	validate.RegisterStructValidation(validation.ValidateListMethod, port.UserServiceListUsersInRadiusRequest{})
 }
