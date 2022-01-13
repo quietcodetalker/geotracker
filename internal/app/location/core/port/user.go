@@ -20,9 +20,24 @@ type UserServiceSetUserLocationResponse struct {
 	Longitude float64 `json:"longitude"`
 }
 
+// UserServiceListUsersInRadiusRequest TODO: add description
+type UserServiceListUsersInRadiusRequest struct {
+	Point     domain.Point `json:"point" validate:"validgeopoint"`
+	Radius    float64      `json:"radius" validate:""`
+	PageToken string       `json:"page_token" validate:"required_without=PageSize"`
+	PageSize  int          `json:"page_size" validate:"required_without=PageToken"`
+}
+
+// UserServiceListUsersInRadiusResponse TODO: add description
+type UserServiceListUsersInRadiusResponse struct {
+	Users         []domain.User
+	NextPageToken int
+}
+
 // UserService represents user service.
 type UserService interface {
 	SetUserLocation(ctx context.Context, req UserServiceSetUserLocationRequest) (UserServiceSetUserLocationResponse, error)
+	ListUsersInRadius(ctx context.Context, req UserServiceListUsersInRadiusRequest) (UserServiceListUsersInRadiusResponse, error)
 }
 
 // CreateUserArg is a param object of use repository CreateUser method.
