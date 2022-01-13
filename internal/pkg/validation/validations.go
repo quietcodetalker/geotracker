@@ -5,6 +5,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/util/pagination"
 	"regexp"
 )
 
@@ -38,6 +39,18 @@ func ValidateGeoPoint(fl validator.FieldLevel) bool {
 	}
 
 	return false
+}
+
+func ValidatePageToken(fl validator.FieldLevel) bool {
+	cursor := fl.Field().String()
+	if cursor == "" {
+		return true
+	}
+	pageToken, pageSize, err := pagination.DecodeCursor(cursor)
+	if pageToken < 0 || pageSize < 0 || err != nil {
+		return false
+	}
+	return true
 }
 
 func ValidateListMethod(sl validator.StructLevel) {
