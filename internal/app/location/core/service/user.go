@@ -4,6 +4,7 @@ import (
 	"context"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/util/pagination"
 )
 
 type userService struct {
@@ -38,4 +39,35 @@ func (s *userService) SetUserLocation(ctx context.Context, req port.UserServiceS
 	}, nil
 
 	// TODO: add record to location history via history microservice
+}
+
+// ListUsersInRadius finds users around given geographic point in given radius.
+func (s *userService) ListUsersInRadius(ctx context.Context, req port.UserServiceListUsersInRadiusRequest) (port.UserServiceListUsersInRadiusResponse, error) {
+	if err := validate.Struct(req); err != nil {
+		// TODO: check different errors
+		return port.UserServiceListUsersInRadiusResponse{}, &port.InvalidArgumentError{}
+	}
+
+	var pageToken, pageSize int
+	if req.PageToken != "" {
+		var err error
+		pageToken, pageSize, err = pagination.DecodeCursor(req.PageToken)
+		if err != nil {
+			return port.UserServiceListUsersInRadiusResponse{}, &port.InvalidArgumentError{}
+		}
+	} else {
+		pageSize = req.PageSize
+	}
+
+	res, err := s.repo.ListUsersInRadius(ctx, port.UserRepositoryListUsersInRadiusRequest{
+		Point:     req.Point,
+		Radius:    req.Radius,
+		PageToken: pageToken,
+		PageSize:  pageSize,
+	})
+	if err != nil {
+		return port.UserServiceListUsersInRadiusResponse{}, err
+	}
+
+	return port.UserServiceListUsersInRadiusResponse(res), nil
 }
