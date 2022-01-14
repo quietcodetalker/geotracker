@@ -3,11 +3,13 @@ package handler
 import (
 	"context"
 	"errors"
+	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
 	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/location"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"net"
 )
 
@@ -70,6 +72,43 @@ func (h *GRPCHandler) SetUserLocation(
 		Longitude: response.Longitude,
 		Latitude:  response.Latitude,
 	}, status.Error(codes.OK, "")
+}
+
+// ListUsersInRadius TODO: add description
+func (h *GRPCHandler) ListUsersInRadius(
+	ctx context.Context,
+	req *pb.ListUsersInRadiusRequest,
+) (*pb.ListUsersInRadiusResponse, error) {
+	if len(req.Point) != 2 {
+		return &pb.ListUsersInRadiusResponse{}, status.Error(codes.FailedPrecondition, "invalid point")
+	}
+	res, err := h.service.ListUsersInRadius(
+		ctx,
+		port.UserServiceListUsersInRadiusRequest{
+			Point:     domain.Point{req.Point[0], req.Point[1]},
+			Radius:    req.Radius,
+			PageToken: req.PageToken,
+			PageSize:  int(req.PageSize),
+		},
+	)
+	if err != nil {
+		return &pb.ListUsersInRadiusResponse{}, grpcErr(err)
+	}
+
+	users := make([]*pb.User, 0, len(res.Users))
+	for _, user := range res.Users {
+		users = append(users, &pb.User{
+			Id:        int32(user.ID),
+			Username:  user.Username,
+			CreatedAt: timestamppb.New(user.CreatedAt),
+			UpdatedAt: timestamppb.New(user.UpdatedAt),
+		})
+	}
+
+	return &pb.ListUsersInRadiusResponse{
+		Users:         users,
+		NextPageToken: res.NextPageToken,
+	}, nil
 }
 
 func grpcErr(err error) error {
