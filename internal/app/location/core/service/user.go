@@ -69,5 +69,13 @@ func (s *userService) ListUsersInRadius(ctx context.Context, req port.UserServic
 		return port.UserServiceListUsersInRadiusResponse{}, err
 	}
 
-	return port.UserServiceListUsersInRadiusResponse(res), nil
+	nextPageToken := ""
+	if res.NextPageToken > 0 {
+		nextPageToken = pagination.EncodeCursor(res.NextPageToken, pageSize)
+	}
+
+	return port.UserServiceListUsersInRadiusResponse{
+		Users:         res.Users,
+		NextPageToken: nextPageToken,
+	}, nil
 }
