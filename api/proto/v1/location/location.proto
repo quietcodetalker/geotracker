@@ -2,10 +2,13 @@ syntax = "proto3";
 
 package proto;
 
+import "google/protobuf/timestamp.proto";
+
 option go_package = "/;location";
 
 service Location {
   rpc SetUserLocation(SetUserLocationRequest) returns(SetUserLocationResponse);
+  rpc ListUsersInRadius(ListUsersInRadiusRequest) returns(ListUsersInRadiusResponse);
 }
 
 message SetUserLocationRequest {
@@ -17,4 +20,23 @@ message SetUserLocationRequest {
 message SetUserLocationResponse {
   double longitude = 1;
   double latitude = 2;
+}
+
+message ListUsersInRadiusRequest {
+  repeated double point = 1;
+  double radius = 2;
+  string page_token = 3;
+  int32 page_size = 4;
+}
+
+message ListUsersInRadiusResponse {
+  repeated User users = 1;
+  string next_page_token = 2;
+}
+
+message User {
+  int32 id = 1;
+  string username = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
 }
