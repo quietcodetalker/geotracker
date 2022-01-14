@@ -592,6 +592,102 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 				require.ErrorAs(t, err, &invalidArgumentError)
 			},
 		},
+		{
+			name: "InvalidRadius",
+			req: port.UserServiceListUsersInRadiusRequest{
+				Point:     domain.Point{0, 0},
+				Radius:    -1,
+				PageToken: "",
+				PageSize:  10,
+			},
+			buildStubs: func(repo *mock.MockUserRepository) {
+				repo.EXPECT().ListUsersInRadius(gomock.Any(), gomock.Any()).Times(0)
+			},
+			assert: func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error) {
+				require.Empty(t, res)
+
+				var invalidArgumentError *port.InvalidArgumentError
+				require.ErrorAs(t, err, &invalidArgumentError)
+			},
+		},
+		{
+			name: "OK_Radius_eq_0",
+			req: port.UserServiceListUsersInRadiusRequest{
+				Point:     domain.Point{0, 0},
+				Radius:    0,
+				PageToken: "MTAwIDEwMA==",
+				PageSize:  0,
+			},
+			buildStubs: func(repo *mock.MockUserRepository) {
+				repo.EXPECT().
+					ListUsersInRadius(gomock.Any(), gomock.Eq(port.UserRepositoryListUsersInRadiusRequest{
+						Point:     domain.Point{0, 0},
+						Radius:    0,
+						PageToken: 100,
+						PageSize:  100,
+					})).
+					Times(1).
+					Return(port.UserRepositoryListUsersInRadiusResponse{
+						Users: []domain.User{
+							{
+								ID:        1,
+								Username:  "test",
+								CreatedAt: time.Now(),
+								UpdatedAt: time.Now(),
+							},
+						},
+						NextPageToken: 1,
+					}, nil)
+			},
+			assert: func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error) {
+				require.NoError(t, err)
+				require.Len(t, res.Users, 1)
+				require.Equal(t, 1, res.Users[0].ID)
+				require.Equal(t, "test", res.Users[0].Username)
+				require.WithinDuration(t, time.Now(), res.Users[0].CreatedAt, time.Second)
+				require.WithinDuration(t, time.Now(), res.Users[0].UpdatedAt, time.Second)
+				require.Equal(t, "MSAxMDA=", res.NextPageToken)
+			},
+		},
+		{
+			name: "OK_Radius_gt_0",
+			req: port.UserServiceListUsersInRadiusRequest{
+				Point:     domain.Point{0, 0},
+				Radius:    1,
+				PageToken: "MTAwIDEwMA==",
+				PageSize:  0,
+			},
+			buildStubs: func(repo *mock.MockUserRepository) {
+				repo.EXPECT().
+					ListUsersInRadius(gomock.Any(), gomock.Eq(port.UserRepositoryListUsersInRadiusRequest{
+						Point:     domain.Point{0, 0},
+						Radius:    1,
+						PageToken: 100,
+						PageSize:  100,
+					})).
+					Times(1).
+					Return(port.UserRepositoryListUsersInRadiusResponse{
+						Users: []domain.User{
+							{
+								ID:        1,
+								Username:  "test",
+								CreatedAt: time.Now(),
+								UpdatedAt: time.Now(),
+							},
+						},
+						NextPageToken: 1,
+					}, nil)
+			},
+			assert: func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error) {
+				require.NoError(t, err)
+				require.Len(t, res.Users, 1)
+				require.Equal(t, 1, res.Users[0].ID)
+				require.Equal(t, "test", res.Users[0].Username)
+				require.WithinDuration(t, time.Now(), res.Users[0].CreatedAt, time.Second)
+				require.WithinDuration(t, time.Now(), res.Users[0].UpdatedAt, time.Second)
+				require.Equal(t, "MSAxMDA=", res.NextPageToken)
+			},
+		},
 	}
 
 	for _, tc := range testCases {
