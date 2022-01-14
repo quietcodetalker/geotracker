@@ -23,7 +23,7 @@ type UserServiceSetUserLocationResponse struct {
 // UserServiceListUsersInRadiusRequest TODO: add description
 type UserServiceListUsersInRadiusRequest struct {
 	Point     domain.Point `json:"point" validate:"validgeopoint"`
-	Radius    float64      `json:"radius" validate:""`
+	Radius    float64      `json:"radius" validate:"gte=0"`
 	PageToken string       `json:"page_token" validate:"required_without=PageSize"`
 	PageSize  int          `json:"page_size" validate:"required_without=PageToken"`
 }
