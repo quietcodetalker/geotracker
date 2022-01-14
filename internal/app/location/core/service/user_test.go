@@ -403,7 +403,46 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 				require.Equal(t, "test", res.Users[0].Username)
 				require.WithinDuration(t, time.Now(), res.Users[0].CreatedAt, time.Second)
 				require.WithinDuration(t, time.Now(), res.Users[0].UpdatedAt, time.Second)
-				require.Equal(t, 1, res.NextPageToken)
+				require.Equal(t, "MSAxMDA=", res.NextPageToken)
+			},
+		},
+		{
+			name: "OK_Lastpage",
+			req: port.UserServiceListUsersInRadiusRequest{
+				Point:     domain.Point{0, 0},
+				Radius:    0,
+				PageToken: "MTAwIDEwMA==",
+				PageSize:  0,
+			},
+			buildStubs: func(repo *mock.MockUserRepository) {
+				repo.EXPECT().
+					ListUsersInRadius(gomock.Any(), gomock.Eq(port.UserRepositoryListUsersInRadiusRequest{
+						Point:     domain.Point{0, 0},
+						Radius:    0,
+						PageToken: 100,
+						PageSize:  100,
+					})).
+					Times(1).
+					Return(port.UserRepositoryListUsersInRadiusResponse{
+						Users: []domain.User{
+							{
+								ID:        1,
+								Username:  "test",
+								CreatedAt: time.Now(),
+								UpdatedAt: time.Now(),
+							},
+						},
+						NextPageToken: 0,
+					}, nil)
+			},
+			assert: func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error) {
+				require.NoError(t, err)
+				require.Len(t, res.Users, 1)
+				require.Equal(t, 1, res.Users[0].ID)
+				require.Equal(t, "test", res.Users[0].Username)
+				require.WithinDuration(t, time.Now(), res.Users[0].CreatedAt, time.Second)
+				require.WithinDuration(t, time.Now(), res.Users[0].UpdatedAt, time.Second)
+				require.Equal(t, "", res.NextPageToken)
 			},
 		},
 		{
@@ -442,7 +481,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 				require.Equal(t, "test", res.Users[0].Username)
 				require.WithinDuration(t, time.Now(), res.Users[0].CreatedAt, time.Second)
 				require.WithinDuration(t, time.Now(), res.Users[0].UpdatedAt, time.Second)
-				require.Equal(t, 1, res.NextPageToken)
+				require.Equal(t, "MSAxMA==", res.NextPageToken)
 			},
 		},
 		{
