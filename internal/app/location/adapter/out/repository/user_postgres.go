@@ -124,7 +124,7 @@ LIMIT $4
 	LocationTable,
 )
 
-// GetUsersInRadius retrieve users in given radius with coordinates.
+// ListUsersInRadius retrieve users in given radius with coordinates.
 func (q *postgresQueries) ListUsersInRadius(ctx context.Context, arg port.UserRepositoryListUsersInRadiusRequest) (port.UserRepositoryListUsersInRadiusResponse, error) {
 	var users []domain.User
 
