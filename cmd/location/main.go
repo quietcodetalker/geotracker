@@ -36,8 +36,12 @@ func main() {
 	repo := repository.NewPostgresRepository(db)
 	svc := service.NewUserService(repo)
 
-	grpcHandler := handler.NewGRPCHandler(svc)
-	if err := grpcHandler.Start(":50051"); err != nil {
+	//grpcHandler := handler.NewGRPCHandler(svc)
+	//if err := grpcHandler.Start(":50051"); err != nil {
+	//	log.Panic(err)
+	//}
+	handler := handler.NewHTTPHandler(svc)
+	if err := handler.Start(cfg.BindAddr); err != nil {
 		log.Panic(err)
 	}
 }
