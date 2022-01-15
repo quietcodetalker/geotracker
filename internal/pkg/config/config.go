@@ -13,6 +13,7 @@ type UserConfig struct {
 	DBPassword string `mapstructure:"DB_PASSWORD"`
 	DBName     string `mapstructure:"DB_NAME"`
 	DBSSLMode  string `mapstructure:"DB_SSLMODE"`
+	BindAddr   string `mapstructure:"BIND_ADDR"`
 }
 
 // LoadConfig parses configuration and stores the result in
