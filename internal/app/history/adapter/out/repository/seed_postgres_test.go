@@ -18,7 +18,7 @@ RETURNING user_id, a, b, created_at, updated_at
 	repository.RecordsTable,
 )
 
-func (s *PostgresTestSuite) seedLocations(args []domain.Record) []domain.Record {
+func (s *PostgresTestSuite) seedRecords(args []domain.Record) []domain.Record {
 	records := make([]domain.Record, 0, len(args))
 
 	tx, err := s.db.Begin()
@@ -34,7 +34,7 @@ func (s *PostgresTestSuite) seedLocations(args []domain.Record) []domain.Record 
 		var record domain.Record
 		var a, b geo.PostgresPoint
 
-		err := stmt.QueryRow(arg.UserID, geo.PostgresPoint(arg.A), geo.PostgresPoint(arg.B)).Scan(
+		err := stmt.QueryRow(arg.UserID, geo.PostgresPoint(arg.A), geo.PostgresPoint(arg.B), arg.CreatedAt).Scan(
 			&record.ID,
 			&a,
 			&b,
