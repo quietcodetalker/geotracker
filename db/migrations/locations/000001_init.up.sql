@@ -9,6 +9,14 @@ RETURN NEW;
 END;
 $$ language 'plpgsql';
 
+CREATE OR REPLACE FUNCTION fix_point_precision()
+    RETURNS TRIGGER AS $$
+BEGIN
+    NEW.point = point(TRUNC(NEW.point[0]::numeric, 8), TRUNC(NEW.point[1]::numeric, 8));
+RETURN NEW;
+END;
+$$ language 'plpgsql';
+
 CREATE TABLE users (
     id SERIAL,
     username varchar(16),
@@ -38,4 +46,8 @@ CREATE TRIGGER update_updated_at BEFORE UPDATE
 
 CREATE TRIGGER update_updated_at BEFORE UPDATE
     ON locations FOR EACH ROW EXECUTE PROCEDURE
-    update_updated_at();
+        update_updated_at();
+
+CREATE TRIGGER fix_points_precision BEFORE INSERT OR UPDATE
+    ON locations FOR EACH ROW EXECUTE PROCEDURE
+        fix_point_precision();
