@@ -107,7 +107,7 @@ var getDistanceQuery = fmt.Sprintf(
 	`
 SELECT SUM(a <@> b)
 FROM %s
-WHERE user_id = $1 created_at >= $2 AND created_at <= $3
+WHERE user_id = $1 AND created_at >= $2 AND created_at <= $3
 `,
 	RecordsTable,
 )
