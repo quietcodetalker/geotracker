@@ -105,7 +105,7 @@ func (r postgresRepository) AddRecord(ctx context.Context, req port.HistoryRepos
 
 var getDistanceQuery = fmt.Sprintf(
 	`
-SELECT SUM(a <@> b)
+SELECT coalesce(SUM(a <@> b), 0.00) * 1609.344
 FROM %s
 WHERE user_id = $1 AND created_at >= $2 AND created_at <= $3
 `,
