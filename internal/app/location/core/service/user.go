@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"gitlab.com/spacewalker/locations/internal/pkg/util/pagination"
 )
 
@@ -27,7 +27,7 @@ func (s *userService) SetUserLocation(ctx context.Context, req port.UserServiceS
 
 	location, err := s.repo.SetUserLocation(ctx, port.UserRepositorySetUserLocationRequest{
 		Username: req.Username,
-		Point:    domain.Point{req.Longitude, req.Latitude},
+		Point:    geo.Point{req.Longitude, req.Latitude},
 	})
 	if err != nil {
 		return port.UserServiceSetUserLocationResponse{}, err

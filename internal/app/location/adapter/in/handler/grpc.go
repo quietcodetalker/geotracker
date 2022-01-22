@@ -3,8 +3,8 @@ package handler
 import (
 	"context"
 	"errors"
-	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/location"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -85,7 +85,7 @@ func (h *GRPCHandler) ListUsersInRadius(
 	res, err := h.service.ListUsersInRadius(
 		ctx,
 		port.UserServiceListUsersInRadiusRequest{
-			Point:     domain.Point{req.Point[0], req.Point[1]},
+			Point:     geo.Point{req.Point[0], req.Point[1]},
 			Radius:    req.Radius,
 			PageToken: req.PageToken,
 			PageSize:  int(req.PageSize),

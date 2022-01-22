@@ -9,6 +9,7 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port/mock"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/service"
+	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	"testing"
 	"time"
@@ -36,7 +37,7 @@ func TestSvcTestSuite(t *testing.T) {
 func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 	username := "user1"
 
-	point := domain.Point{
+	point := geo.Point{
 		util.RandomFloat64(-180.0, 180.0),
 		util.RandomFloat64(-90.0, 90.0),
 	}
@@ -97,14 +98,14 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 						gomock.Any(),
 						gomock.Eq(port.UserRepositorySetUserLocationRequest{
 							Username: username,
-							Point:    domain.Point{-180.0, -90.0},
+							Point:    geo.Point{-180.0, -90.0},
 						}),
 					).
 					Times(1).
 					Return(
 						domain.Location{
 							UserID:    1,
-							Point:     domain.Point{-180.0, -90.0},
+							Point:     geo.Point{-180.0, -90.0},
 							CreatedAt: time.Now(),
 							UpdatedAt: time.Now(),
 						},
@@ -134,14 +135,14 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 						gomock.Any(),
 						gomock.Eq(port.UserRepositorySetUserLocationRequest{
 							Username: username,
-							Point:    domain.Point{180.0, 90.0},
+							Point:    geo.Point{180.0, 90.0},
 						}),
 					).
 					Times(1).
 					Return(
 						domain.Location{
 							UserID:    1,
-							Point:     domain.Point{180.0, 90.0},
+							Point:     geo.Point{180.0, 90.0},
 							CreatedAt: time.Now(),
 							UpdatedAt: time.Now(),
 						},
@@ -171,14 +172,14 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 						gomock.Any(),
 						gomock.Eq(port.UserRepositorySetUserLocationRequest{
 							Username: username,
-							Point:    domain.Point{0, 0},
+							Point:    geo.Point{0, 0},
 						}),
 					).
 					Times(1).
 					Return(
 						domain.Location{
 							UserID:    1,
-							Point:     domain.Point{0, 0},
+							Point:     geo.Point{0, 0},
 							CreatedAt: time.Now(),
 							UpdatedAt: time.Now(),
 						},
@@ -370,7 +371,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 		{
 			name: "OK_PageToken",
 			req: port.UserServiceListUsersInRadiusRequest{
-				Point:     domain.Point{0, 0},
+				Point:     geo.Point{0, 0},
 				Radius:    0,
 				PageToken: "MTAwIDEwMA==",
 				PageSize:  0,
@@ -378,7 +379,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 			buildStubs: func(repo *mock.MockUserRepository) {
 				repo.EXPECT().
 					ListUsersInRadius(gomock.Any(), gomock.Eq(port.UserRepositoryListUsersInRadiusRequest{
-						Point:     domain.Point{0, 0},
+						Point:     geo.Point{0, 0},
 						Radius:    0,
 						PageToken: 100,
 						PageSize:  100,
@@ -409,7 +410,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 		{
 			name: "OK_Lastpage",
 			req: port.UserServiceListUsersInRadiusRequest{
-				Point:     domain.Point{0, 0},
+				Point:     geo.Point{0, 0},
 				Radius:    0,
 				PageToken: "MTAwIDEwMA==",
 				PageSize:  0,
@@ -417,7 +418,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 			buildStubs: func(repo *mock.MockUserRepository) {
 				repo.EXPECT().
 					ListUsersInRadius(gomock.Any(), gomock.Eq(port.UserRepositoryListUsersInRadiusRequest{
-						Point:     domain.Point{0, 0},
+						Point:     geo.Point{0, 0},
 						Radius:    0,
 						PageToken: 100,
 						PageSize:  100,
@@ -448,7 +449,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 		{
 			name: "OK_PageSize",
 			req: port.UserServiceListUsersInRadiusRequest{
-				Point:     domain.Point{0, 0},
+				Point:     geo.Point{0, 0},
 				Radius:    0,
 				PageToken: "",
 				PageSize:  10,
@@ -456,7 +457,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 			buildStubs: func(repo *mock.MockUserRepository) {
 				repo.EXPECT().
 					ListUsersInRadius(gomock.Any(), gomock.Eq(port.UserRepositoryListUsersInRadiusRequest{
-						Point:     domain.Point{0, 0},
+						Point:     geo.Point{0, 0},
 						Radius:    0,
 						PageToken: 0,
 						PageSize:  10,
@@ -487,7 +488,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 		{
 			name: "InvalidPoint_LongitudeLessThanMin",
 			req: port.UserServiceListUsersInRadiusRequest{
-				Point:     domain.Point{-180.1, 0},
+				Point:     geo.Point{-180.1, 0},
 				Radius:    0,
 				PageToken: "1",
 				PageSize:  0,
@@ -505,7 +506,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 		{
 			name: "InvalidPoint_LongitudeGreaterThanMax",
 			req: port.UserServiceListUsersInRadiusRequest{
-				Point:     domain.Point{180.1, 0},
+				Point:     geo.Point{180.1, 0},
 				Radius:    0,
 				PageToken: "1",
 				PageSize:  0,
@@ -523,7 +524,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 		{
 			name: "InvalidPoint_LatitudeLessThanMin",
 			req: port.UserServiceListUsersInRadiusRequest{
-				Point:     domain.Point{0, -90.1},
+				Point:     geo.Point{0, -90.1},
 				Radius:    0,
 				PageToken: "1",
 				PageSize:  0,
@@ -541,7 +542,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 		{
 			name: "InvalidPoint_LatitudeGreaterThanMax",
 			req: port.UserServiceListUsersInRadiusRequest{
-				Point:     domain.Point{0, 90.1},
+				Point:     geo.Point{0, 90.1},
 				Radius:    0,
 				PageToken: "1",
 				PageSize:  0,
@@ -559,7 +560,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 		{
 			name: "PageTokenAndPageSizeBothProvided",
 			req: port.UserServiceListUsersInRadiusRequest{
-				Point:     domain.Point{0, 0},
+				Point:     geo.Point{0, 0},
 				Radius:    0,
 				PageToken: "1",
 				PageSize:  10,
@@ -577,7 +578,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 		{
 			name: "PageTokenAndPageSizeBothNotProvided",
 			req: port.UserServiceListUsersInRadiusRequest{
-				Point:     domain.Point{0, 0},
+				Point:     geo.Point{0, 0},
 				Radius:    0,
 				PageToken: "1",
 				PageSize:  10,
@@ -595,7 +596,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 		{
 			name: "InvalidRadius",
 			req: port.UserServiceListUsersInRadiusRequest{
-				Point:     domain.Point{0, 0},
+				Point:     geo.Point{0, 0},
 				Radius:    -1,
 				PageToken: "",
 				PageSize:  10,
@@ -613,7 +614,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 		{
 			name: "OK_Radius_eq_0",
 			req: port.UserServiceListUsersInRadiusRequest{
-				Point:     domain.Point{0, 0},
+				Point:     geo.Point{0, 0},
 				Radius:    0,
 				PageToken: "MTAwIDEwMA==",
 				PageSize:  0,
@@ -621,7 +622,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 			buildStubs: func(repo *mock.MockUserRepository) {
 				repo.EXPECT().
 					ListUsersInRadius(gomock.Any(), gomock.Eq(port.UserRepositoryListUsersInRadiusRequest{
-						Point:     domain.Point{0, 0},
+						Point:     geo.Point{0, 0},
 						Radius:    0,
 						PageToken: 100,
 						PageSize:  100,
@@ -652,7 +653,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 		{
 			name: "OK_Radius_gt_0",
 			req: port.UserServiceListUsersInRadiusRequest{
-				Point:     domain.Point{0, 0},
+				Point:     geo.Point{0, 0},
 				Radius:    1,
 				PageToken: "MTAwIDEwMA==",
 				PageSize:  0,
@@ -660,7 +661,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 			buildStubs: func(repo *mock.MockUserRepository) {
 				repo.EXPECT().
 					ListUsersInRadius(gomock.Any(), gomock.Eq(port.UserRepositoryListUsersInRadiusRequest{
-						Point:     domain.Point{0, 0},
+						Point:     geo.Point{0, 0},
 						Radius:    1,
 						PageToken: 100,
 						PageSize:  100,

@@ -3,8 +3,8 @@ package validation
 import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
-	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"gitlab.com/spacewalker/locations/internal/pkg/util/pagination"
 	"regexp"
 )
@@ -26,7 +26,7 @@ func ValidateLatitude(fl validator.FieldLevel) bool {
 }
 
 func ValidateGeoPoint(fl validator.FieldLevel) bool {
-	if value, ok := fl.Field().Interface().(domain.Point); ok {
+	if value, ok := fl.Field().Interface().(geo.Point); ok {
 		long := value.Longitude()
 		lat := value.Latitude()
 		if long < -180 || long > 180 {

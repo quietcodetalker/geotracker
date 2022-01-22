@@ -6,6 +6,7 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/location/adapter/out/repository"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	"testing"
 	"time"
@@ -189,7 +190,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 	setLocationArgs := []port.LocationRepositorySetLocationRequest{
 		{
 			UserID: users[0].ID,
-			Point:  domain.Point{1.0, 1.0},
+			Point:  geo.Point{1.0, 1.0},
 		},
 	}
 	locations := s.seedLocations(setLocationArgs)
@@ -206,7 +207,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 			name: "OK_UserExist_LocationExist",
 			arg: port.UserRepositorySetUserLocationRequest{
 				Username: users[0].Username,
-				Point:    domain.Point{locations[0].Point.Longitude() + 1.0, locations[0].Point.Latitude() + 1.0},
+				Point:    geo.Point{locations[0].Point.Longitude() + 1.0, locations[0].Point.Latitude() + 1.0},
 			},
 			hasErr: false,
 			isErr:  nil,
@@ -223,7 +224,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 			name: "OK_UserExist_LocationDoesNotExist",
 			arg: port.UserRepositorySetUserLocationRequest{
 				Username: users[1].Username,
-				Point:    domain.Point{1.0, 1.0},
+				Point:    geo.Point{1.0, 1.0},
 			},
 			hasErr: false,
 			isErr:  nil,
@@ -240,7 +241,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 			name: "OK_UserDoesNotExist_LocationDoesNotExist",
 			arg: port.UserRepositorySetUserLocationRequest{
 				Username: "user3",
-				Point:    domain.Point{1.0, 1.0},
+				Point:    geo.Point{1.0, 1.0},
 			},
 			hasErr: false,
 			isErr:  nil,
@@ -299,77 +300,77 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 	setLocationArgs := []port.LocationRepositorySetLocationRequest{
 		{
 			UserID: users[0].ID,
-			Point: domain.Point{
+			Point: geo.Point{
 				0.0 + util.RandomFloat64(-0.01, 0.01),
 				0.0 + util.RandomFloat64(-0.01, 0.01),
 			},
 		},
 		{
 			UserID: users[1].ID,
-			Point: domain.Point{
+			Point: geo.Point{
 				0.0 + util.RandomFloat64(-0.01, 0.01),
 				-90.0 + util.RandomFloat64(0.0, 0.01),
 			},
 		},
 		{
 			UserID: users[2].ID,
-			Point: domain.Point{
+			Point: geo.Point{
 				0.0 + util.RandomFloat64(-0.01, 0.01),
 				90.0 + util.RandomFloat64(-0.01, 0.0),
 			},
 		},
 		{
 			UserID: users[3].ID,
-			Point: domain.Point{
+			Point: geo.Point{
 				180.0 + util.RandomFloat64(-0.01, 0.0),
 				0.0 + util.RandomFloat64(-0.01, 0.01),
 			},
 		},
 		{
 			UserID: users[4].ID,
-			Point: domain.Point{
+			Point: geo.Point{
 				-180.0 + util.RandomFloat64(0.0, 0.01),
 				0.0 + util.RandomFloat64(-0.01, 0.01),
 			},
 		},
 		{
 			UserID: users[5].ID,
-			Point: domain.Point{
+			Point: geo.Point{
 				90.0 + util.RandomFloat64(-0.01, 0.01),
 				0.0 + util.RandomFloat64(-0.01, 0.01),
 			},
 		},
 		{
 			UserID: users[6].ID,
-			Point: domain.Point{
+			Point: geo.Point{
 				-90.0 + util.RandomFloat64(-0.01, 0.01),
 				0.0 + util.RandomFloat64(-0.01, 0.01),
 			},
 		},
 		{
 			UserID: users[7].ID,
-			Point: domain.Point{
+			Point: geo.Point{
 				180.0 + util.RandomFloat64(-0.01, 0.0),
 				-90.0 + util.RandomFloat64(0.0, 0.01),
 			},
 		},
 		{
 			UserID: users[8].ID,
-			Point: domain.Point{
+			Point: geo.Point{
 				-180.0 + util.RandomFloat64(0.0, 0.01),
 				-90.0 + util.RandomFloat64(0.0, 0.01),
 			},
 		},
 		{
 			UserID: users[9].ID,
-			Point: domain.Point{
+			Point: geo.Point{
 				180.0 + util.RandomFloat64(-0.01, 0.0),
 				90.0 + util.RandomFloat64(-0.01, 0.0),
 			},
 		},
 		{
 			UserID: users[10].ID,
-			Point: domain.Point{
+			Point: geo.Point{
 				180.0 + util.RandomFloat64(-0.01, 0.0),
 				-90.0 + util.RandomFloat64(0.0, 0.01),
 			},
@@ -390,7 +391,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 		{
 			name: "OK_0",
 			in: port.UserRepositoryListUsersInRadiusRequest{
-				Point:     domain.Point{0.0, 0.0},
+				Point:     geo.Point{0.0, 0.0},
 				Radius:    10000.0,
 				PageSize:  5,
 				PageToken: 0,
@@ -401,7 +402,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 		{
 			name: "OK_1",
 			in: port.UserRepositoryListUsersInRadiusRequest{
-				Point:     domain.Point{0.0, -90.0},
+				Point:     geo.Point{0.0, -90.0},
 				Radius:    10000.0,
 				PageSize:  5,
 				PageToken: 0,
@@ -418,7 +419,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 		{
 			name: "OK_2",
 			in: port.UserRepositoryListUsersInRadiusRequest{
-				Point:     domain.Point{0.0, 90.0},
+				Point:     geo.Point{0.0, 90.0},
 				Radius:    10000.0,
 				PageSize:  5,
 				PageToken: 0,
@@ -432,7 +433,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 		{
 			name: "OK_3",
 			in: port.UserRepositoryListUsersInRadiusRequest{
-				Point:     domain.Point{180.0, 0.0},
+				Point:     geo.Point{180.0, 0.0},
 				Radius:    10000.0,
 				PageSize:  5,
 				PageToken: 0,
@@ -446,7 +447,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 		{
 			name: "OK_4",
 			in: port.UserRepositoryListUsersInRadiusRequest{
-				Point:     domain.Point{90.0, 0.0},
+				Point:     geo.Point{90.0, 0.0},
 				Radius:    10000.0,
 				PageSize:  5,
 				PageToken: 0,
@@ -459,7 +460,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 		{
 			name: "OK_5",
 			in: port.UserRepositoryListUsersInRadiusRequest{
-				Point:     domain.Point{-90.0, 0.0},
+				Point:     geo.Point{-90.0, 0.0},
 				Radius:    10000.0,
 				PageSize:  5,
 				PageToken: 0,
@@ -472,7 +473,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 		{
 			name: "OK_6",
 			in: port.UserRepositoryListUsersInRadiusRequest{
-				Point:     domain.Point{45.0, 45.0},
+				Point:     geo.Point{45.0, 45.0},
 				Radius:    10.0,
 				PageSize:  5,
 				PageToken: 0,
@@ -484,7 +485,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 		{
 			name: "OK_Pagination_1",
 			in: port.UserRepositoryListUsersInRadiusRequest{
-				Point:     domain.Point{0.0, -90.0},
+				Point:     geo.Point{0.0, -90.0},
 				Radius:    10000.0,
 				PageSize:  2,
 				PageToken: 0,
@@ -499,7 +500,7 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 		{
 			name: "OK_Pagination_2",
 			in: port.UserRepositoryListUsersInRadiusRequest{
-				Point:     domain.Point{0.0, -90.0},
+				Point:     geo.Point{0.0, -90.0},
 				Radius:    10000.0,
 				PageSize:  1,
 				PageToken: users[1].ID,

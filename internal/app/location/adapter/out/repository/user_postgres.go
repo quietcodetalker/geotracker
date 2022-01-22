@@ -8,6 +8,7 @@ import (
 	"github.com/lib/pq"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 )
 
 var createUserQuery = fmt.Sprintf(
@@ -130,7 +131,7 @@ func (q *postgresQueries) ListUsersInRadius(ctx context.Context, arg port.UserRe
 
 	// Fetch PageSize + 1 (extra marker element)
 	// If such element happens to be retrieved it means that next page can be (probably) retrieved as well.
-	rows, err := q.db.QueryContext(ctx, listUsersInRadiusQuery, PostgresPoint(arg.Point), arg.Radius, arg.PageToken, arg.PageSize+1)
+	rows, err := q.db.QueryContext(ctx, listUsersInRadiusQuery, geo.PostgresPoint(arg.Point), arg.Radius, arg.PageToken, arg.PageSize+1)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return port.UserRepositoryListUsersInRadiusResponse{}, port.ErrNotFound

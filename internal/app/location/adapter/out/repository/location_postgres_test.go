@@ -6,6 +6,7 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/location/adapter/out/repository"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"testing"
 	"time"
 )
@@ -24,7 +25,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_SetLocation() {
 	setLocationArgs := []port.LocationRepositorySetLocationRequest{
 		{
 			UserID: users[0].ID,
-			Point:  domain.Point{1.0, 1.0},
+			Point:  geo.Point{1.0, 1.0},
 		},
 	}
 	locations := s.seedLocations(setLocationArgs)
@@ -41,7 +42,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_SetLocation() {
 			name: "OK_UserExist_LocationExist",
 			arg: port.LocationRepositorySetLocationRequest{
 				UserID: users[0].ID,
-				Point: domain.Point{
+				Point: geo.Point{
 					locations[0].Point[0] + 1.0,
 					locations[0].Point[1] + 1.0,
 				},
@@ -61,7 +62,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_SetLocation() {
 			name: "OK_UserExist_LocationDoesNotExist",
 			arg: port.LocationRepositorySetLocationRequest{
 				UserID: users[1].ID,
-				Point:  domain.Point{1.0, 1.0},
+				Point:  geo.Point{1.0, 1.0},
 			},
 			hasErr: false,
 			isErr:  nil,
@@ -78,7 +79,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_SetLocation() {
 			name: "ErrForeignKey_UserDoesNotExist_LocationDoesNotExist",
 			arg: port.LocationRepositorySetLocationRequest{
 				UserID: 0,
-				Point:  domain.Point{1.0, 1.0},
+				Point:  geo.Point{1.0, 1.0},
 			},
 			hasErr: true,
 			isErr:  nil,
@@ -91,7 +92,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_SetLocation() {
 			name: "ErrCheck_LattitudeLessThenMin",
 			arg: port.LocationRepositorySetLocationRequest{
 				UserID: users[0].ID,
-				Point:  domain.Point{1.0, -181.0},
+				Point:  geo.Point{1.0, -181.0},
 			},
 			hasErr: true,
 			isErr:  nil,
@@ -113,7 +114,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_SetLocation() {
 			name: "ErrCheck_LattitudeGreaterThenMax",
 			arg: port.LocationRepositorySetLocationRequest{
 				UserID: users[0].ID,
-				Point:  domain.Point{1.0, 181.0},
+				Point:  geo.Point{1.0, 181.0},
 			},
 			hasErr: true,
 			isErr:  nil,
@@ -135,7 +136,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_SetLocation() {
 			name: "ErrCheck_LongitudeLessThenMin",
 			arg: port.LocationRepositorySetLocationRequest{
 				UserID: users[0].ID,
-				Point:  domain.Point{-181.0, 1.0},
+				Point:  geo.Point{-181.0, 1.0},
 			},
 			hasErr: true,
 			isErr:  nil,
@@ -157,7 +158,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_SetLocation() {
 			name: "ErrCheck_LongitudeGreaterThenMax",
 			arg: port.LocationRepositorySetLocationRequest{
 				UserID: users[0].ID,
-				Point:  domain.Point{181.0, 1.0},
+				Point:  geo.Point{181.0, 1.0},
 			},
 			hasErr: true,
 			isErr:  nil,
@@ -213,7 +214,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_UpdateLocation() {
 	setLocationArgs := []port.LocationRepositorySetLocationRequest{
 		{
 			UserID: users[0].ID,
-			Point:  domain.Point{1.0, 1.0},
+			Point:  geo.Point{1.0, 1.0},
 		},
 	}
 	locations := s.seedLocations(setLocationArgs)
@@ -231,12 +232,12 @@ func (s *PostgresTestSuite) Test_PostgresQueries_UpdateLocation() {
 			name: "OK",
 			in: port.LocationRepositoryUpdateLocationByUserIDRequest{
 				UserID: users[0].ID,
-				Point:  domain.Point{2.0, 2.0},
+				Point:  geo.Point{2.0, 2.0},
 			},
 			hasErr: false,
 			expected: domain.Location{
 				UserID:    locations[0].UserID,
-				Point:     domain.Point{2.0, 2.0},
+				Point:     geo.Point{2.0, 2.0},
 				CreatedAt: locations[0].CreatedAt,
 				UpdatedAt: locations[0].UpdatedAt,
 			},
@@ -245,7 +246,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_UpdateLocation() {
 			name: "NotFound",
 			in: port.LocationRepositoryUpdateLocationByUserIDRequest{
 				UserID: 2,
-				Point:  domain.Point{2.0, 2.0},
+				Point:  geo.Point{2.0, 2.0},
 			},
 			hasErr:   true,
 			isErr:    port.ErrNotFound,
@@ -255,7 +256,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_UpdateLocation() {
 			name: "InvalidLongitude",
 			in: port.LocationRepositoryUpdateLocationByUserIDRequest{
 				UserID: users[0].ID,
-				Point:  domain.Point{181.0, 2.0},
+				Point:  geo.Point{181.0, 2.0},
 			},
 			hasErr: true,
 			asErr:  &port.InvalidLocationError{},
@@ -277,7 +278,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_UpdateLocation() {
 			name: "InvalidLatitude",
 			in: port.LocationRepositoryUpdateLocationByUserIDRequest{
 				UserID: users[0].ID,
-				Point:  domain.Point{2.0, 91.0},
+				Point:  geo.Point{2.0, 91.0},
 			},
 			hasErr: true,
 			asErr:  &port.InvalidLocationError{},

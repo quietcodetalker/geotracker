@@ -6,6 +6,7 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/location/adapter/out/repository"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 )
 
 var seedUsersQuery = fmt.Sprintf(
@@ -73,9 +74,9 @@ func (s *PostgresTestSuite) seedLocations(args []port.LocationRepositorySetLocat
 
 	for _, arg := range args {
 		var location domain.Location
-		var pgPoint repository.PostgresPoint
+		var pgPoint geo.PostgresPoint
 
-		err := stmt.QueryRow(arg.UserID, repository.PostgresPoint(arg.Point)).Scan(
+		err := stmt.QueryRow(arg.UserID, geo.PostgresPoint(arg.Point)).Scan(
 			&location.UserID,
 			&pgPoint,
 			&location.CreatedAt,
@@ -83,7 +84,7 @@ func (s *PostgresTestSuite) seedLocations(args []port.LocationRepositorySetLocat
 		)
 		require.NoError(s.T(), err)
 
-		location.Point = domain.Point(pgPoint)
+		location.Point = geo.Point(pgPoint)
 		locations = append(locations, location)
 	}
 

@@ -3,31 +3,13 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"database/sql/driver"
 	"errors"
 	"fmt"
 	"github.com/lib/pq"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 )
-
-type PostgresPoint domain.Point
-
-// Value returns value in format that satisfies driver.Driver interface.
-func (p PostgresPoint) Value() (driver.Value, error) {
-	return fmt.Sprintf("(%v,%v)", p[0], p[1]), nil
-}
-
-// Scan parses raw value retrieved from database and if succeeded assign itself parsed values.
-func (p *PostgresPoint) Scan(src interface{}) error {
-	val, ok := src.([]byte)
-	if !ok {
-		return fmt.Errorf("value contains unexpected type")
-	}
-	_, err := fmt.Sscanf(string(val), "(%f,%f)", &p[0], &p[1])
-
-	return err
-}
 
 var setLocationQuery = fmt.Sprintf(
 	`
@@ -46,8 +28,8 @@ RETURNING user_id, point, created_at, updated_at
 // Returns updated location entity.
 func (q *postgresQueries) SetLocation(ctx context.Context, arg port.LocationRepositorySetLocationRequest) (domain.Location, error) {
 	var location domain.Location
-	var pgPoint PostgresPoint
-	if err := q.db.QueryRowContext(ctx, setLocationQuery, arg.UserID, PostgresPoint(arg.Point)).Scan(
+	var pgPoint geo.PostgresPoint
+	if err := q.db.QueryRowContext(ctx, setLocationQuery, arg.UserID, geo.PostgresPoint(arg.Point)).Scan(
 		&location.UserID,
 		&pgPoint,
 		&location.CreatedAt,
@@ -81,7 +63,7 @@ func (q *postgresQueries) SetLocation(ctx context.Context, arg port.LocationRepo
 		return domain.Location{}, err
 	}
 
-	location.Point = domain.Point(pgPoint)
+	location.Point = geo.Point(pgPoint)
 
 	return location, nil
 }
@@ -99,9 +81,9 @@ RETURNING user_id, point, created_at, updated_at
 // UpdateLocationByUserID TODO: add description
 func (q *postgresQueries) UpdateLocationByUserID(ctx context.Context, arg port.LocationRepositoryUpdateLocationByUserIDRequest) (domain.Location, error) {
 	var location domain.Location
-	var pgPoint PostgresPoint
+	var pgPoint geo.PostgresPoint
 
-	row := q.db.QueryRowContext(ctx, updateLocationyUserIDQuery, arg.UserID, PostgresPoint(arg.Point))
+	row := q.db.QueryRowContext(ctx, updateLocationyUserIDQuery, arg.UserID, geo.PostgresPoint(arg.Point))
 
 	if err := row.Scan(
 		&location.UserID,
@@ -139,7 +121,7 @@ func (q *postgresQueries) UpdateLocationByUserID(ctx context.Context, arg port.L
 		return domain.Location{}, err
 	}
 
-	location.Point = domain.Point(pgPoint)
+	location.Point = geo.Point(pgPoint)
 
 	return location, nil
 }

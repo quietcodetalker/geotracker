@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/schema"
-	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	"google.golang.org/grpc/codes"
 	"net/http"
@@ -115,7 +115,7 @@ func (h *HTTPHandler) listUsersInRadius(w http.ResponseWriter, r *http.Request) 
 	fmt.Println(dto)
 
 	req := port.UserServiceListUsersInRadiusRequest{
-		Point: domain.Point{
+		Point: geo.Point{
 			dto.Longitude,
 			dto.Latitude,
 		},
