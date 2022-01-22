@@ -26,5 +26,5 @@ CREATE TABLE records (
 
 CREATE TRIGGER update_updated_at BEFORE UPDATE
     ON records FOR EACH ROW EXECUTE PROCEDURE
-    update_updated_at();
+        update_updated_at();
 
