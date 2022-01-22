@@ -1,19 +1,22 @@
-USERS_DB_URL := postgres://root:shadow@localhost:5432/users?sslmode=disable
-TRANSITIONS_DB_URL := postgres://root:shadow@localhost:5432/transitions?sslmode=disable
+LOCATIONS_DB_URL := postgres://root:shadow@localhost:5432/locations?sslmode=disable
+HISTORY_DB_URL := postgres://root:shadow@localhost:5432/history?sslmode=disable
 
 migrate_users_up:
-	migrate -database ${USERS_DB_URL} -path db/migrations/users up
+	migrate -database ${LOCATIONS_DB_URL} -path db/migrations/locations up
 
-migrate_transitions_up:
-	migrate -database ${TRANSITIONS_DB_URL} -path db/migrations/transitions up
+migrate_history_up:
+	migrate -database ${HISTORY_DB_URL} -path db/migrations/history up
 
 migrate_users_down:
-	migrate -database ${USERS_DB_URL} -path db/migrations/users down
+	migrate -database ${LOCATIONS_DB_URL} -path db/migrations/locations down
 
-migrate_transitions_down:
-	migrate -database ${TRANSITIONS_DB_URL} -path db/migrations/transitions down
+migrate_history_down:
+	migrate -database ${HISTORY_DB_URL} -path db/migrations/history down
 
 protoc_gen:
 	sh ./scripts/protoc-gen.sh
 
-.PHONY: migrate_users_up migrate_users_down migrate_transitions_up migrate_transitions_down protoc_gen
+run_locations:
+	go run ./cmd/locations
+
+.PHONY: migrate_users_up migrate_users_down migrate_history_up migrate_history_down protoc_gen run_locations

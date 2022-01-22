@@ -1,0 +1,6 @@
+DROP TRIGGER IF EXISTS update_updated_at ON records;
+
+DROP TABLE IF EXISTS records;
+
+DROP EXTENSION IF EXISTS earthdistance;
+DROP EXTENSION IF EXISTS cube;
