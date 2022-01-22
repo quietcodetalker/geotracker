@@ -1,0 +1,65 @@
+//go:generate mockgen -destination=mock/mock_user.go -package=mock . HistoryRepository,HistoryService
+
+package port
+
+import (
+	"context"
+	"gitlab.com/spacewalker/locations/internal/app/history/core/domain"
+	"gitlab.com/spacewalker/locations/internal/pkg/geo"
+	"time"
+)
+
+// HistoryServiceAddRecordRequest represents request object of HistoryService AddRecord method.
+type HistoryServiceAddRecordRequest struct {
+	UserID     int     `json:"user_id"`
+	LatitudeA  float64 `json:"latitude_a" validate:"validlatitude"`
+	LongitudeA float64 `json:"longitude_a" validate:"validlongitude"`
+	LatitudeB  float64 `json:"latitude_b" validate:"validlatitude"`
+	LongitudeB float64 `json:"longitude_b" validate:"validlongitude"`
+}
+
+// HistoryServiceAddRecordResponse represents response object of HistoryService AddRecord method.
+type HistoryServiceAddRecordResponse struct {
+	UserID    int       `json:"user_id"`
+	Point     geo.Point `json:"point"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// HistoryServiceGetDistanceRequest represents request object of HistoryService GetDistance method.
+type HistoryServiceGetDistanceRequest struct {
+	UserID int       `json:"user_id"`
+	From   time.Time `json:"from"`
+	To     time.Time `json:"to"`
+}
+
+// HistoryServiceGetDistanceResponse represents response object of HistoryService GetDistance method.
+type HistoryServiceGetDistanceResponse struct {
+	Distance float64 `json:"distance"`
+}
+
+// HistoryService represents history service.
+type HistoryService interface {
+	AddRecord(ctx context.Context, req HistoryServiceAddRecordRequest) (HistoryServiceAddRecordResponse, error)
+	GetDistance(ctx context.Context, req HistoryServiceGetDistanceRequest) (HistoryServiceGetDistanceResponse, error)
+}
+
+// HistoryRepositoryAddRecordRequest represents request object of HistoryRepository AddRecord method.
+type HistoryRepositoryAddRecordRequest struct {
+	UserID int       `json:"user_id"`
+	A      geo.Point `json:"a"`
+	B      geo.Point `json:"b"`
+}
+
+// HistoryRepositoryGetDistanceRequest represents request object of HistoryRepository GetDistance method.
+type HistoryRepositoryGetDistanceRequest struct {
+	UserID int       `json:"user_id"`
+	From   time.Time `json:"from"`
+	To     time.Time `json:"to"`
+}
+
+// HistoryRepository represents history repository.
+type HistoryRepository interface {
+	AddRecord(ctx context.Context, req HistoryRepositoryAddRecordRequest) (domain.Record, error)
+	GetDistance(ctx context.Context, req HistoryRepositoryGetDistanceRequest) (float64, error)
+}
