@@ -25,9 +25,11 @@ func (s *userService) SetUserLocation(ctx context.Context, req port.UserServiceS
 		return port.UserServiceSetUserLocationResponse{}, &port.InvalidArgumentError{}
 	}
 
+	point := geo.Trunc(geo.Point{req.Longitude, req.Latitude})
+
 	location, err := s.repo.SetUserLocation(ctx, port.UserRepositorySetUserLocationRequest{
 		Username: req.Username,
-		Point:    geo.Point{req.Longitude, req.Latitude},
+		Point:    point,
 	})
 	if err != nil {
 		return port.UserServiceSetUserLocationResponse{}, err
@@ -47,6 +49,8 @@ func (s *userService) ListUsersInRadius(ctx context.Context, req port.UserServic
 		// TODO: check different errors
 		return port.UserServiceListUsersInRadiusResponse{}, &port.InvalidArgumentError{}
 	}
+
+	req.Point = geo.Trunc(req.Point)
 
 	var pageToken, pageSize int
 	if req.PageToken != "" {
