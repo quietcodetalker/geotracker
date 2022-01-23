@@ -4,8 +4,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-// UserConfig stores all configuration of user application
-type UserConfig struct {
+// LocationConfig stores all configuration of user application
+type LocationConfig struct {
 	DBDriver   string `mapstructure:"DB_DRIVER"`
 	DBHost     string `mapstructure:"DB_HOST"`
 	DBPort     string `mapstructure:"DB_PORT"`
@@ -36,8 +36,8 @@ func LoadConfig(name string, path string, config interface{}) error {
 	return err
 }
 
-// LoadUserConfig TODO: add description
-func LoadUserConfig(name string, path string) (UserConfig, error) {
+// LoadLocationConfig TODO: add description
+func LoadLocationConfig(name string, path string) (UserConfig, error) {
 	var cfg UserConfig
 
 	err := LoadConfig(name, path, &cfg)

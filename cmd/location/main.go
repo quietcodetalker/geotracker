@@ -16,7 +16,7 @@ func main() {
 	_, filename, _, _ := runtime.Caller(0)
 	rootDir := path.Join(path.Dir(filename), "../..")
 
-	cfg, err := config.LoadUserConfig(
+	cfg, err := config.LoadLocationConfig(
 		"user",
 		path.Join(rootDir, "configs"),
 	)
