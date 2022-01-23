@@ -113,13 +113,16 @@ func (h *GRPCHandler) ListUsersInRadius(
 
 func grpcErr(err error) error {
 	var invalidArgumentError *port.InvalidArgumentError
+	var invalidLocationError *port.InvalidLocationError
 
 	if err != nil {
 		switch {
+		case errors.As(err, &invalidLocationError):
+			fallthrough
 		case errors.As(err, &invalidArgumentError):
 			fallthrough
 		case errors.Is(err, port.ErrInvalidUsername):
-			return status.Error(codes.FailedPrecondition, err.Error())
+			return status.Error(codes.InvalidArgument, err.Error())
 		default:
 			return status.Error(codes.Internal, "internal error")
 		}
