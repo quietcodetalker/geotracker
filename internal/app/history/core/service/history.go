@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"gitlab.com/spacewalker/locations/internal/app/history/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 )
 
 type historyService struct {
@@ -25,7 +26,11 @@ func (s historyService) AddRecord(ctx context.Context, req port.HistoryServiceAd
 		return port.HistoryServiceAddRecordResponse{}, &port.InvalidArgumentError{}
 	}
 
-	record, err := s.repo.AddRecord(ctx, port.HistoryRepositoryAddRecordRequest(req))
+	record, err := s.repo.AddRecord(ctx, port.HistoryRepositoryAddRecordRequest{
+		UserID: req.UserID,
+		A:      geo.Trunc(req.A),
+		B:      geo.Trunc(req.B),
+	})
 	if err != nil {
 		fmt.Println(err)
 		return port.HistoryServiceAddRecordResponse{}, err
