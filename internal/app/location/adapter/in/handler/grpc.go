@@ -65,7 +65,7 @@ func (h *GRPCHandler) SetUserLocation(
 		Longitude: request.GetLongitude(),
 	})
 	if err != nil {
-		return &pb.SetUserLocationResponse{}, grpcErr(err)
+		return nil, grpcErr(err)
 	}
 
 	return &pb.SetUserLocationResponse{
@@ -92,7 +92,7 @@ func (h *GRPCHandler) ListUsersInRadius(
 		},
 	)
 	if err != nil {
-		return &pb.ListUsersInRadiusResponse{}, grpcErr(err)
+		return nil, grpcErr(err)
 	}
 
 	users := make([]*pb.User, 0, len(res.Users))
@@ -108,7 +108,7 @@ func (h *GRPCHandler) ListUsersInRadius(
 	return &pb.ListUsersInRadiusResponse{
 		Users:         users,
 		NextPageToken: res.NextPageToken,
-	}, nil
+	}, status.Error(codes.OK, "")
 }
 
 func grpcErr(err error) error {
