@@ -27,7 +27,7 @@ type HistoryServiceAddRecordResponse struct {
 
 // HistoryServiceGetDistanceRequest represents request object of HistoryService GetDistance method.
 type HistoryServiceGetDistanceRequest struct {
-	UserID int       `json:"user_id"`
+	UserID int       `json:"user_id" validate:"required,gt=0"`
 	From   time.Time `json:"from"`
 	To     time.Time `json:"to"`
 }
