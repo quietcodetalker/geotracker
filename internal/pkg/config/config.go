@@ -16,13 +16,30 @@ type LocationConfig struct {
 	BindAddr   string `mapstructure:"BIND_ADDR"`
 }
 
+// HistoryConfig stores all configuration of user application
+type HistoryConfig struct {
+	DBDriver   string `mapstructure:"DB_DRIVER"`
+	DBHost     string `mapstructure:"DB_HOST"`
+	DBPort     string `mapstructure:"DB_PORT"`
+	DBUser     string `mapstructure:"DB_USER"`
+	DBPassword string `mapstructure:"DB_PASSWORD"`
+	DBName     string `mapstructure:"DB_NAME"`
+	DBSSLMode  string `mapstructure:"DB_SSLMODE"`
+	BindAddr   string `mapstructure:"BIND_ADDR"`
+}
+
 // LoadConfig parses configuration and stores the result in
 // the value pointed to by config.
 func LoadConfig(name string, path string, config interface{}) error {
 	var err error
 
-	viper.AddConfigPath(path)
-	viper.SetConfigName(name)
+	if path != "" {
+		viper.AddConfigPath(path)
+	}
+
+	if name != "" {
+		viper.SetConfigName(name)
+	}
 	viper.SetConfigType("env")
 
 	viper.AutomaticEnv()
@@ -37,12 +54,24 @@ func LoadConfig(name string, path string, config interface{}) error {
 }
 
 // LoadLocationConfig TODO: add description
-func LoadLocationConfig(name string, path string) (UserConfig, error) {
-	var cfg UserConfig
+func LoadLocationConfig(name string, path string) (LocationConfig, error) {
+	var cfg LocationConfig
 
 	err := LoadConfig(name, path, &cfg)
 	if err != nil {
-		return UserConfig{}, err
+		return LocationConfig{}, err
+	}
+
+	return cfg, nil
+}
+
+// LoadHistoryConfig TODO: add description
+func LoadHistoryConfig(name string, path string) (HistoryConfig, error) {
+	var cfg HistoryConfig
+
+	err := LoadConfig(name, path, &cfg)
+	if err != nil {
+		return HistoryConfig{}, err
 	}
 
 	return cfg, nil
