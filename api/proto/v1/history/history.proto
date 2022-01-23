@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "/;history";
+
+service History {
+  rpc AddRecord(AddRecordRequest) returns(AddRecordResponse);
+  rpc GetDistance(GetDistanceRequest) returns(GetDistanceResponse);
+}
+
+message AddRecordRequest {
+  int32 user_id = 1;
+  Point a = 2;
+  Point b = 3;
+}
+message AddRecordResponse {
+  int32 user_id = 1;
+  Point a = 2;
+  Point b = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+}
+
+message GetDistanceRequest{
+  int32 user_id = 1;
+  google.protobuf.Timestamp from = 2;
+  google.protobuf.Timestamp to = 3;
+}
+message GetDistanceResponse{
+  double distance = 1;
+}
+
+message Point {
+  double longitude = 1;
+  double latitude = 2;
+}
