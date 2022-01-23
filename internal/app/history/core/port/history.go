@@ -11,17 +11,16 @@ import (
 
 // HistoryServiceAddRecordRequest represents request object of HistoryService AddRecord method.
 type HistoryServiceAddRecordRequest struct {
-	UserID     int     `json:"user_id"`
-	LatitudeA  float64 `json:"latitude_a" validate:"validlatitude"`
-	LongitudeA float64 `json:"longitude_a" validate:"validlongitude"`
-	LatitudeB  float64 `json:"latitude_b" validate:"validlatitude"`
-	LongitudeB float64 `json:"longitude_b" validate:"validlongitude"`
+	UserID int       `json:"user_id" validate:"required,gt=0"`
+	A      geo.Point `json:"a" validate:"validgeopoint"`
+	B      geo.Point `json:"b" validate:"validgeopoint"`
 }
 
 // HistoryServiceAddRecordResponse represents response object of HistoryService AddRecord method.
 type HistoryServiceAddRecordResponse struct {
 	UserID    int       `json:"user_id"`
-	Point     geo.Point `json:"point"`
+	A         geo.Point `json:"a"`
+	B         geo.Point `json:"b"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
