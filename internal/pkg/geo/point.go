@@ -3,6 +3,7 @@ package geo
 import (
 	"database/sql/driver"
 	"fmt"
+	"gitlab.com/spacewalker/locations/internal/pkg/util"
 )
 
 // Point represents coordinates [longitude, latitude] of the geographic position.
@@ -35,4 +36,16 @@ func (p *PostgresPoint) Scan(src interface{}) error {
 	_, err := fmt.Sscanf(string(val), "(%f,%f)", &p[0], &p[1])
 
 	return err
+}
+
+const (
+	pointPrecision = 8
+)
+
+// Trunc truncates longitude and latitude to fixed precision..
+func Trunc(point Point) Point {
+	point[0] = util.Trunc(point[0], pointPrecision)
+	point[1] = util.Trunc(point[1], pointPrecision)
+
+	return point
 }
