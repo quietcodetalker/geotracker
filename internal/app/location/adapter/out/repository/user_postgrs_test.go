@@ -256,6 +256,20 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 				require.WithinDuration(t, time.Now(), location.UpdatedAt, time.Second)
 			},
 		},
+		{
+			name: "OK_PointTruncatedToFixedPrecision",
+			arg: port.UserRepositorySetUserLocationRequest{
+				Username: "user3",
+				Point:    geo.Point{0.123456789, 0.123456789},
+			},
+			hasErr: false,
+			isErr:  nil,
+			asErr:  nil,
+			assert: func(t *testing.T, location domain.Location) {
+				require.Equal(t, 0.12345678, location.Point.Latitude())
+				require.Equal(t, 0.12345678, location.Point.Longitude())
+			},
+		},
 	}
 
 	repo := repository.NewPostgresRepository(s.db)

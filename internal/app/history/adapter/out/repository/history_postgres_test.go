@@ -36,6 +36,23 @@ func (s *PostgresTestSuite) Test_PostgresRepository_AddRecord() {
 			},
 		},
 		{
+			name: "OK_PointsTruncatedToFixedPrecision",
+			req: port.HistoryRepositoryAddRecordRequest{
+				UserID: 4,
+				A:      geo.Point{0.123456789, 0.123456789},
+				B:      geo.Point{0.123456789, 0.123456789},
+			},
+			assert: func(t *testing.T, rec domain.Record, err error) {
+				require.NoError(t, err)
+				require.NotEmpty(t, rec.ID)
+
+				require.Equal(t, 0.12345678, rec.A.Longitude())
+				require.Equal(t, 0.12345678, rec.A.Latitude())
+				require.Equal(t, 0.12345678, rec.B.Longitude())
+				require.Equal(t, 0.12345678, rec.B.Latitude())
+			},
+		},
+		{
 			name: "InvalidPoint_A_Longitude_LessThanMin",
 			req: port.HistoryRepositoryAddRecordRequest{
 				UserID: 1,
