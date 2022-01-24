@@ -328,3 +328,70 @@ func (s *PostgresTestSuite) Test_PostgresQueries_UpdateLocation() {
 		})
 	}
 }
+
+func (s *PostgresTestSuite) Test_PostgresQueries_GetLocation() {
+	createUserArgs := []port.CreateUserArg{
+		{Username: "user0"},
+		{Username: "user1"},
+	}
+	users := s.seedUsers(createUserArgs)
+
+	setLocationRequests := []port.LocationRepositorySetLocationRequest{
+		{
+			UserID: users[0].ID,
+			Point:  geo.Point{1.1, 2.2},
+		},
+	}
+	locations := s.seedLocations(setLocationRequests)
+
+	testCases := []struct {
+		name     string
+		userID   int
+		expected domain.Location
+		hasError bool
+		isError  error
+		asError  error
+	}{
+		{
+			name:     "OK",
+			userID:   locations[0].UserID,
+			expected: locations[0],
+			hasError: false,
+		},
+		{
+			name:     "NoLocation",
+			userID:   users[1].ID,
+			expected: domain.Location{},
+			hasError: true,
+			isError:  port.ErrNotFound,
+		},
+		{
+			name:     "NoUser",
+			userID:   2,
+			expected: domain.Location{},
+			hasError: true,
+			isError:  port.ErrNotFound,
+		},
+	}
+
+	repo := repository.NewPostgresRepository(s.db)
+
+	for _, tc := range testCases {
+		tc := tc
+		s.T().Run(tc.name, func(t *testing.T) {
+			location, err := repo.GetLocation(context.Background(), tc.userID)
+			if tc.hasError {
+				require.Empty(t, location)
+				if tc.isError != nil {
+					require.ErrorIs(t, err, tc.isError)
+				}
+				if tc.asError != nil {
+					require.ErrorAs(t, err, &tc.asError)
+				}
+			} else {
+				require.Equal(t, tc.expected, location)
+				require.NoError(t, err)
+			}
+		})
+	}
+}
