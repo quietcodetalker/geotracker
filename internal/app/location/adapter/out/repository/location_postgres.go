@@ -125,3 +125,34 @@ func (q *postgresQueries) UpdateLocationByUserID(ctx context.Context, arg port.L
 
 	return location, nil
 }
+
+var getLocationQuery = fmt.Sprintf(
+	`
+SELECT user_id, point, created_at, updated_at
+FROM %s
+WHERE user_id = $1
+`,
+	LocationTable,
+)
+
+// GetLocation finds location by user id.
+func (q *postgresQueries) GetLocation(ctx context.Context, userID int) (domain.Location, error) {
+	var location domain.Location
+	var point geo.PostgresPoint
+
+	if err := q.db.QueryRowContext(ctx, getLocationQuery, userID).Scan(
+		&location.UserID,
+		&point,
+		&location.CreatedAt,
+		&location.UpdatedAt,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return domain.Location{}, port.ErrNotFound
+		}
+		return domain.Location{}, err
+	}
+
+	location.Point = geo.Point(point)
+
+	return location, nil
+}
