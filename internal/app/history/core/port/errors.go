@@ -11,26 +11,26 @@ var (
 	ErrNotFound = errors.New("not found")
 )
 
-// TODO add description
+// InvalidLocationErrorViolation TODO add description
 type InvalidLocationErrorViolation struct {
 	Subject string
 	Value   float64
 }
 
-// TODO add description
+// InvalidLocationError TODO add description
 type InvalidLocationError struct {
 	Violations []InvalidLocationErrorViolation
 }
 
-// TODO add description
+// Error returns text representation of the error.
 func (e *InvalidLocationError) Error() string {
 	return "invalid location"
 }
 
-// TODO add description
+// InvalidArgumentError TODO: add description
 type InvalidArgumentError struct{}
 
-// TODO add description
+// Error returns text representation of the error.
 func (e *InvalidArgumentError) Error() string {
 	return "invalid argument"
 }
