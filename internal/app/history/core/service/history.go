@@ -2,27 +2,29 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"gitlab.com/spacewalker/locations/internal/app/history/core/port"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
+	"log"
+	"time"
 )
 
 type historyService struct {
-	repo port.HistoryRepository
+	repo           port.HistoryRepository
+	locationClient port.LocationClient
 }
 
 // NewHistoryService creates new instance of history service and returns its pointer.
-func NewHistoryService(repo port.HistoryRepository) port.HistoryService {
+func NewHistoryService(repo port.HistoryRepository, locationClient port.LocationClient) port.HistoryService {
 	return &historyService{
-		repo: repo,
+		repo:           repo,
+		locationClient: locationClient,
 	}
 }
 
 // AddRecord adds a history record via repository and returns it (except id).
-func (s historyService) AddRecord(ctx context.Context, req port.HistoryServiceAddRecordRequest) (port.HistoryServiceAddRecordResponse, error) {
+func (s *historyService) AddRecord(ctx context.Context, req port.HistoryServiceAddRecordRequest) (port.HistoryServiceAddRecordResponse, error) {
 	if err := validate.Struct(req); err != nil {
 		// TODO: handle different errors
-		fmt.Println(err)
 		return port.HistoryServiceAddRecordResponse{}, &port.InvalidArgumentError{}
 	}
 
@@ -32,7 +34,6 @@ func (s historyService) AddRecord(ctx context.Context, req port.HistoryServiceAd
 		B:      geo.Trunc(req.B),
 	})
 	if err != nil {
-		fmt.Println(err)
 		return port.HistoryServiceAddRecordResponse{}, err
 	}
 
@@ -46,10 +47,8 @@ func (s historyService) AddRecord(ctx context.Context, req port.HistoryServiceAd
 }
 
 // GetDistance calculates distance that particular user got through in given time period.
-func (s historyService) GetDistance(ctx context.Context, req port.HistoryServiceGetDistanceRequest) (port.HistoryServiceGetDistanceResponse, error) {
+func (s *historyService) GetDistance(ctx context.Context, req port.HistoryServiceGetDistanceRequest) (port.HistoryServiceGetDistanceResponse, error) {
 	if err := validate.Struct(req); err != nil {
-		// TODO: handle different errors
-		fmt.Println(err)
 		return port.HistoryServiceGetDistanceResponse{}, &port.InvalidArgumentError{}
 	}
 
@@ -59,4 +58,43 @@ func (s historyService) GetDistance(ctx context.Context, req port.HistoryService
 	}
 
 	return port.HistoryServiceGetDistanceResponse{Distance: distance}, nil
+}
+
+// GetDistanceByUsername calculates distance that particular user got through in given time period.
+func (s *historyService) GetDistanceByUsername(ctx context.Context, req port.HistoryServiceGetDistanceByUsernameRequest) (port.HistoryServiceGetDistanceByUsernameResponse, error) {
+	if err := validate.Struct(req); err != nil {
+		return port.HistoryServiceGetDistanceByUsernameResponse{}, &port.InvalidArgumentError{}
+	}
+	switch {
+	case req.To == nil && req.From == nil:
+		to := time.Now()
+		from := to.Add(-24 * time.Hour)
+		req.To = &to
+		req.From = &from
+	case req.To == nil:
+		to := req.From.Add(24 * time.Hour)
+		req.To = &to
+	case req.From == nil:
+		from := req.To.Add(-24 * time.Hour)
+		req.From = &from
+	}
+
+	userID, err := s.locationClient.GetUserIDByUsername(ctx, req.Username)
+	if err != nil {
+		return port.HistoryServiceGetDistanceByUsernameResponse{}, err
+	}
+
+	log.Printf("WTF")
+	distance, err := s.repo.GetDistance(ctx, port.HistoryRepositoryGetDistanceRequest{
+		UserID: userID,
+		To:     *req.To,
+		From:   *req.From,
+	})
+	if err != nil {
+		return port.HistoryServiceGetDistanceByUsernameResponse{}, err
+	}
+
+	return port.HistoryServiceGetDistanceByUsernameResponse{
+		Distance: distance,
+	}, nil
 }
