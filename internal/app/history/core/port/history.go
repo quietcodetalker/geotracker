@@ -37,9 +37,22 @@ type HistoryServiceGetDistanceResponse struct {
 	Distance float64 `json:"distance"`
 }
 
+// HistoryServiceGetDistanceByUsernameRequest represents request object of HistoryRepository GetDistanceByUsername method.
+type HistoryServiceGetDistanceByUsernameRequest struct {
+	Username string     `json:"username" validate:"required"`
+	From     *time.Time `json:"from"`
+	To       *time.Time `json:"to"`
+}
+
+// HistoryServiceGetDistanceByUsernameResponse represents response object of HistoryService GetDistanceByUsername method.
+type HistoryServiceGetDistanceByUsernameResponse struct {
+	Distance float64 `json:"distance"`
+}
+
 // HistoryService represents history service.
 type HistoryService interface {
 	AddRecord(ctx context.Context, req HistoryServiceAddRecordRequest) (HistoryServiceAddRecordResponse, error)
+	GetDistanceByUsername(ctx context.Context, req HistoryServiceGetDistanceByUsernameRequest) (HistoryServiceGetDistanceByUsernameResponse, error)
 	GetDistance(ctx context.Context, req HistoryServiceGetDistanceRequest) (HistoryServiceGetDistanceResponse, error)
 }
 
