@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package proto;
+
+import "user.proto";
+
+option go_package = "pkg/api/proto/v1/location";
+
+service LocationInternal {
+  rpc GetUserByUsername(GetUserByUsernameRequest) returns(User);
+}
+
+message GetUserByUsernameRequest {
+  string username = 1;
+}

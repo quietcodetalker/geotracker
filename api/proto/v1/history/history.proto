@@ -4,7 +4,7 @@ package proto;
 
 import "google/protobuf/timestamp.proto";
 
-option go_package = "/;history";
+option go_package = "pkg/api/proto/v1/history";
 
 service History {
   rpc AddRecord(AddRecordRequest) returns(AddRecordResponse);
