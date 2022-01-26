@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/go-chi/chi/v5"
@@ -11,7 +10,6 @@ import (
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	"google.golang.org/grpc/codes"
 	"net/http"
-	"time"
 )
 
 var (
@@ -22,7 +20,6 @@ var (
 type HTTPHandler struct {
 	service port.UserService
 	router  *chi.Mux
-	server  *http.Server
 }
 
 // NewHTTPHandler creates HTTPHandler and returns its pointer.
@@ -32,9 +29,6 @@ func NewHTTPHandler(service port.UserService) *HTTPHandler {
 	handler := &HTTPHandler{
 		service: service,
 		router:  router,
-		server: &http.Server{
-			Handler: router,
-		},
 	}
 
 	handler.setupRoutes()
@@ -42,22 +36,8 @@ func NewHTTPHandler(service port.UserService) *HTTPHandler {
 	return handler
 }
 
-// Start TODO: add description
-func (h *HTTPHandler) Start(addr string) error {
-	h.server.Addr = addr
-	if err := h.server.ListenAndServe(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// Stop TODO: add description
-func (h *HTTPHandler) Stop(ctx context.Context) error {
-	cancelCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-
-	return h.server.Shutdown(cancelCtx)
+func (h *HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	h.router.ServeHTTP(w, r)
 }
 
 func (h *HTTPHandler) setupRoutes() {
@@ -112,7 +92,6 @@ func (h *HTTPHandler) listUsersInRadius(w http.ResponseWriter, r *http.Request) 
 		util.RespondErr(w, http.StatusOK, getHttpError(&port.InvalidArgumentError{}))
 		return
 	}
-	fmt.Println(dto)
 
 	req := port.UserServiceListUsersInRadiusRequest{
 		Point: geo.Point{
