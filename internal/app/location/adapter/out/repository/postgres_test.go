@@ -30,7 +30,7 @@ func (s *PostgresTestSuite) SetupSuite() {
 	rootDir := path.Join(path.Dir(filename), "../../../../../..")
 
 	cfg, err := config.LoadLocationConfig(
-		"user_test",
+		"locations_test",
 		path.Join(rootDir, "configs"),
 	)
 	require.NoError(s.T(), err)

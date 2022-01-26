@@ -201,7 +201,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 		hasErr bool
 		isErr  error
 		asErr  error
-		assert func(t *testing.T, user domain.Location)
+		assert func(t *testing.T, res port.UserRepositorySetUserLocationResponse)
 	}{
 		{
 			name: "OK_UserExist_LocationExist",
@@ -212,12 +212,12 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 			hasErr: false,
 			isErr:  nil,
 			asErr:  nil,
-			assert: func(t *testing.T, location domain.Location) {
-				require.Equal(t, users[0].ID, location.UserID)
-				require.Equal(t, locations[0].Point.Latitude()+1.0, location.Point.Latitude())
-				require.Equal(t, locations[0].Point.Longitude()+1.0, location.Point.Longitude())
-				require.WithinDuration(t, locations[0].CreatedAt, location.CreatedAt, time.Second)
-				require.WithinDuration(t, locations[0].UpdatedAt, location.UpdatedAt, time.Second)
+			assert: func(t *testing.T, res port.UserRepositorySetUserLocationResponse) {
+				require.Equal(t, users[0].ID, res.Location.UserID)
+				require.Equal(t, locations[0].Point.Latitude()+1.0, res.Location.Point.Latitude())
+				require.Equal(t, locations[0].Point.Longitude()+1.0, res.Location.Point.Longitude())
+				require.WithinDuration(t, locations[0].CreatedAt, res.Location.CreatedAt, time.Second)
+				require.WithinDuration(t, locations[0].UpdatedAt, res.Location.UpdatedAt, time.Second)
 			},
 		},
 		{
@@ -229,12 +229,12 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 			hasErr: false,
 			isErr:  nil,
 			asErr:  nil,
-			assert: func(t *testing.T, location domain.Location) {
-				require.Equal(t, users[1].ID, location.UserID)
-				require.Equal(t, 1.0, location.Point.Latitude())
-				require.Equal(t, 1.0, location.Point.Longitude())
-				require.WithinDuration(t, time.Now(), location.CreatedAt, time.Second)
-				require.WithinDuration(t, time.Now(), location.UpdatedAt, time.Second)
+			assert: func(t *testing.T, res port.UserRepositorySetUserLocationResponse) {
+				require.Equal(t, users[1].ID, res.Location.UserID)
+				require.Equal(t, 1.0, res.Location.Point.Latitude())
+				require.Equal(t, 1.0, res.Location.Point.Longitude())
+				require.WithinDuration(t, time.Now(), res.Location.CreatedAt, time.Second)
+				require.WithinDuration(t, time.Now(), res.Location.UpdatedAt, time.Second)
 			},
 		},
 		{
@@ -246,14 +246,14 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 			hasErr: false,
 			isErr:  nil,
 			asErr:  nil,
-			assert: func(t *testing.T, location domain.Location) {
+			assert: func(t *testing.T, res port.UserRepositorySetUserLocationResponse) {
 				for _, u := range users {
-					require.NotEqual(t, u.ID, location.UserID)
+					require.NotEqual(t, u.ID, res.Location.UserID)
 				}
-				require.Equal(t, 1.0, location.Point.Latitude())
-				require.Equal(t, 1.0, location.Point.Longitude())
-				require.WithinDuration(t, time.Now(), location.CreatedAt, time.Second)
-				require.WithinDuration(t, time.Now(), location.UpdatedAt, time.Second)
+				require.Equal(t, 1.0, res.Location.Point.Latitude())
+				require.Equal(t, 1.0, res.Location.Point.Longitude())
+				require.WithinDuration(t, time.Now(), res.Location.CreatedAt, time.Second)
+				require.WithinDuration(t, time.Now(), res.Location.UpdatedAt, time.Second)
 			},
 		},
 		{
@@ -265,9 +265,9 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 			hasErr: false,
 			isErr:  nil,
 			asErr:  nil,
-			assert: func(t *testing.T, location domain.Location) {
-				require.Equal(t, 0.12345678, location.Point.Latitude())
-				require.Equal(t, 0.12345678, location.Point.Longitude())
+			assert: func(t *testing.T, res port.UserRepositorySetUserLocationResponse) {
+				require.Equal(t, 0.12345678, res.Location.Point.Latitude())
+				require.Equal(t, 0.12345678, res.Location.Point.Longitude())
 			},
 		},
 	}
@@ -277,7 +277,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 	for _, tc := range testCases {
 		tc := tc
 		s.T().Run(tc.name, func(t *testing.T) {
-			location, err := repo.SetUserLocation(context.Background(), tc.arg)
+			res, err := repo.SetUserLocation(context.Background(), tc.arg)
 			if !tc.hasErr {
 				require.NoError(t, err)
 			} else {
@@ -289,7 +289,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_SetUserLocation() {
 					require.ErrorAs(t, err, tc.asErr)
 				}
 			}
-			tc.assert(t, location)
+			tc.assert(t, res)
 		})
 	}
 }

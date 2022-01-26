@@ -81,11 +81,22 @@ func (q *postgresQueries) GetByUsername(ctx context.Context, username string) (d
 
 // SetUserLocation gets User by given username and updates Location by user ID
 //with provided coordinates within a single database transaction.
-func (r *postgresRepository) SetUserLocation(ctx context.Context, arg port.UserRepositorySetUserLocationRequest) (domain.Location, error) {
+func (r *postgresRepository) SetUserLocation(ctx context.Context, arg port.UserRepositorySetUserLocationRequest) (port.UserRepositorySetUserLocationResponse, error) {
+	var user domain.User
+	var prevLocation domain.Location
 	var location domain.Location
 
 	err := r.execTx(ctx, func(q *postgresQueries) error {
-		user, err := q.GetByUsername(ctx, arg.Username)
+		var err error
+
+		user, err = q.GetByUsername(ctx, arg.Username)
+		if err == nil {
+			var glErr error
+			prevLocation, glErr = q.GetLocation(ctx, user.ID)
+			if glErr != nil && glErr != port.ErrNotFound {
+				return err
+			}
+		}
 		if err == port.ErrNotFound {
 			user, err = q.CreateUser(ctx, port.CreateUserArg{Username: arg.Username})
 			if err != nil {
@@ -107,10 +118,14 @@ func (r *postgresRepository) SetUserLocation(ctx context.Context, arg port.UserR
 		return nil
 	})
 	if err != nil {
-		return domain.Location{}, err
+		return port.UserRepositorySetUserLocationResponse{}, err
 	}
 
-	return location, nil
+	return port.UserRepositorySetUserLocationResponse{
+		User:         user,
+		PrevLocation: prevLocation,
+		Location:     location,
+	}, nil
 }
 
 var listUsersInRadiusQuery = fmt.Sprintf(
