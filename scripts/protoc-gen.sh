@@ -1,12 +1,11 @@
 protoc \
---proto_path=. \
---go_out=./pkg/ --go_opt=paths=source_relative \
---go-grpc_out=./pkg/ --go-grpc_opt=paths=source_relative \
-./api/proto/v1/location/location.proto
+--proto_path=./api/proto/v1/location \
+--go_out=. --go_opt=paths=import \
+--go-grpc_out=. --go-grpc_opt=paths=import \
+./api/proto/v1/location/*.proto
 
 protoc \
---proto_path=. \
---go_out=./pkg/ --go_opt=paths=source_relative \
---go-grpc_out=./pkg/ --go-grpc_opt=paths=source_relative \
-./api/proto/v1/history/history.proto
-
+--proto_path=./api/proto/v1/history \
+--go_out=. --go_opt=paths=import \
+--go-grpc_out=. --go-grpc_opt=paths=import \
+./api/proto/v1/history/*.proto
