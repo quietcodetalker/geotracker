@@ -3,10 +3,13 @@ module gitlab.com/spacewalker/locations
 go 1.17
 
 require (
+	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/golang-migrate/migrate/v4 v4.15.1
 	github.com/golang/mock v1.6.0
+	github.com/gorilla/schema v1.2.0
 	github.com/lib/pq v1.10.4
+	github.com/shopspring/decimal v1.3.1
 	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.7.0
 	google.golang.org/grpc v1.41.0
@@ -16,11 +19,9 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
-	github.com/go-chi/chi/v5 v5.0.7 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/gorilla/schema v1.2.0 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
