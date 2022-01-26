@@ -8,18 +8,22 @@ import (
 	"google.golang.org/grpc"
 )
 
-type GRPCClient struct{}
-
-func NewGRPCClient() port.HistoryClient {
-	return &GRPCClient{}
+type GRPCClient struct {
+	addr string
 }
 
-func (G GRPCClient) AddRecord(ctx context.Context, req port.HistoryClientAddRecordRequest) (port.HistoryClientAddRecordResponse, error) {
+func NewGRPCClient(addr string) port.HistoryClient {
+	return &GRPCClient{
+		addr: addr,
+	}
+}
+
+func (c GRPCClient) AddRecord(ctx context.Context, req port.HistoryClientAddRecordRequest) (port.HistoryClientAddRecordResponse, error) {
 	var opts []grpc.DialOption
 
 	opts = append(opts, grpc.WithInsecure())
 
-	conn, err := grpc.Dial("localhost:50052", opts...)
+	conn, err := grpc.Dial(c.addr, opts...)
 	if err != nil {
 		return port.HistoryClientAddRecordResponse{}, err
 	}
@@ -51,6 +55,6 @@ func (G GRPCClient) AddRecord(ctx context.Context, req port.HistoryClientAddReco
 	}, nil
 }
 
-func (G GRPCClient) GetDistance(ctx context.Context, req port.HistoryClientGetDistanceRequest) (port.HistoryClientGetDistanceResponse, error) {
+func (c GRPCClient) GetDistance(ctx context.Context, req port.HistoryClientGetDistanceRequest) (port.HistoryClientGetDistanceResponse, error) {
 	panic("implement me")
 }
