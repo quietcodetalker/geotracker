@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"context"
+	"errors"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -37,15 +38,15 @@ func TestSvcTestSuite(t *testing.T) {
 func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 	username := "user1"
 
-	point := geo.Point{
+	point := geo.Trunc(geo.Point{
 		util.RandomFloat64(-180.0, 180.0),
 		util.RandomFloat64(-90.0, 90.0),
-	}
+	})
 
 	testCases := []struct {
 		name       string
 		arg        port.UserServiceSetUserLocationRequest
-		buildStubs func(repo *mock.MockUserRepository)
+		buildStubs func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient)
 		assert     func(t *testing.T, res domain.Location, err error)
 	}{
 		{
@@ -55,7 +56,8 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: point.Longitude(),
 				Latitude:  point.Latitude(),
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
+				historyClient.EXPECT().AddRecord(gomock.Any(), gomock.Any())
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -66,11 +68,13 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 					).
 					Times(1).
 					Return(
-						domain.Location{
-							UserID:    1,
-							Point:     point,
-							CreatedAt: time.Now(),
-							UpdatedAt: time.Now(),
+						port.UserRepositorySetUserLocationResponse{
+							Location: domain.Location{
+								UserID:    1,
+								Point:     point,
+								CreatedAt: time.Now(),
+								UpdatedAt: time.Now(),
+							},
 						},
 						nil,
 					)
@@ -92,7 +96,8 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: -180.0,
 				Latitude:  -90.0,
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
+				historyClient.EXPECT().AddRecord(gomock.Any(), gomock.Any())
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -103,11 +108,13 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 					).
 					Times(1).
 					Return(
-						domain.Location{
-							UserID:    1,
-							Point:     geo.Point{-180.0, -90.0},
-							CreatedAt: time.Now(),
-							UpdatedAt: time.Now(),
+						port.UserRepositorySetUserLocationResponse{
+							Location: domain.Location{
+								UserID:    1,
+								Point:     geo.Point{-180.0, -90.0},
+								CreatedAt: time.Now(),
+								UpdatedAt: time.Now(),
+							},
 						},
 						nil,
 					)
@@ -129,7 +136,8 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: 180.0,
 				Latitude:  90.0,
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
+				historyClient.EXPECT().AddRecord(gomock.Any(), gomock.Any())
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -140,11 +148,13 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 					).
 					Times(1).
 					Return(
-						domain.Location{
-							UserID:    1,
-							Point:     geo.Point{180.0, 90.0},
-							CreatedAt: time.Now(),
-							UpdatedAt: time.Now(),
+						port.UserRepositorySetUserLocationResponse{
+							Location: domain.Location{
+								UserID:    1,
+								Point:     geo.Point{180.0, 90.0},
+								CreatedAt: time.Now(),
+								UpdatedAt: time.Now(),
+							},
 						},
 						nil,
 					)
@@ -166,7 +176,8 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: 0.0,
 				Latitude:  0.0,
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
+				historyClient.EXPECT().AddRecord(gomock.Any(), gomock.Any())
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -177,11 +188,13 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 					).
 					Times(1).
 					Return(
-						domain.Location{
-							UserID:    1,
-							Point:     geo.Point{0, 0},
-							CreatedAt: time.Now(),
-							UpdatedAt: time.Now(),
+						port.UserRepositorySetUserLocationResponse{
+							Location: domain.Location{
+								UserID:    1,
+								Point:     geo.Point{0, 0},
+								CreatedAt: time.Now(),
+								UpdatedAt: time.Now(),
+							},
 						},
 						nil,
 					)
@@ -203,7 +216,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: -180.01,
 				Latitude:  point.Latitude(),
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -224,7 +237,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: 180.01,
 				Latitude:  point.Latitude(),
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -245,7 +258,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: point.Longitude(),
 				Latitude:  -90.01,
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -266,7 +279,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: point.Longitude(),
 				Latitude:  90.01,
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -287,7 +300,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: point.Longitude(),
 				Latitude:  point.Latitude(),
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -308,7 +321,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: point.Longitude(),
 				Latitude:  point.Latitude(),
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -329,7 +342,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 				Longitude: point.Longitude(),
 				Latitude:  point.Latitude(),
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().
 					SetUserLocation(
 						gomock.Any(),
@@ -352,9 +365,10 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 			defer ctrl.Finish()
 
 			repo := mock.NewMockUserRepository(ctrl)
-			tc.buildStubs(repo)
+			historyClient := mock.NewMockHistoryClient(ctrl)
+			tc.buildStubs(repo, historyClient)
 
-			svc := service.NewUserService(repo)
+			svc := service.NewUserService(repo, historyClient)
 
 			_, _ = svc.SetUserLocation(context.Background(), tc.arg)
 		})
@@ -365,7 +379,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 	testCases := []struct {
 		name       string
 		req        port.UserServiceListUsersInRadiusRequest
-		buildStubs func(repo *mock.MockUserRepository)
+		buildStubs func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient)
 		assert     func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error)
 	}{
 		{
@@ -376,7 +390,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 				PageToken: "MTAwIDEwMA==",
 				PageSize:  0,
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().
 					ListUsersInRadius(gomock.Any(), gomock.Eq(port.UserRepositoryListUsersInRadiusRequest{
 						Point:     geo.Point{0, 0},
@@ -415,7 +429,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 				PageToken: "MTAwIDEwMA==",
 				PageSize:  0,
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().
 					ListUsersInRadius(gomock.Any(), gomock.Eq(port.UserRepositoryListUsersInRadiusRequest{
 						Point:     geo.Point{0, 0},
@@ -454,7 +468,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 				PageToken: "",
 				PageSize:  10,
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().
 					ListUsersInRadius(gomock.Any(), gomock.Eq(port.UserRepositoryListUsersInRadiusRequest{
 						Point:     geo.Point{0, 0},
@@ -493,7 +507,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 				PageToken: "1",
 				PageSize:  0,
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().ListUsersInRadius(gomock.Any(), gomock.Any()).Times(0)
 			},
 			assert: func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error) {
@@ -511,7 +525,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 				PageToken: "1",
 				PageSize:  0,
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().ListUsersInRadius(gomock.Any(), gomock.Any()).Times(0)
 			},
 			assert: func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error) {
@@ -529,7 +543,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 				PageToken: "1",
 				PageSize:  0,
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().ListUsersInRadius(gomock.Any(), gomock.Any()).Times(0)
 			},
 			assert: func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error) {
@@ -547,7 +561,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 				PageToken: "1",
 				PageSize:  0,
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().ListUsersInRadius(gomock.Any(), gomock.Any()).Times(0)
 			},
 			assert: func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error) {
@@ -565,7 +579,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 				PageToken: "1",
 				PageSize:  10,
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().ListUsersInRadius(gomock.Any(), gomock.Any()).Times(0)
 			},
 			assert: func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error) {
@@ -583,7 +597,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 				PageToken: "1",
 				PageSize:  10,
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().ListUsersInRadius(gomock.Any(), gomock.Any()).Times(0)
 			},
 			assert: func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error) {
@@ -601,7 +615,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 				PageToken: "",
 				PageSize:  10,
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().ListUsersInRadius(gomock.Any(), gomock.Any()).Times(0)
 			},
 			assert: func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error) {
@@ -619,7 +633,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 				PageToken: "MTAwIDEwMA==",
 				PageSize:  0,
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().
 					ListUsersInRadius(gomock.Any(), gomock.Eq(port.UserRepositoryListUsersInRadiusRequest{
 						Point:     geo.Point{0, 0},
@@ -658,7 +672,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 				PageToken: "MTAwIDEwMA==",
 				PageSize:  0,
 			},
-			buildStubs: func(repo *mock.MockUserRepository) {
+			buildStubs: func(repo *mock.MockUserRepository, historyClient *mock.MockHistoryClient) {
 				repo.EXPECT().
 					ListUsersInRadius(gomock.Any(), gomock.Eq(port.UserRepositoryListUsersInRadiusRequest{
 						Point:     geo.Point{0, 0},
@@ -698,13 +712,118 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 			defer ctrl.Finish()
 
 			repo := mock.NewMockUserRepository(ctrl)
-			tc.buildStubs(repo)
+			historyClient := mock.NewMockHistoryClient(ctrl)
+			tc.buildStubs(repo, historyClient)
 
-			svc := service.NewUserService(repo)
+			svc := service.NewUserService(repo, historyClient)
 
 			res, err := svc.ListUsersInRadius(context.Background(), tc.req)
 
 			tc.assert(t, res, err)
+		})
+	}
+}
+
+func (s *UserSvcTestSuite) Test_UserService_GetByUsername() {
+	users := []domain.User{
+		{
+			ID:        1,
+			Username:  "user1",
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		},
+	}
+	errInternal := errors.New("internal error")
+
+	testCases := []struct {
+		name       string
+		buildStubs func(repository *mock.MockUserRepository)
+		username   string
+		expected   domain.User
+		hasError   bool
+		isError    error
+		asError    error
+	}{
+		{
+			name: "OK",
+			buildStubs: func(repository *mock.MockUserRepository) {
+				repository.EXPECT().
+					GetByUsername(gomock.Any(), gomock.Eq(users[0].Username)).
+					Times(1).
+					Return(users[0], nil)
+			},
+			username: users[0].Username,
+			expected: users[0],
+			hasError: false,
+		},
+		{
+			name: "InvalidUsername",
+			buildStubs: func(repository *mock.MockUserRepository) {
+				repository.EXPECT().
+					GetByUsername(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			username: "",
+			expected: domain.User{},
+			hasError: true,
+			asError:  &port.InvalidArgumentError{},
+		},
+		{
+			name: "UserNotFound",
+			buildStubs: func(repository *mock.MockUserRepository) {
+				repository.EXPECT().
+					GetByUsername(gomock.Any(), gomock.Eq(users[0].Username)).
+					Times(1).
+					Return(domain.User{}, port.ErrNotFound)
+			},
+			username: users[0].Username,
+			expected: domain.User{},
+			hasError: true,
+			isError:  port.ErrNotFound,
+		},
+		{
+			name: "InternalError",
+			buildStubs: func(repository *mock.MockUserRepository) {
+				repository.EXPECT().
+					GetByUsername(gomock.Any(), gomock.Eq(users[0].Username)).
+					Times(1).
+					Return(domain.User{}, errInternal)
+			},
+			username: users[0].Username,
+			expected: domain.User{},
+			hasError: true,
+			isError:  errInternal,
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		s.T().Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			repo := mock.NewMockUserRepository(ctrl)
+			historyClient := mock.NewMockHistoryClient(ctrl)
+			tc.buildStubs(repo)
+
+			svc := service.NewUserService(repo, historyClient)
+
+			user, err := svc.GetByUsername(context.Background(), tc.username)
+			if tc.hasError {
+				if tc.isError != nil {
+					require.ErrorIs(t, err, tc.isError)
+				}
+				if tc.asError != nil {
+					require.ErrorAs(t, err, &tc.asError)
+				}
+			} else {
+				require.NoError(t, err)
+
+				require.Equal(t, tc.expected.ID, user.ID)
+				require.Equal(t, tc.expected.Username, user.Username)
+				require.Equal(t, tc.expected.CreatedAt, user.CreatedAt)
+				require.Equal(t, tc.expected.UpdatedAt, user.UpdatedAt)
+			}
 		})
 	}
 }

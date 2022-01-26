@@ -2,19 +2,22 @@ package service
 
 import (
 	"context"
+	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"gitlab.com/spacewalker/locations/internal/pkg/util/pagination"
 )
 
 type userService struct {
-	repo port.UserRepository
+	repo          port.UserRepository
+	historyClient port.HistoryClient
 }
 
 // NewUserService creates instance of UserService and returns its pointer.
-func NewUserService(repo port.UserRepository) port.UserService {
+func NewUserService(repo port.UserRepository, historyClient port.HistoryClient) port.UserService {
 	return &userService{
-		repo: repo,
+		repo:          repo,
+		historyClient: historyClient,
 	}
 }
 
@@ -27,7 +30,7 @@ func (s *userService) SetUserLocation(ctx context.Context, req port.UserServiceS
 
 	point := geo.Trunc(geo.Point{req.Longitude, req.Latitude})
 
-	location, err := s.repo.SetUserLocation(ctx, port.UserRepositorySetUserLocationRequest{
+	res, err := s.repo.SetUserLocation(ctx, port.UserRepositorySetUserLocationRequest{
 		Username: req.Username,
 		Point:    point,
 	})
@@ -35,12 +38,18 @@ func (s *userService) SetUserLocation(ctx context.Context, req port.UserServiceS
 		return port.UserServiceSetUserLocationResponse{}, err
 	}
 
-	return port.UserServiceSetUserLocationResponse{
-		Latitude:  location.Point.Latitude(),
-		Longitude: location.Point.Longitude(),
-	}, nil
+	if res.PrevLocation.UserID == res.User.ID {
+		_, _ = s.historyClient.AddRecord(ctx, port.HistoryClientAddRecordRequest{
+			UserID: res.PrevLocation.UserID,
+			A:      res.PrevLocation.Point,
+			B:      res.Location.Point,
+		})
+	}
 
-	// TODO: add record to location history via history microservice
+	return port.UserServiceSetUserLocationResponse{
+		Latitude:  res.Location.Point.Latitude(),
+		Longitude: res.Location.Point.Longitude(),
+	}, nil
 }
 
 // ListUsersInRadius finds users around given geographic point in given radius.
@@ -78,8 +87,30 @@ func (s *userService) ListUsersInRadius(ctx context.Context, req port.UserServic
 		nextPageToken = pagination.EncodeCursor(res.NextPageToken, pageSize)
 	}
 
+	if res.Users == nil {
+		res.Users = make([]domain.User, 0)
+	}
+
 	return port.UserServiceListUsersInRadiusResponse{
 		Users:         res.Users,
 		NextPageToken: nextPageToken,
 	}, nil
+}
+
+// GetByUsername finds user by username.
+// If provided username is empty string, *InvalidArgumentError returned.
+// If user is found nil error returned.
+// If user is not found error ErrNotFound returned.
+// Otherwise, returned other error which should be considered as internal.
+func (s *userService) GetByUsername(ctx context.Context, username string) (domain.User, error) {
+	if username == "" {
+		return domain.User{}, &port.InvalidArgumentError{}
+	}
+
+	user, err := s.repo.GetByUsername(ctx, username)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return user, nil
 }

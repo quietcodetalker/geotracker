@@ -37,6 +37,7 @@ type UserServiceListUsersInRadiusResponse struct {
 
 // UserService represents user service.
 type UserService interface {
+	GetByUsername(ctx context.Context, username string) (domain.User, error)
 	SetUserLocation(ctx context.Context, req UserServiceSetUserLocationRequest) (UserServiceSetUserLocationResponse, error)
 	ListUsersInRadius(ctx context.Context, req UserServiceListUsersInRadiusRequest) (UserServiceListUsersInRadiusResponse, error)
 }
@@ -66,10 +67,17 @@ type UserRepositoryListUsersInRadiusResponse struct {
 	NextPageToken int
 }
 
+// UserRepositorySetUserLocationResponse TODO: add description
+type UserRepositorySetUserLocationResponse struct {
+	User         domain.User
+	PrevLocation domain.Location
+	Location     domain.Location
+}
+
 // UserRepository represents user repository.
 type UserRepository interface {
 	CreateUser(ctx context.Context, arg CreateUserArg) (domain.User, error)
 	GetByUsername(ctx context.Context, username string) (domain.User, error)
-	SetUserLocation(ctx context.Context, arg UserRepositorySetUserLocationRequest) (domain.Location, error)
+	SetUserLocation(ctx context.Context, arg UserRepositorySetUserLocationRequest) (UserRepositorySetUserLocationResponse, error)
 	ListUsersInRadius(ctx context.Context, arg UserRepositoryListUsersInRadiusRequest) (UserRepositoryListUsersInRadiusResponse, error)
 }
