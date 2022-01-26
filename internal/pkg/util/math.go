@@ -1,9 +1,12 @@
 package util
 
-import "math"
+import (
+	"github.com/shopspring/decimal"
+)
 
 // Trunc truncates float64 number to given precision.
 func Trunc(number float64, precision int) float64 {
-	pow10 := math.Pow10(precision)
-	return math.Trunc(number*pow10) / pow10
+	result, _ := decimal.NewFromFloat(number).Truncate(int32(precision)).Float64()
+
+	return result
 }

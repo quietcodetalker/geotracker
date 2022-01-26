@@ -29,7 +29,7 @@ func TestTrunc(t *testing.T) {
 			name:      "OK_3",
 			number:    150.1234,
 			precision: -2,
-			expected:  100.0,
+			expected:  150.1234,
 		},
 	}
 
