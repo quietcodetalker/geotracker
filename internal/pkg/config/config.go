@@ -6,26 +6,30 @@ import (
 
 // LocationConfig stores all configuration of user application
 type LocationConfig struct {
-	DBDriver   string `mapstructure:"DB_DRIVER"`
-	DBHost     string `mapstructure:"DB_HOST"`
-	DBPort     string `mapstructure:"DB_PORT"`
-	DBUser     string `mapstructure:"DB_USER"`
-	DBPassword string `mapstructure:"DB_PASSWORD"`
-	DBName     string `mapstructure:"DB_NAME"`
-	DBSSLMode  string `mapstructure:"DB_SSLMODE"`
-	BindAddr   string `mapstructure:"BIND_ADDR"`
+	DBDriver     string `mapstructure:"DB_DRIVER"`
+	DBHost       string `mapstructure:"DB_HOST"`
+	DBPort       string `mapstructure:"DB_PORT"`
+	DBUser       string `mapstructure:"DB_USER"`
+	DBPassword   string `mapstructure:"DB_PASSWORD"`
+	DBName       string `mapstructure:"DB_NAME"`
+	DBSSLMode    string `mapstructure:"DB_SSLMODE"`
+	BindAddrHTTP string `mapstructure:"BIND_ADDR_HTTP"`
+	BindAddrGRPC string `mapstructure:"BIND_ADDR_GRPC"`
+	HistoryAddr  string `mapstructure:"HISTORY_ADDR"`
 }
 
 // HistoryConfig stores all configuration of user application
 type HistoryConfig struct {
-	DBDriver   string `mapstructure:"DB_DRIVER"`
-	DBHost     string `mapstructure:"DB_HOST"`
-	DBPort     string `mapstructure:"DB_PORT"`
-	DBUser     string `mapstructure:"DB_USER"`
-	DBPassword string `mapstructure:"DB_PASSWORD"`
-	DBName     string `mapstructure:"DB_NAME"`
-	DBSSLMode  string `mapstructure:"DB_SSLMODE"`
-	BindAddr   string `mapstructure:"BIND_ADDR"`
+	DBDriver     string `mapstructure:"DB_DRIVER"`
+	DBHost       string `mapstructure:"DB_HOST"`
+	DBPort       string `mapstructure:"DB_PORT"`
+	DBUser       string `mapstructure:"DB_USER"`
+	DBPassword   string `mapstructure:"DB_PASSWORD"`
+	DBName       string `mapstructure:"DB_NAME"`
+	DBSSLMode    string `mapstructure:"DB_SSLMODE"`
+	BindAddrHTTP string `mapstructure:"BIND_ADDR_HTTP"`
+	BindAddrGRPC string `mapstructure:"BIND_ADDR_GRPC"`
+	LocationAddr string `mapstructure:"LOCATION_ADDR"`
 }
 
 // LoadConfig parses configuration and stores the result in
