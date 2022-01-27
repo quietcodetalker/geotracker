@@ -7,7 +7,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"log"
 )
 
 // GRPCInternalHandler is a handler that serves request from another internal microservice.
@@ -28,7 +27,6 @@ func NewGRPCInternalHandler(service port.UserService) *GRPCInternalHandler {
 func (h *GRPCInternalHandler) GetUserByUsername(ctx context.Context, request *pb.GetUserByUsernameRequest) (*pb.User, error) {
 	user, err := h.service.GetByUsername(ctx, request.Username)
 	if err != nil {
-		log.Printf("service.GetByUsername err: %v", err)
 		if err == port.ErrNotFound {
 			return nil, status.Error(codes.NotFound, err.Error())
 		}

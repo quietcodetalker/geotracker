@@ -5,7 +5,6 @@ import (
 	"github.com/gorilla/schema"
 	"gitlab.com/spacewalker/locations/internal/app/history/core/port"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
-	"log"
 	"net/http"
 	"time"
 )
@@ -93,7 +92,6 @@ func (h *HTTPHandler) getDistance(w http.ResponseWriter, r *http.Request) {
 		From:     fromPtr,
 		To:       toPtr,
 	})
-	log.Printf("res, err: %v %v", res, err)
 	if err != nil {
 		util.Respond(w, http.StatusOK, port.ErrToHTTP(err))
 		return

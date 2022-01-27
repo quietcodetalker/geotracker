@@ -4,7 +4,6 @@ import (
 	"context"
 	"gitlab.com/spacewalker/locations/internal/app/history/core/port"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
-	"log"
 	"time"
 )
 
@@ -84,7 +83,6 @@ func (s *historyService) GetDistanceByUsername(ctx context.Context, req port.His
 		return port.HistoryServiceGetDistanceByUsernameResponse{}, err
 	}
 
-	log.Printf("WTF")
 	distance, err := s.repo.GetDistance(ctx, port.HistoryRepositoryGetDistanceRequest{
 		UserID: userID,
 		To:     *req.To,
