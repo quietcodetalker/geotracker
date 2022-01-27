@@ -1,16 +1,16 @@
-package history
+package location
 
 import (
 	"context"
 	"errors"
 	"fmt"
-	"gitlab.com/spacewalker/locations/internal/app/history/adapter/in/handler"
-	"gitlab.com/spacewalker/locations/internal/app/history/adapter/out/locationclient"
-	"gitlab.com/spacewalker/locations/internal/app/history/adapter/out/repository"
-	"gitlab.com/spacewalker/locations/internal/app/history/core/service"
+	"gitlab.com/spacewalker/locations/internal/app/location/adapter/in/handler"
+	"gitlab.com/spacewalker/locations/internal/app/location/adapter/out/historyclient"
+	"gitlab.com/spacewalker/locations/internal/app/location/adapter/out/repository"
+	"gitlab.com/spacewalker/locations/internal/app/location/core/service"
 	"gitlab.com/spacewalker/locations/internal/pkg/config"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
-	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/history"
+	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/location"
 	"google.golang.org/grpc"
 	"log"
 	"strings"
@@ -19,13 +19,13 @@ import (
 
 // App is a history application.
 type App struct {
-	config     config.HistoryConfig
+	config     config.LocationConfig
 	httpServer *util.HTTPServer
 	grpcServer *util.GRPCServer
 }
 
-// NewApp creates and instance of history application and returns its pointer.
-func NewApp(config config.HistoryConfig) *App {
+// NewApp creates and instance of location application and returns its pointer.
+func NewApp(config config.LocationConfig) *App {
 	return &App{
 		config: config,
 	}
@@ -43,14 +43,14 @@ func (a *App) Start() error {
 	}
 
 	repo := repository.NewPostgresRepository(db)
-	locationClient := locationclient.NewGRPCClient(a.config.LocationAddr)
-	svc := service.NewHistoryService(repo, locationClient)
+	historyClient := historyclient.NewGRPCClient(a.config.HistoryAddr)
+	svc := service.NewUserService(repo, historyClient)
 	httpHandler := handler.NewHTTPHandler(svc)
-	grpcHandler := handler.NewGRPCHandler(svc)
+	grpcHandler := handler.NewGRPCInternalHandler(svc)
 
 	a.httpServer = util.NewHTTPServer(a.config.BindAddrHTTP, httpHandler)
 	a.grpcServer = util.NewGRPCServer(a.config.BindAddrGRPC, func(server *grpc.Server) {
-		pb.RegisterHistoryServer(server, grpcHandler)
+		pb.RegisterLocationInternalServer(server, grpcHandler)
 	})
 
 	var httpErr, grpcErr error
