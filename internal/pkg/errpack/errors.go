@@ -17,6 +17,7 @@ type PreconditionFailureViolation struct {
 // PreconditionFailureError describes failed preconditions.
 type PreconditionFailureError struct {
 	Violations []*PreconditionFailureViolation `json:"violations"`
+	Err        error
 }
 
 // Error returns error's text representation.
@@ -33,6 +34,7 @@ type BadRequestViolation struct {
 // BadRequestError describes request violations.
 type BadRequestError struct {
 	Violations []*BadRequestViolation `json:"violations"`
+	Err        error
 }
 
 // Error returns error's text representation.
@@ -49,7 +51,10 @@ type ResourceInfo struct {
 }
 
 // NotFoundError means that resource is being accessed isn't found.
-type NotFoundError ResourceInfo
+type NotFoundError struct {
+	ResourceInfo
+	Err error
+}
 
 // Error returns error's text representation.
 func (e *NotFoundError) Error() string {
@@ -57,7 +62,10 @@ func (e *NotFoundError) Error() string {
 }
 
 // AlreadyExistsError means that resource is being created already exists.
-type AlreadyExistsError ResourceInfo
+type AlreadyExistsError struct {
+	ResourceInfo
+	Err error
+}
 
 // Error returns error's text representation.
 func (e *AlreadyExistsError) Error() string {
@@ -71,7 +79,10 @@ type DebugInfo struct {
 }
 
 // InternalError is an internal error.
-type InternalError DebugInfo
+type InternalError struct {
+	DebugInfo
+	Err error
+}
 
 // Error returns error's text representation.
 func (e *InternalError) Error() string {
@@ -79,7 +90,10 @@ func (e *InternalError) Error() string {
 }
 
 // UnknownError is an unknown error.
-type UnknownError DebugInfo
+type UnknownError struct {
+	DebugInfo
+	Err error
+}
 
 // Error returns error's text representation.
 func (e *UnknownError) Error() string {
