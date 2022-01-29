@@ -2,12 +2,9 @@ package handler
 
 import (
 	"context"
-	"errors"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
 	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/location"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -29,10 +26,7 @@ func NewGRPCInternalHandler(service port.UserService) *GRPCInternalHandler {
 func (h *GRPCInternalHandler) GetUserByUsername(ctx context.Context, request *pb.GetUserByUsernameRequest) (*pb.User, error) {
 	user, err := h.service.GetByUsername(ctx, request.Username)
 	if err != nil {
-		if errors.Is(err, errpack.ErrNotFound) {
-			return nil, status.Error(codes.NotFound, err.Error())
-		}
-		return nil, status.Error(codes.Internal, "")
+		return nil, errpack.ErrToGRPC(err)
 	}
 
 	return &pb.User{
@@ -40,5 +34,5 @@ func (h *GRPCInternalHandler) GetUserByUsername(ctx context.Context, request *pb
 		Username:  user.Username,
 		CreatedAt: timestamppb.New(user.CreatedAt),
 		UpdatedAt: timestamppb.New(user.UpdatedAt),
-	}, status.Error(codes.OK, "")
+	}, errpack.ErrToGRPC(nil)
 }

@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"errors"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/schema"
@@ -54,14 +53,14 @@ func (h *HTTPHandler) setUserLocation(w http.ResponseWriter, r *http.Request) {
 	var dto port.UserServiceSetUserLocationRequest
 
 	if err := util.DecodeBody(r, &dto); err != nil {
-		util.RespondErr(w, http.StatusOK, getHttpError(err))
+		util.Respond(w, http.StatusOK, errpack.ErrToHTTP(fmt.Errorf("%w", errpack.ErrInternalError)))
 		return
 	}
 	dto.Username = chi.URLParam(r, "username")
 
 	res, err := h.service.SetUserLocation(r.Context(), dto)
 	if err != nil {
-		util.RespondErr(w, http.StatusOK, getHttpError(err))
+		util.Respond(w, http.StatusOK, errpack.ErrToHTTP(err))
 		return
 	}
 
@@ -82,7 +81,7 @@ func (h *HTTPHandler) listUsersInRadius(w http.ResponseWriter, r *http.Request) 
 
 	err := r.ParseForm()
 	if err != nil {
-		util.RespondErr(w, http.StatusOK, getHttpError(err))
+		util.Respond(w, http.StatusOK, errpack.ErrToHTTP(fmt.Errorf("%w", errpack.ErrInternalError)))
 		return
 	}
 
@@ -90,7 +89,7 @@ func (h *HTTPHandler) listUsersInRadius(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		fmt.Println(err)
 		// TODO: check whether it makes sense to handle different errors
-		util.RespondErr(w, http.StatusOK, getHttpError(errpack.ErrInvalidArgument))
+		util.Respond(w, http.StatusOK, errpack.ErrToHTTP(fmt.Errorf("%w", errpack.ErrInvalidArgument)))
 		return
 	}
 
@@ -106,7 +105,7 @@ func (h *HTTPHandler) listUsersInRadius(w http.ResponseWriter, r *http.Request) 
 
 	res, err = h.service.ListUsersInRadius(r.Context(), req)
 	if err != nil {
-		util.RespondErr(w, http.StatusOK, getHttpError(err))
+		util.Respond(w, http.StatusOK, errpack.ErrToHTTP(err))
 		return
 	}
 
@@ -121,49 +120,4 @@ type httpError struct {
 
 func (e httpError) Error() string {
 	return e.Message
-}
-
-func getHttpError(err error) error {
-
-	if err != nil {
-		switch {
-		case errors.Is(err, errpack.ErrFailedPrecondition):
-			return httpError{
-				Status:  codes.FailedPrecondition,
-				Code:    grpcCodeToHTTP(codes.FailedPrecondition),
-				Message: err.Error(),
-			}
-		case errors.Is(err, errpack.ErrInvalidArgument):
-			return httpError{
-				Status:  codes.InvalidArgument,
-				Code:    grpcCodeToHTTP(codes.InvalidArgument),
-				Message: err.Error(),
-			}
-		default:
-			return httpError{
-				Status:  codes.Internal,
-				Code:    grpcCodeToHTTP(codes.Internal),
-				Message: "internal error",
-			}
-		}
-	}
-
-	return nil
-}
-
-func grpcCodeToHTTP(code codes.Code) uint32 {
-	switch code {
-	case codes.NotFound:
-		return http.StatusNotFound
-	case codes.InvalidArgument:
-		return http.StatusBadRequest
-	case codes.FailedPrecondition:
-		return http.StatusUnprocessableEntity
-	case codes.Internal:
-		fallthrough
-	case codes.Unknown:
-		fallthrough
-	default:
-		return http.StatusInternalServerError
-	}
 }

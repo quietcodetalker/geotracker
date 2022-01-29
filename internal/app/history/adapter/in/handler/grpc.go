@@ -2,7 +2,7 @@ package handler
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"gitlab.com/spacewalker/locations/internal/app/history/core/port"
 	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
@@ -28,7 +28,7 @@ func NewGRPCHandler(service port.HistoryService) *GRPCHandler {
 func (h *GRPCHandler) AddRecord(ctx context.Context, req *pb.AddRecordRequest) (*pb.AddRecordResponse, error) {
 	if req.A == nil || req.B == nil {
 		// TODO: specify error
-		return nil, status.Error(codes.InvalidArgument, "")
+		return nil, errpack.ErrToGRPC(fmt.Errorf("%w", errpack.ErrInvalidArgument))
 	}
 
 	res, err := h.service.AddRecord(ctx, port.HistoryServiceAddRecordRequest{
@@ -44,7 +44,7 @@ func (h *GRPCHandler) AddRecord(ctx context.Context, req *pb.AddRecordRequest) (
 	})
 
 	if err != nil {
-		return nil, grpcErr(err)
+		return nil, errpack.ErrToGRPC(err)
 	}
 
 	return &pb.AddRecordResponse{
@@ -65,7 +65,7 @@ func (h *GRPCHandler) AddRecord(ctx context.Context, req *pb.AddRecordRequest) (
 func (h *GRPCHandler) GetDistance(ctx context.Context, req *pb.GetDistanceRequest) (*pb.GetDistanceResponse, error) {
 	if req.From == nil || req.To == nil {
 		// TODO: specify error
-		return nil, status.Error(codes.InvalidArgument, "")
+		return nil, errpack.ErrToGRPC(fmt.Errorf("%w", errpack.ErrInvalidArgument))
 	}
 
 	res, err := h.service.GetDistance(ctx, port.HistoryServiceGetDistanceRequest{
@@ -74,21 +74,8 @@ func (h *GRPCHandler) GetDistance(ctx context.Context, req *pb.GetDistanceReques
 		To:     req.To.AsTime(),
 	})
 	if err != nil {
-		return nil, grpcErr(err)
+		return nil, errpack.ErrToGRPC(err)
 	}
 
 	return &pb.GetDistanceResponse{Distance: res.Distance}, status.Error(codes.OK, "")
-}
-
-func grpcErr(err error) error {
-	if err != nil {
-		switch {
-		case errors.Is(err, errpack.ErrInvalidArgument):
-			return status.Error(codes.InvalidArgument, err.Error())
-		default:
-			return status.Error(codes.Internal, "internal error")
-		}
-	}
-
-	return nil
 }
