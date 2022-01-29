@@ -8,6 +8,7 @@ import (
 	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"gitlab.com/spacewalker/locations/internal/pkg/util/pagination"
+	"time"
 )
 
 type userService struct {
@@ -42,9 +43,10 @@ func (s *userService) SetUserLocation(ctx context.Context, req port.UserServiceS
 
 	if res.PrevLocation.UserID == res.User.ID {
 		_, _ = s.historyClient.AddRecord(ctx, port.HistoryClientAddRecordRequest{
-			UserID: res.PrevLocation.UserID,
-			A:      res.PrevLocation.Point,
-			B:      res.Location.Point,
+			UserID:    res.PrevLocation.UserID,
+			A:         res.PrevLocation.Point,
+			B:         res.Location.Point,
+			Timestamp: time.Now().UTC(),
 		})
 	}
 

@@ -11,9 +11,9 @@ import (
 var seedRecordsQuery = fmt.Sprintf(
 	`
 INSERT INTO %s
-(user_id, a, b, created_at)
+(user_id, a, b, timestamp)
 VALUES ($1, $2, $3, $4)
-RETURNING user_id, a, b, created_at, updated_at
+RETURNING user_id, a, b, timestamp
 `,
 	repository.RecordsTable,
 )
@@ -34,12 +34,11 @@ func (s *PostgresTestSuite) seedRecords(args []domain.Record) []domain.Record {
 		var record domain.Record
 		var a, b geo.PostgresPoint
 
-		err := stmt.QueryRow(arg.UserID, geo.PostgresPoint(arg.A), geo.PostgresPoint(arg.B), arg.CreatedAt).Scan(
+		err := stmt.QueryRow(arg.UserID, geo.PostgresPoint(arg.A), geo.PostgresPoint(arg.B), arg.Timestamp).Scan(
 			&record.ID,
 			&a,
 			&b,
-			&record.CreatedAt,
-			&record.UpdatedAt,
+			&record.Timestamp,
 		)
 		require.NoError(s.T(), err)
 

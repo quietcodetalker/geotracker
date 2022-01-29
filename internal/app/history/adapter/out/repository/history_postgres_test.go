@@ -169,25 +169,25 @@ func (s *PostgresTestSuite) Test_PostgresRepository_GetDistance() {
 			UserID:    1,
 			A:         geo.Point{0.0, 0.0},
 			B:         geo.Point{1.0, 0.0},
-			CreatedAt: ref.Add(-time.Hour * 5),
+			Timestamp: ref.Add(-time.Hour * 5),
 		},
 		{
 			UserID:    1,
 			A:         geo.Point{1.0, 0.0},
 			B:         geo.Point{1.0, 1.0},
-			CreatedAt: ref.Add(-time.Hour * 4),
+			Timestamp: ref.Add(-time.Hour * 4),
 		},
 		{
 			UserID:    2,
 			A:         geo.Point{1.0, 1.0},
 			B:         geo.Point{2.0, 1.0},
-			CreatedAt: ref.Add(-time.Hour * 3),
+			Timestamp: ref.Add(-time.Hour * 3),
 		},
 		{
 			UserID:    1,
 			A:         geo.Point{2.0, 1.0},
 			B:         geo.Point{2.0, 2.0},
-			CreatedAt: ref.Add(-time.Hour * 2),
+			Timestamp: ref.Add(-time.Hour * 2),
 		},
 	}
 

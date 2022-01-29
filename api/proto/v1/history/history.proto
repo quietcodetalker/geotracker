@@ -15,13 +15,13 @@ message AddRecordRequest {
   int32 user_id = 1;
   Point a = 2;
   Point b = 3;
+  google.protobuf.Timestamp timestamp = 4;
 }
 message AddRecordResponse {
   int32 user_id = 1;
   Point a = 2;
   Point b = 3;
-  google.protobuf.Timestamp created_at = 4;
-  google.protobuf.Timestamp updated_at = 5;
+  google.protobuf.Timestamp timestamp = 4;
 }
 
 message GetDistanceRequest{

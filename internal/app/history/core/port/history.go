@@ -11,9 +11,10 @@ import (
 
 // HistoryServiceAddRecordRequest represents request object of HistoryService AddRecord method.
 type HistoryServiceAddRecordRequest struct {
-	UserID int       `json:"user_id" validate:"required,gt=0"`
-	A      geo.Point `json:"a" validate:"validgeopoint"`
-	B      geo.Point `json:"b" validate:"validgeopoint"`
+	UserID    int       `json:"user_id" validate:"required,gt=0"`
+	A         geo.Point `json:"a" validate:"validgeopoint"`
+	B         geo.Point `json:"b" validate:"validgeopoint"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 // HistoryServiceGetDistanceRequest represents request object of HistoryService GetDistance method.
@@ -49,9 +50,10 @@ type HistoryService interface {
 
 // HistoryRepositoryAddRecordRequest represents request object of HistoryRepository AddRecord method.
 type HistoryRepositoryAddRecordRequest struct {
-	UserID int       `json:"user_id"`
-	A      geo.Point `json:"a"`
-	B      geo.Point `json:"b"`
+	UserID    int       `json:"user_id"`
+	A         geo.Point `json:"a"`
+	B         geo.Point `json:"b"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 // HistoryRepositoryGetDistanceRequest represents request object of HistoryRepository GetDistance method.

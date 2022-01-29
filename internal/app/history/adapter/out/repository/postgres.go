@@ -34,9 +34,9 @@ func NewPostgresRepository(db *sql.DB) port.HistoryRepository {
 var addRecordQuery = fmt.Sprintf(
 	`
 INSERT INTO %s
-(user_id, a, b)
-VALUES ($1, $2, $3)
-RETURNING id, user_id, a, b, created_at, updated_at
+(user_id, a, b, timestamp)
+VALUES ($1, $2, $3, $4)
+RETURNING id, user_id, a, b, timestamp
 `,
 	RecordsTable,
 )
@@ -53,13 +53,12 @@ func (r postgresRepository) AddRecord(ctx context.Context, req port.HistoryRepos
 	var record domain.Record
 	var a, b geo.PostgresPoint
 
-	if err := r.db.QueryRowContext(ctx, addRecordQuery, req.UserID, geo.PostgresPoint(req.A), geo.PostgresPoint(req.B)).Scan(
+	if err := r.db.QueryRowContext(ctx, addRecordQuery, req.UserID, geo.PostgresPoint(req.A), geo.PostgresPoint(req.B), req.Timestamp).Scan(
 		&record.ID,
 		&record.UserID,
 		&a,
 		&b,
-		&record.CreatedAt,
-		&record.UpdatedAt,
+		&record.Timestamp,
 	); err != nil {
 		var pqErr *pq.Error
 		if errors.As(err, &pqErr) {
@@ -87,7 +86,7 @@ var getDistanceQuery = fmt.Sprintf(
 	`
 SELECT coalesce(SUM(a <@> b), 0.00) * 1609.344
 FROM %s
-WHERE user_id = $1 AND created_at >= $2 AND created_at <= $3
+WHERE user_id = $1 AND timestamp >= $2 AND timestamp <= $3
 `,
 	RecordsTable,
 )

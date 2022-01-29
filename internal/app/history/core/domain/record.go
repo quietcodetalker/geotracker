@@ -11,6 +11,5 @@ type Record struct {
 	UserID    int       `json:"user_id"`
 	A         geo.Point `json:"a"`
 	B         geo.Point `json:"b"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Timestamp time.Time `json:"timestamp"`
 }

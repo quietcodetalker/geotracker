@@ -9,6 +9,7 @@ import (
 	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/history"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // GRPCHandler represents history handle that handle grpc requests.
@@ -41,6 +42,7 @@ func (h *GRPCHandler) AddRecord(ctx context.Context, req *pb.AddRecordRequest) (
 			req.B.Longitude,
 			req.B.Latitude,
 		},
+		Timestamp: req.Timestamp.AsTime(),
 	})
 
 	if err != nil {
@@ -57,8 +59,7 @@ func (h *GRPCHandler) AddRecord(ctx context.Context, req *pb.AddRecordRequest) (
 			Longitude: res.B.Longitude(),
 			Latitude:  res.B.Latitude(),
 		},
-		CreatedAt: nil,
-		UpdatedAt: nil,
+		Timestamp: timestamppb.New(res.Timestamp),
 	}, status.Error(codes.OK, "")
 }
 

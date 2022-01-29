@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type GRPCClient struct {
@@ -47,6 +48,7 @@ func (c GRPCClient) AddRecord(ctx context.Context, req port.HistoryClientAddReco
 			Longitude: req.B.Longitude(),
 			Latitude:  req.B.Latitude(),
 		},
+		Timestamp: timestamppb.New(req.Timestamp),
 	})
 	if err != nil {
 		st, ok := status.FromError(err)
@@ -65,8 +67,7 @@ func (c GRPCClient) AddRecord(ctx context.Context, req port.HistoryClientAddReco
 		UserID:    int(res.UserId),
 		A:         geo.Point{res.A.Longitude, res.A.Latitude},
 		B:         geo.Point{res.B.Longitude, res.B.Latitude},
-		CreatedAt: res.CreatedAt.AsTime(),
-		UpdatedAt: res.UpdatedAt.AsTime(),
+		Timestamp: res.Timestamp.AsTime(),
 	}, nil
 }
 

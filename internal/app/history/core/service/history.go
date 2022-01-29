@@ -37,9 +37,10 @@ func (s *historyService) AddRecord(ctx context.Context, req port.HistoryServiceA
 	}
 
 	record, err := s.repo.AddRecord(ctx, port.HistoryRepositoryAddRecordRequest{
-		UserID: req.UserID,
-		A:      geo.Trunc(req.A),
-		B:      geo.Trunc(req.B),
+		UserID:    req.UserID,
+		A:         geo.Trunc(req.A),
+		B:         geo.Trunc(req.B),
+		Timestamp: req.Timestamp,
 	})
 	if err != nil {
 		return domain.Record{}, err
