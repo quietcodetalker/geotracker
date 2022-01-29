@@ -8,6 +8,7 @@ import (
 	"github.com/lib/pq"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 )
 
@@ -21,7 +22,17 @@ RETURNING id, username, created_at, updated_at
 	UserTable,
 )
 
-// CreateUser add new User to database and returns it.
+// CreateUser adds a new user to the users table.
+//
+// It returns the created user and any error encountered.
+//
+// `ErrInvalidArgument` is returned in case username is invalid.
+//
+// `ErrAlreadyExists` is returned in case a user with given username already exists.
+//
+// `ErrInternalError` is returned in case of any other failure.
+//
+// Returned error is wrapped with `fmt.Errorf("%w", err)`. Use `errors.Is()` to compare errors.
 func (q *postgresQueries) CreateUser(ctx context.Context, arg port.CreateUserArg) (domain.User, error) {
 	var user domain.User
 
@@ -35,17 +46,17 @@ func (q *postgresQueries) CreateUser(ctx context.Context, arg port.CreateUserArg
 		if errors.As(err, &pqErr) {
 			switch pqErr.Code.Name() {
 			case "string_data_right_truncation":
-				return domain.User{}, port.ErrInvalidUsername
+				return domain.User{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 			}
 
 			switch pqErr.Constraint {
 			case ConstraintUsersUsernameKey:
-				return domain.User{}, port.ErrAlreadyExists
+				return domain.User{}, fmt.Errorf("%w", errpack.ErrAlreadyExists)
 			case ConstraintUsersUsernameValid:
-				return domain.User{}, port.ErrInvalidUsername
+				return domain.User{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 			}
 		}
-		return domain.User{}, err
+		return domain.User{}, fmt.Errorf("%w", errpack.ErrInternalError)
 	}
 
 	return user, nil
@@ -60,8 +71,15 @@ WHERE username = $1
 	UserTable,
 )
 
-// GetByUsername returns user with given username.
-// If user is not found returns ErrNotFound error.
+// GetByUsername finds a user by username in users table.
+//
+// It returns `User` and `error`.
+//
+// `ErrNotFound` is returned in case user not found.
+//
+// `ErrInternalError` is returned in case of any other failure.
+//
+// Returned error is wrapped with `fmt.Errorf("%w", err)`. Use `errors.Is()` to compare errors.
 func (q *postgresQueries) GetByUsername(ctx context.Context, username string) (domain.User, error) {
 	var user domain.User
 	if err := q.db.QueryRowContext(ctx, getByUsernameQuery, username).Scan(
@@ -70,17 +88,38 @@ func (q *postgresQueries) GetByUsername(ctx context.Context, username string) (d
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	); err != nil {
-		if err == sql.ErrNoRows {
-			return domain.User{}, port.ErrNotFound
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.User{}, fmt.Errorf("%w", errpack.ErrNotFound)
 		}
-		return domain.User{}, err
+		return domain.User{}, fmt.Errorf("%w", errpack.ErrInternalError)
 	}
 
 	return user, nil
 }
 
-// SetUserLocation gets User by given username and updates Location by user ID
-//with provided coordinates within a single database transaction.
+// SetUserLocation sets user's location.
+//
+// It finds a user by the provided username. If the user is not found, it creates new one.
+// If user was found, it finds current location of the user.
+// Then sets location of the user. All of it is done in the scope of the database transaction.
+//
+// It returns a response and any error encountered.
+//
+// The response consists of:
+//		- found or created user
+//		- previous location of the user (should be considered as not found if its `UserID` equals 0)
+//		- new location of the user
+//
+// `ErrInternalError` is returned in following cases:
+//		- any error encountered while
+// 			starting, committing and rolling back the database transaction.
+//		- `ErrInternalError` is returned from `GetByUsername`, `ErrInternalError`,
+//			`GetLocation` or `CreateUser` methods
+//
+//	`ErrInvalidArgument` is returned in case `ErrInvalidArgument` is returned from
+//	`CreateUser` or `SetLocation` methods.
+//
+// Returned error is wrapped with `fmt.Errorf("%w", err)`. Use `errors.Is()` to compare errors.
 func (r *postgresRepository) SetUserLocation(ctx context.Context, arg port.UserRepositorySetUserLocationRequest) (port.UserRepositorySetUserLocationResponse, error) {
 	var user domain.User
 	var prevLocation domain.Location
@@ -91,20 +130,24 @@ func (r *postgresRepository) SetUserLocation(ctx context.Context, arg port.UserR
 
 		user, err = q.GetByUsername(ctx, arg.Username)
 		if err == nil {
+			// User is found.
 			var glErr error
 			prevLocation, glErr = q.GetLocation(ctx, user.ID)
-			if glErr != nil && glErr != port.ErrNotFound {
-				return err
+			if glErr != nil && !errors.Is(glErr, errpack.ErrNotFound) {
+				return fmt.Errorf("%w", errpack.ErrInternalError)
 			}
 		}
-		if err == port.ErrNotFound {
+		if errors.Is(err, errpack.ErrNotFound) {
+			// ErrNotFound occurred.
 			user, err = q.CreateUser(ctx, port.CreateUserArg{Username: arg.Username})
 			if err != nil {
+				// ErrInternalError or ErrInvalidArgument occurred.
 				return err
 			}
 		}
 		if err != nil {
-			return err
+			// ErrInternalError occurred.
+			return fmt.Errorf("%w", errpack.ErrInternalError)
 		}
 
 		location, err = q.SetLocation(ctx, port.LocationRepositorySetLocationRequest{
@@ -112,6 +155,7 @@ func (r *postgresRepository) SetUserLocation(ctx context.Context, arg port.UserR
 			Point:  arg.Point,
 		})
 		if err != nil {
+			// ErrInvalidArgument or ErrInternalErr occurred.
 			return err
 		}
 
@@ -140,7 +184,21 @@ LIMIT $4
 	LocationTable,
 )
 
-// ListUsersInRadius retrieve users in given radius with coordinates.
+// ListUsersInRadius finds no more than `arg.PageSize` users by given radius and coordinates
+// with IDs greater than `arg.PageToken` ordered by ID.
+//
+// It returns a response and any error encountered.
+//
+// The response consists of a user list and next page token.
+// Next page token is ID of last found user if required amount of users found.
+//
+// A user list that equals nil should be considered as empty.
+// Next page id is an ID of the first user of the next page.
+// If the next page token equal 0, there is no more pages.
+//
+// `ErrInternalErr` is returned in case any error encountered.
+//
+// Returned error is wrapped with `fmt.Errorf("%w", err)`. Use `errors.Is()` to compare errors.
 func (q *postgresQueries) ListUsersInRadius(ctx context.Context, arg port.UserRepositoryListUsersInRadiusRequest) (port.UserRepositoryListUsersInRadiusResponse, error) {
 	var users []domain.User
 
@@ -148,10 +206,10 @@ func (q *postgresQueries) ListUsersInRadius(ctx context.Context, arg port.UserRe
 	// If such element happens to be retrieved it means that next page can be (probably) retrieved as well.
 	rows, err := q.db.QueryContext(ctx, listUsersInRadiusQuery, geo.PostgresPoint(arg.Point), arg.Radius, arg.PageToken, arg.PageSize+1)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return port.UserRepositoryListUsersInRadiusResponse{}, port.ErrNotFound
+		if errors.Is(err, sql.ErrNoRows) {
+			return port.UserRepositoryListUsersInRadiusResponse{}, nil
 		}
-		return port.UserRepositoryListUsersInRadiusResponse{}, err
+		return port.UserRepositoryListUsersInRadiusResponse{}, fmt.Errorf("%w", errpack.ErrInternalError)
 	}
 	defer rows.Close()
 
@@ -171,7 +229,7 @@ func (q *postgresQueries) ListUsersInRadius(ctx context.Context, arg port.UserRe
 			&user.CreatedAt,
 			&user.UpdatedAt,
 		); err != nil {
-			return port.UserRepositoryListUsersInRadiusResponse{}, err
+			return port.UserRepositoryListUsersInRadiusResponse{}, fmt.Errorf("%w", errpack.ErrInternalError)
 		}
 		users = append(users, user)
 	}

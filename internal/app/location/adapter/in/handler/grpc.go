@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/location"
 	"google.golang.org/grpc"
@@ -112,19 +113,20 @@ func (h *GRPCHandler) ListUsersInRadius(
 }
 
 func grpcErr(err error) error {
-	var invalidArgumentError *port.InvalidArgumentError
-	var invalidLocationError *port.InvalidLocationError
 
 	if err != nil {
 		switch {
-		case errors.As(err, &invalidLocationError):
-			fallthrough
-		case errors.As(err, &invalidArgumentError):
-			fallthrough
-		case errors.Is(err, port.ErrInvalidUsername):
+		case errors.Is(err, errpack.ErrNotFound):
+			return status.Error(codes.NotFound, err.Error())
+		case errors.Is(err, errpack.ErrAlreadyExists):
+			return status.Error(codes.AlreadyExists, err.Error())
+		case errors.Is(err, errpack.ErrInternalError):
+			return status.Error(codes.Internal, err.Error())
+		case errors.Is(err, errpack.ErrInvalidArgument):
 			return status.Error(codes.InvalidArgument, err.Error())
+		case errors.Is(err, errpack.ErrFailedPrecondition):
 		default:
-			return status.Error(codes.Internal, "internal error")
+
 		}
 	}
 

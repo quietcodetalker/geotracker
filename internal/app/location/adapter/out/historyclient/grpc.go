@@ -2,22 +2,28 @@ package historyclient
 
 import (
 	"context"
+	"fmt"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/history"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type GRPCClient struct {
 	addr string
 }
 
+// NewGRPCClient TODO: add description
 func NewGRPCClient(addr string) port.HistoryClient {
 	return &GRPCClient{
 		addr: addr,
 	}
 }
 
+// AddRecord TODO: add description
 func (c GRPCClient) AddRecord(ctx context.Context, req port.HistoryClientAddRecordRequest) (port.HistoryClientAddRecordResponse, error) {
 	var opts []grpc.DialOption
 
@@ -25,7 +31,7 @@ func (c GRPCClient) AddRecord(ctx context.Context, req port.HistoryClientAddReco
 
 	conn, err := grpc.Dial(c.addr, opts...)
 	if err != nil {
-		return port.HistoryClientAddRecordResponse{}, err
+		return port.HistoryClientAddRecordResponse{}, fmt.Errorf("%w", errpack.ErrInternalError)
 	}
 	defer conn.Close()
 
@@ -43,7 +49,16 @@ func (c GRPCClient) AddRecord(ctx context.Context, req port.HistoryClientAddReco
 		},
 	})
 	if err != nil {
-		return port.HistoryClientAddRecordResponse{}, err
+		st, ok := status.FromError(err)
+		if !ok {
+			return port.HistoryClientAddRecordResponse{}, fmt.Errorf("%w", errpack.ErrInternalError)
+		}
+		switch st.Code() {
+		case codes.InvalidArgument:
+			return port.HistoryClientAddRecordResponse{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
+		default:
+			return port.HistoryClientAddRecordResponse{}, fmt.Errorf("%w", errpack.ErrInternalError)
+		}
 	}
 
 	return port.HistoryClientAddRecordResponse{

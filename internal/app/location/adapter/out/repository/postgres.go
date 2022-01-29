@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 )
 
 const (
@@ -21,6 +22,7 @@ type postgresRepository struct {
 	db *sql.DB
 }
 
+// NewPostgresRepository returns a new instance of port.Repository
 func NewPostgresRepository(db *sql.DB) port.Repository {
 	return &postgresRepository{
 		postgresQueries: newPostgresQueries(db),
@@ -28,22 +30,30 @@ func NewPostgresRepository(db *sql.DB) port.Repository {
 	}
 }
 
+// execTx executes provided callback in the scope of a database transaction.
+//
+// It returns an error occurred while starting, committing or rolling back the transaction or
+// and error returned by the callback.
 func (r *postgresRepository) execTx(ctx context.Context, fn func(*postgresQueries) error) error {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("%w", errpack.ErrInternalError)
 	}
 
 	q := newPostgresQueries(tx)
 	err = fn(q)
 	if err != nil {
-		if rbErr := tx.Rollback(); err != nil {
-			return fmt.Errorf("tx err: %v, rb err: %v", err, rbErr)
+		if rbErr := tx.Rollback(); rbErr != nil {
+			return fmt.Errorf("%w", errpack.ErrInternalError)
 		}
-		return err
+		return fmt.Errorf("%w", errpack.ErrInternalError)
 	}
 
-	return tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("%w", errpack.ErrInternalError)
+	}
+
+	return nil
 }
 
 type postgresQueries struct {

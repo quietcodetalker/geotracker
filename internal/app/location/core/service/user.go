@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"gitlab.com/spacewalker/locations/internal/pkg/util/pagination"
 )
@@ -25,7 +27,7 @@ func NewUserService(repo port.UserRepository, historyClient port.HistoryClient) 
 func (s *userService) SetUserLocation(ctx context.Context, req port.UserServiceSetUserLocationRequest) (port.UserServiceSetUserLocationResponse, error) {
 	if err := validate.Struct(req); err != nil {
 		// TODO: check different errors?
-		return port.UserServiceSetUserLocationResponse{}, &port.InvalidArgumentError{}
+		return port.UserServiceSetUserLocationResponse{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 	}
 
 	point := geo.Trunc(geo.Point{req.Longitude, req.Latitude})
@@ -52,11 +54,11 @@ func (s *userService) SetUserLocation(ctx context.Context, req port.UserServiceS
 	}, nil
 }
 
-// ListUsersInRadius finds users around given geographic point in given radius.
+// ListUsersInRadius finds users by given location and radius.
 func (s *userService) ListUsersInRadius(ctx context.Context, req port.UserServiceListUsersInRadiusRequest) (port.UserServiceListUsersInRadiusResponse, error) {
 	if err := validate.Struct(req); err != nil {
 		// TODO: check different errors
-		return port.UserServiceListUsersInRadiusResponse{}, &port.InvalidArgumentError{}
+		return port.UserServiceListUsersInRadiusResponse{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 	}
 
 	req.Point = geo.Trunc(req.Point)
@@ -66,7 +68,7 @@ func (s *userService) ListUsersInRadius(ctx context.Context, req port.UserServic
 		var err error
 		pageToken, pageSize, err = pagination.DecodeCursor(req.PageToken)
 		if err != nil {
-			return port.UserServiceListUsersInRadiusResponse{}, &port.InvalidArgumentError{}
+			return port.UserServiceListUsersInRadiusResponse{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 		}
 	} else {
 		pageSize = req.PageSize
@@ -98,13 +100,15 @@ func (s *userService) ListUsersInRadius(ctx context.Context, req port.UserServic
 }
 
 // GetByUsername finds user by username.
-// If provided username is empty string, *InvalidArgumentError returned.
-// If user is found nil error returned.
-// If user is not found error ErrNotFound returned.
-// Otherwise, returned other error which should be considered as internal.
+//
+// It returns a user and any error encountered.
+//
+// `ErrInvalidArgument` is returned in case username is empty string.
+//
+// Any other error occurred in `GetByUsername` is returned.
 func (s *userService) GetByUsername(ctx context.Context, username string) (domain.User, error) {
 	if username == "" {
-		return domain.User{}, &port.InvalidArgumentError{}
+		return domain.User{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 	}
 
 	user, err := s.repo.GetByUsername(ctx, username)

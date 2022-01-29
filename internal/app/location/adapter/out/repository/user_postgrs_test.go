@@ -6,6 +6,7 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/location/adapter/out/repository"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	"testing"
@@ -47,7 +48,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_CreateUser() {
 			name:   "ErrConstraint_UserAlreadyExists",
 			arg:    port.CreateUserArg{Username: users[0].Username},
 			hasErr: true,
-			isErr:  port.ErrAlreadyExists,
+			isErr:  errpack.ErrAlreadyExists,
 			assert: func(t *testing.T, user domain.User, err error) {
 				require.Empty(t, user)
 			},
@@ -56,7 +57,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_CreateUser() {
 			name:   "ErrConstraint_InvalidUsername_TooShort",
 			arg:    port.CreateUserArg{Username: "u"},
 			hasErr: true,
-			isErr:  port.ErrInvalidUsername,
+			isErr:  errpack.ErrInvalidArgument,
 			assert: func(t *testing.T, user domain.User, err error) {
 				require.Empty(t, user)
 			},
@@ -65,7 +66,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_CreateUser() {
 			name:   "ErrConstraint_InvalidUsername_TooLong",
 			arg:    port.CreateUserArg{Username: "uuuuuuuuuuuuuuuuu"},
 			hasErr: true,
-			isErr:  port.ErrInvalidUsername,
+			isErr:  errpack.ErrInvalidArgument,
 			assert: func(t *testing.T, user domain.User, err error) {
 				require.Empty(t, user)
 			},
@@ -74,7 +75,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_CreateUser() {
 			name:   "ErrConstraint_InvalidUsername_DoesNotMatchPattern",
 			arg:    port.CreateUserArg{Username: "user3_"},
 			hasErr: true,
-			isErr:  port.ErrInvalidUsername,
+			isErr:  errpack.ErrInvalidArgument,
 			assert: func(t *testing.T, user domain.User, err error) {
 				require.Empty(t, user)
 			},
@@ -144,7 +145,7 @@ func (s *PostgresTestSuite) Test_PostgresQueries_GetUserByUsername() {
 			name:   "NotFound",
 			user:   domain.User{Username: "user3"},
 			hasErr: true,
-			isErr:  port.ErrNotFound,
+			isErr:  errpack.ErrNotFound,
 			asErr:  nil,
 			assert: func(t *testing.T, user domain.User) {
 				require.Empty(t, user)

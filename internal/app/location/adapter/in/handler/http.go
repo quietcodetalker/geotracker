@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/schema"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	"google.golang.org/grpc/codes"
@@ -89,7 +90,7 @@ func (h *HTTPHandler) listUsersInRadius(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		fmt.Println(err)
 		// TODO: check whether it makes sense to handle different errors
-		util.RespondErr(w, http.StatusOK, getHttpError(&port.InvalidArgumentError{}))
+		util.RespondErr(w, http.StatusOK, getHttpError(errpack.ErrInvalidArgument))
 		return
 	}
 
@@ -123,16 +124,19 @@ func (e httpError) Error() string {
 }
 
 func getHttpError(err error) error {
-	var invalidArgumentError *port.InvalidArgumentError
 
 	if err != nil {
 		switch {
-		case errors.As(err, &invalidArgumentError):
-			fallthrough
-		case errors.Is(err, port.ErrInvalidUsername):
+		case errors.Is(err, errpack.ErrFailedPrecondition):
 			return httpError{
 				Status:  codes.FailedPrecondition,
 				Code:    grpcCodeToHTTP(codes.FailedPrecondition),
+				Message: err.Error(),
+			}
+		case errors.Is(err, errpack.ErrInvalidArgument):
+			return httpError{
+				Status:  codes.InvalidArgument,
+				Code:    grpcCodeToHTTP(codes.InvalidArgument),
 				Message: err.Error(),
 			}
 		default:
@@ -149,8 +153,12 @@ func getHttpError(err error) error {
 
 func grpcCodeToHTTP(code codes.Code) uint32 {
 	switch code {
-	case codes.FailedPrecondition:
+	case codes.NotFound:
+		return http.StatusNotFound
+	case codes.InvalidArgument:
 		return http.StatusBadRequest
+	case codes.FailedPrecondition:
+		return http.StatusUnprocessableEntity
 	case codes.Internal:
 		fallthrough
 	case codes.Unknown:

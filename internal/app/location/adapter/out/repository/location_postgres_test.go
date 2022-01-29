@@ -6,6 +6,7 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/location/adapter/out/repository"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"testing"
 	"time"
@@ -95,19 +96,9 @@ func (s *PostgresTestSuite) Test_PostgresQueries_SetLocation() {
 				Point:  geo.Point{1.0, -181.0},
 			},
 			hasErr: true,
-			isErr:  nil,
-			asErr:  &port.InvalidLocationError{},
+			isErr:  errpack.ErrInvalidArgument,
 			assert: func(t *testing.T, location domain.Location, err error) {
-				var invalidLocationError *port.InvalidLocationError
-				require.ErrorAs(t, err, &invalidLocationError)
-				require.Equal(t, port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "latitude",
-							Value:   -181.00,
-						},
-					},
-				}, *invalidLocationError)
+				require.Empty(t, location)
 			},
 		},
 		{
@@ -117,19 +108,9 @@ func (s *PostgresTestSuite) Test_PostgresQueries_SetLocation() {
 				Point:  geo.Point{1.0, 181.0},
 			},
 			hasErr: true,
-			isErr:  nil,
-			asErr:  &port.InvalidLocationError{},
+			isErr:  errpack.ErrInvalidArgument,
 			assert: func(t *testing.T, location domain.Location, err error) {
-				var invalidLocationError *port.InvalidLocationError
-				require.ErrorAs(t, err, &invalidLocationError)
-				require.Equal(t, port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "latitude",
-							Value:   181.00,
-						},
-					},
-				}, *invalidLocationError)
+				require.Empty(t, location)
 			},
 		},
 		{
@@ -139,19 +120,9 @@ func (s *PostgresTestSuite) Test_PostgresQueries_SetLocation() {
 				Point:  geo.Point{-181.0, 1.0},
 			},
 			hasErr: true,
-			isErr:  nil,
-			asErr:  &port.InvalidLocationError{},
+			isErr:  errpack.ErrInvalidArgument,
 			assert: func(t *testing.T, location domain.Location, err error) {
-				var invalidLocationError *port.InvalidLocationError
-				require.ErrorAs(t, err, &invalidLocationError)
-				require.Equal(t, port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "longitude",
-							Value:   -181.00,
-						},
-					},
-				}, *invalidLocationError)
+				require.Empty(t, location)
 			},
 		},
 		{
@@ -161,19 +132,9 @@ func (s *PostgresTestSuite) Test_PostgresQueries_SetLocation() {
 				Point:  geo.Point{181.0, 1.0},
 			},
 			hasErr: true,
-			isErr:  nil,
-			asErr:  &port.InvalidLocationError{},
+			isErr:  errpack.ErrInvalidArgument,
 			assert: func(t *testing.T, location domain.Location, err error) {
-				var invalidLocationError *port.InvalidLocationError
-				require.ErrorAs(t, err, &invalidLocationError)
-				require.Equal(t, port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "longitude",
-							Value:   181.00,
-						},
-					},
-				}, *invalidLocationError)
+				require.Empty(t, location)
 			},
 		},
 	}
@@ -196,135 +157,6 @@ func (s *PostgresTestSuite) Test_PostgresQueries_SetLocation() {
 				}
 			}
 			tc.assert(t, location, err)
-		})
-	}
-}
-
-func (s *PostgresTestSuite) Test_PostgresQueries_UpdateLocation() {
-	createUserArgs := []port.CreateUserArg{
-		{
-			Username: "user1",
-		},
-		{
-			Username: "user2",
-		},
-	}
-	users := s.seedUsers(createUserArgs)
-
-	setLocationArgs := []port.LocationRepositorySetLocationRequest{
-		{
-			UserID: users[0].ID,
-			Point:  geo.Point{1.0, 1.0},
-		},
-	}
-	locations := s.seedLocations(setLocationArgs)
-
-	testCases := []struct {
-		name      string
-		in        port.LocationRepositoryUpdateLocationByUserIDRequest
-		hasErr    bool
-		isErr     error
-		asErr     error
-		assertErr func(t *testing.T, err error)
-		expected  domain.Location
-	}{
-		{
-			name: "OK",
-			in: port.LocationRepositoryUpdateLocationByUserIDRequest{
-				UserID: users[0].ID,
-				Point:  geo.Point{2.0, 2.0},
-			},
-			hasErr: false,
-			expected: domain.Location{
-				UserID:    locations[0].UserID,
-				Point:     geo.Point{2.0, 2.0},
-				CreatedAt: locations[0].CreatedAt,
-				UpdatedAt: locations[0].UpdatedAt,
-			},
-		},
-		{
-			name: "NotFound",
-			in: port.LocationRepositoryUpdateLocationByUserIDRequest{
-				UserID: 2,
-				Point:  geo.Point{2.0, 2.0},
-			},
-			hasErr:   true,
-			isErr:    port.ErrNotFound,
-			expected: domain.Location{},
-		},
-		{
-			name: "InvalidLongitude",
-			in: port.LocationRepositoryUpdateLocationByUserIDRequest{
-				UserID: users[0].ID,
-				Point:  geo.Point{181.0, 2.0},
-			},
-			hasErr: true,
-			asErr:  &port.InvalidLocationError{},
-			assertErr: func(t *testing.T, err error) {
-				var invalidLocationError *port.InvalidLocationError
-				require.ErrorAs(t, err, &invalidLocationError)
-				require.Equal(t, port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "longitude",
-							Value:   181.00,
-						},
-					},
-				}, *invalidLocationError)
-			},
-			expected: domain.Location{},
-		},
-		{
-			name: "InvalidLatitude",
-			in: port.LocationRepositoryUpdateLocationByUserIDRequest{
-				UserID: users[0].ID,
-				Point:  geo.Point{2.0, 91.0},
-			},
-			hasErr: true,
-			asErr:  &port.InvalidLocationError{},
-			assertErr: func(t *testing.T, err error) {
-				var invalidLocationError *port.InvalidLocationError
-				require.ErrorAs(t, err, &invalidLocationError)
-				require.Equal(t, port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "latitude",
-							Value:   91.00,
-						},
-					},
-				}, *invalidLocationError)
-			},
-			expected: domain.Location{},
-		},
-	}
-
-	repo := repository.NewPostgresRepository(s.db)
-
-	for _, tc := range testCases {
-		tc := tc
-
-		s.T().Run(tc.name, func(t *testing.T) {
-			location, err := repo.UpdateLocationByUserID(context.Background(), tc.in)
-			require.Equal(t, tc.expected.UserID, location.UserID)
-			require.Equal(t, tc.expected.Point, location.Point)
-			require.WithinDuration(t, tc.expected.CreatedAt, location.CreatedAt, time.Second)
-			require.WithinDuration(t, tc.expected.UpdatedAt, location.UpdatedAt, time.Second)
-
-			if !tc.hasErr {
-				require.NoError(t, err)
-			} else {
-				require.Error(t, err)
-				if tc.isErr != nil {
-					require.ErrorIs(t, err, tc.isErr)
-				}
-				if tc.asErr != nil {
-					require.ErrorAs(t, err, &tc.asErr)
-				}
-				if tc.assertErr != nil {
-					tc.assertErr(t, err)
-				}
-			}
-
 		})
 	}
 }
@@ -363,14 +195,14 @@ func (s *PostgresTestSuite) Test_PostgresQueries_GetLocation() {
 			userID:   users[1].ID,
 			expected: domain.Location{},
 			hasError: true,
-			isError:  port.ErrNotFound,
+			isError:  errpack.ErrNotFound,
 		},
 		{
 			name:     "NoUser",
 			userID:   2,
 			expected: domain.Location{},
 			hasError: true,
-			isError:  port.ErrNotFound,
+			isError:  errpack.ErrNotFound,
 		},
 	}
 

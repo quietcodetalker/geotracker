@@ -8,6 +8,7 @@ import (
 	"github.com/lib/pq"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 )
 
@@ -24,8 +25,19 @@ RETURNING user_id, point, created_at, updated_at
 	LocationTable,
 )
 
-// SetLocation sets user's location by given user ID.
-// Returns updated location entity.
+// SetLocation adds a new record to locations table with `arg.UserID` as `user_id` and
+// `arg.Point` as `point`.
+// If a record with given id already exists it only updates point.
+//
+// Returns `Location` populated with data from the created or updated record and `error`.
+//
+// `ErrFailedPrecondition` is returned, in case there is no user with given id.
+//
+// `ErrInvalidArgument` is returned in case given point's longitude or latitude is invalid.,
+//
+// `ErrInvalidError` is returned in case of any other failure.
+//
+// Returned error is wrapped with `fmt.Errorf("%w", err)`, so use `errors.Is()` to compare returned error.
 func (q *postgresQueries) SetLocation(ctx context.Context, arg port.LocationRepositorySetLocationRequest) (domain.Location, error) {
 	var location domain.Location
 	var pgPoint geo.PostgresPoint
@@ -39,86 +51,14 @@ func (q *postgresQueries) SetLocation(ctx context.Context, arg port.LocationRepo
 		if errors.As(err, &pqErr) {
 			switch pqErr.Constraint {
 			case ConstraintLocationsUserIdFkey:
-				return domain.Location{}, port.ErrAttemptedSettingLocationOfNonExistentUser
+				return domain.Location{}, fmt.Errorf("%w", errpack.ErrFailedPrecondition)
 			case ConstraintLocationsLatitudeValid:
-				return domain.Location{}, &port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "latitude",
-							Value:   arg.Point.Latitude(),
-						},
-					},
-				}
+				return domain.Location{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 			case ConstraintLocationsLongitudeValid:
-				return domain.Location{}, &port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "longitude",
-							Value:   arg.Point.Longitude(),
-						},
-					},
-				}
+				return domain.Location{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 			}
 		}
-		return domain.Location{}, err
-	}
-
-	location.Point = geo.Point(pgPoint)
-
-	return location, nil
-}
-
-var updateLocationyUserIDQuery = fmt.Sprintf(
-	`
-UPDATE %s
-SET point = $2
-WHERE user_id = $1
-RETURNING user_id, point, created_at, updated_at
-`,
-	LocationTable,
-)
-
-// UpdateLocationByUserID TODO: add description
-func (q *postgresQueries) UpdateLocationByUserID(ctx context.Context, arg port.LocationRepositoryUpdateLocationByUserIDRequest) (domain.Location, error) {
-	var location domain.Location
-	var pgPoint geo.PostgresPoint
-
-	row := q.db.QueryRowContext(ctx, updateLocationyUserIDQuery, arg.UserID, geo.PostgresPoint(arg.Point))
-
-	if err := row.Scan(
-		&location.UserID,
-		&pgPoint,
-		&location.CreatedAt,
-		&location.UpdatedAt,
-	); err != nil {
-		if err == sql.ErrNoRows {
-			return domain.Location{}, port.ErrNotFound
-		}
-
-		var pqErr *pq.Error
-		if errors.As(err, &pqErr) {
-			switch pqErr.Constraint {
-			case ConstraintLocationsLatitudeValid:
-				return domain.Location{}, &port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "latitude",
-							Value:   arg.Point.Latitude(),
-						},
-					},
-				}
-			case ConstraintLocationsLongitudeValid:
-				return domain.Location{}, &port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "longitude",
-							Value:   arg.Point.Longitude(),
-						},
-					},
-				}
-			}
-		}
-		return domain.Location{}, err
+		return domain.Location{}, fmt.Errorf("%w", errpack.ErrInternalError)
 	}
 
 	location.Point = geo.Point(pgPoint)
@@ -135,7 +75,15 @@ WHERE user_id = $1
 	LocationTable,
 )
 
-// GetLocation finds location by user id.
+// GetLocation finds a location by given user id in the locations table.
+//
+// It returns a found location and any error encountered.
+//
+// `ErrNotFound` is returned in case required location is not found.
+//
+// `ErrInternalError` is returned in case of any other error.
+//
+// Returned error is wrapped with `fmt.Errorf("%w", err)`, so use `errors.Is()` to compare returned error.
 func (q *postgresQueries) GetLocation(ctx context.Context, userID int) (domain.Location, error) {
 	var location domain.Location
 	var point geo.PostgresPoint
@@ -146,10 +94,10 @@ func (q *postgresQueries) GetLocation(ctx context.Context, userID int) (domain.L
 		&location.CreatedAt,
 		&location.UpdatedAt,
 	); err != nil {
-		if err == sql.ErrNoRows {
-			return domain.Location{}, port.ErrNotFound
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.Location{}, fmt.Errorf("%w", errpack.ErrNotFound)
 		}
-		return domain.Location{}, err
+		return domain.Location{}, fmt.Errorf("%w", errpack.ErrInternalError)
 	}
 
 	location.Point = geo.Point(point)

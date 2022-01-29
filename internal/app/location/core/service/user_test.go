@@ -10,6 +10,7 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port/mock"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/service"
+	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	"testing"
@@ -226,8 +227,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 			},
 			assert: func(t *testing.T, res domain.Location, err error) {
 				require.Empty(t, res)
-				var invalidArgumentErr *port.InvalidArgumentError
-				require.ErrorAs(t, err, &invalidArgumentErr)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -247,8 +247,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 			},
 			assert: func(t *testing.T, res domain.Location, err error) {
 				require.Empty(t, res)
-				var invalidArgumentErr *port.InvalidArgumentError
-				require.ErrorAs(t, err, &invalidArgumentErr)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -268,8 +267,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 			},
 			assert: func(t *testing.T, res domain.Location, err error) {
 				require.Empty(t, res)
-				var invalidArgumentErr *port.InvalidArgumentError
-				require.ErrorAs(t, err, &invalidArgumentErr)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -289,8 +287,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 			},
 			assert: func(t *testing.T, res domain.Location, err error) {
 				require.Empty(t, res)
-				var invalidArgumentErr *port.InvalidArgumentError
-				require.ErrorAs(t, err, &invalidArgumentErr)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -310,8 +307,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 			},
 			assert: func(t *testing.T, res domain.Location, err error) {
 				require.Empty(t, res)
-				var invalidArgumentErr *port.InvalidArgumentError
-				require.ErrorAs(t, err, &invalidArgumentErr)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -331,8 +327,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 			},
 			assert: func(t *testing.T, res domain.Location, err error) {
 				require.Empty(t, res)
-				var invalidArgumentErr *port.InvalidArgumentError
-				require.ErrorAs(t, err, &invalidArgumentErr)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -352,8 +347,7 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 			},
 			assert: func(t *testing.T, res domain.Location, err error) {
 				require.Empty(t, res)
-				var invalidArgumentErr *port.InvalidArgumentError
-				require.ErrorAs(t, err, &invalidArgumentErr)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 	}
@@ -512,9 +506,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 			},
 			assert: func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error) {
 				require.Empty(t, res)
-
-				var invalidArgumentError *port.InvalidArgumentError
-				require.ErrorAs(t, err, &invalidArgumentError)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -530,9 +522,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 			},
 			assert: func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error) {
 				require.Empty(t, res)
-
-				var invalidArgumentError *port.InvalidArgumentError
-				require.ErrorAs(t, err, &invalidArgumentError)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -548,9 +538,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 			},
 			assert: func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error) {
 				require.Empty(t, res)
-
-				var invalidArgumentError *port.InvalidArgumentError
-				require.ErrorAs(t, err, &invalidArgumentError)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -566,9 +554,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 			},
 			assert: func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error) {
 				require.Empty(t, res)
-
-				var invalidArgumentError *port.InvalidArgumentError
-				require.ErrorAs(t, err, &invalidArgumentError)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -584,9 +570,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 			},
 			assert: func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error) {
 				require.Empty(t, res)
-
-				var invalidArgumentError *port.InvalidArgumentError
-				require.ErrorAs(t, err, &invalidArgumentError)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -602,9 +586,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 			},
 			assert: func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error) {
 				require.Empty(t, res)
-
-				var invalidArgumentError *port.InvalidArgumentError
-				require.ErrorAs(t, err, &invalidArgumentError)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -620,9 +602,7 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 			},
 			assert: func(t *testing.T, res port.UserServiceListUsersInRadiusResponse, err error) {
 				require.Empty(t, res)
-
-				var invalidArgumentError *port.InvalidArgumentError
-				require.ErrorAs(t, err, &invalidArgumentError)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -766,7 +746,7 @@ func (s *UserSvcTestSuite) Test_UserService_GetByUsername() {
 			username: "",
 			expected: domain.User{},
 			hasError: true,
-			asError:  &port.InvalidArgumentError{},
+			isError:  errpack.ErrInvalidArgument,
 		},
 		{
 			name: "UserNotFound",
@@ -774,12 +754,12 @@ func (s *UserSvcTestSuite) Test_UserService_GetByUsername() {
 				repository.EXPECT().
 					GetByUsername(gomock.Any(), gomock.Eq(users[0].Username)).
 					Times(1).
-					Return(domain.User{}, port.ErrNotFound)
+					Return(domain.User{}, errpack.ErrNotFound)
 			},
 			username: users[0].Username,
 			expected: domain.User{},
 			hasError: true,
-			isError:  port.ErrNotFound,
+			isError:  errpack.ErrNotFound,
 		},
 		{
 			name: "InternalError",
