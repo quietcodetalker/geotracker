@@ -38,5 +38,4 @@ type LocationRepositoryUpdateLocationByUserIDRequest struct {
 type LocationRepository interface {
 	GetLocation(ctx context.Context, userID int) (domain.Location, error)
 	SetLocation(ctx context.Context, arg LocationRepositorySetLocationRequest) (domain.Location, error)
-	UpdateLocationByUserID(ctx context.Context, arg LocationRepositoryUpdateLocationByUserIDRequest) (domain.Location, error)
 }
