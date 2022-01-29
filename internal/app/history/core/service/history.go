@@ -25,7 +25,11 @@ func NewHistoryService(repo port.HistoryRepository, locationClient port.Location
 
 // AddRecord adds a history record.
 //
-// It returns
+// It returns an added record and any error occurred.
+//
+// `ErrInvalidArgument` is returned in case of `req` validation failure.
+//
+// If a call to `AddRecord` repository method fails, any returned error is propagated.
 func (s *historyService) AddRecord(ctx context.Context, req port.HistoryServiceAddRecordRequest) (domain.Record, error) {
 	if err := validate.Struct(req); err != nil {
 		// TODO: handle different errors
