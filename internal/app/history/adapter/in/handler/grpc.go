@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"gitlab.com/spacewalker/locations/internal/app/history/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/history"
 	"google.golang.org/grpc/codes"
@@ -80,14 +81,9 @@ func (h *GRPCHandler) GetDistance(ctx context.Context, req *pb.GetDistanceReques
 }
 
 func grpcErr(err error) error {
-	var invalidArgumentError *port.InvalidArgumentError
-	var invalidLocationError *port.InvalidLocationError
-
 	if err != nil {
 		switch {
-		case errors.As(err, &invalidArgumentError):
-			fallthrough
-		case errors.As(err, &invalidLocationError):
+		case errors.Is(err, errpack.ErrInvalidArgument):
 			return status.Error(codes.InvalidArgument, err.Error())
 		default:
 			return status.Error(codes.Internal, "internal error")

@@ -8,6 +8,7 @@ import (
 	"github.com/lib/pq"
 	"gitlab.com/spacewalker/locations/internal/app/history/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/history/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 )
 
@@ -25,7 +26,7 @@ type postgresRepository struct {
 	db *sql.DB
 }
 
-// NewPostgresRepository creates postgres repository instance and return its pointer.
+// NewPostgresRepository returns pointer to new PostgresRepository instance.
 func NewPostgresRepository(db *sql.DB) port.HistoryRepository {
 	return &postgresRepository{db: db}
 }
@@ -40,7 +41,14 @@ RETURNING id, user_id, a, b, created_at, updated_at
 	RecordsTable,
 )
 
-// AddRecord adds a record with to records table and returns it.
+// AddRecord adds a history record into records table.
+//
+// It returns added record and any error encountered.
+//
+// `ErrInvalidArgument` is returned in case any of provided geo points contains
+// invalid latitude or longitude.
+//
+// `ErrInternalError` is returned in case of any other error.
 func (r postgresRepository) AddRecord(ctx context.Context, req port.HistoryRepositoryAddRecordRequest) (domain.Record, error) {
 	var record domain.Record
 	var a, b geo.PostgresPoint
@@ -57,44 +65,16 @@ func (r postgresRepository) AddRecord(ctx context.Context, req port.HistoryRepos
 		if errors.As(err, &pqErr) {
 			switch pqErr.Constraint {
 			case constraintRecordsALongitudeValid:
-				return domain.Record{}, &port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "a.longitude",
-							Value:   req.A.Longitude(),
-						},
-					},
-				}
+				fallthrough
 			case constraintRecordsALatitudeValid:
-				return domain.Record{}, &port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "a.latitude",
-							Value:   req.A.Latitude(),
-						},
-					},
-				}
+				fallthrough
 			case constraintRecordsBLongitudeValid:
-				return domain.Record{}, &port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "b.longitude",
-							Value:   req.B.Longitude(),
-						},
-					},
-				}
+				fallthrough
 			case constraintRecordsBLatitudeValid:
-				return domain.Record{}, &port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "b.latitude",
-							Value:   req.B.Latitude(),
-						},
-					},
-				}
+				return domain.Record{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 			}
 		}
-		return domain.Record{}, err
+		return domain.Record{}, fmt.Errorf("%w", errpack.ErrInternalError)
 	}
 
 	record.A = geo.Point(a)
@@ -112,14 +92,21 @@ WHERE user_id = $1 AND created_at >= $2 AND created_at <= $3
 	RecordsTable,
 )
 
-// GetDistance finds distance that users got through in a period of time.
+// GetDistance returns distance a user with the provided ID passed in
+// a provided period of time.
+//
+// It returns distance and any error occurred.
+//
+// If there is no user with provided ID, 0 is returned as distance.
+//
+// `ErrInternalError` is returned in case of any error.
 func (r postgresRepository) GetDistance(ctx context.Context, req port.HistoryRepositoryGetDistanceRequest) (float64, error) {
 	var distance float64
 	if err := r.db.QueryRowContext(ctx, getDistanceQuery, req.UserID, req.From, req.To).Scan(&distance); err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return 0, nil
 		}
-		return 0, err
+		return 0, fmt.Errorf("%w", errpack.ErrInternalError)
 	}
 
 	return distance, nil

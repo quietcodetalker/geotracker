@@ -6,6 +6,7 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/history/adapter/out/repository"
 	"gitlab.com/spacewalker/locations/internal/app/history/core/domain"
 	"gitlab.com/spacewalker/locations/internal/app/history/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"testing"
 	"time"
@@ -61,17 +62,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_AddRecord() {
 			},
 			assert: func(t *testing.T, rec domain.Record, err error) {
 				require.Empty(t, rec)
-
-				var invalidLocationError *port.InvalidLocationError
-				require.ErrorAs(t, err, &invalidLocationError)
-				require.Equal(t, port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "a.longitude",
-							Value:   -180.1,
-						},
-					},
-				}, *invalidLocationError)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -83,17 +74,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_AddRecord() {
 			},
 			assert: func(t *testing.T, rec domain.Record, err error) {
 				require.Empty(t, rec)
-
-				var invalidLocationError *port.InvalidLocationError
-				require.ErrorAs(t, err, &invalidLocationError)
-				require.Equal(t, port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "a.longitude",
-							Value:   180.1,
-						},
-					},
-				}, *invalidLocationError)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -105,17 +86,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_AddRecord() {
 			},
 			assert: func(t *testing.T, rec domain.Record, err error) {
 				require.Empty(t, rec)
-
-				var invalidLocationError *port.InvalidLocationError
-				require.ErrorAs(t, err, &invalidLocationError)
-				require.Equal(t, port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "a.latitude",
-							Value:   -90.1,
-						},
-					},
-				}, *invalidLocationError)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -127,17 +98,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_AddRecord() {
 			},
 			assert: func(t *testing.T, rec domain.Record, err error) {
 				require.Empty(t, rec)
-
-				var invalidLocationError *port.InvalidLocationError
-				require.ErrorAs(t, err, &invalidLocationError)
-				require.Equal(t, port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "a.latitude",
-							Value:   90.1,
-						},
-					},
-				}, *invalidLocationError)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -149,17 +110,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_AddRecord() {
 			},
 			assert: func(t *testing.T, rec domain.Record, err error) {
 				require.Empty(t, rec)
-
-				var invalidLocationError *port.InvalidLocationError
-				require.ErrorAs(t, err, &invalidLocationError)
-				require.Equal(t, port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "b.longitude",
-							Value:   -180.1,
-						},
-					},
-				}, *invalidLocationError)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -171,17 +122,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_AddRecord() {
 			},
 			assert: func(t *testing.T, rec domain.Record, err error) {
 				require.Empty(t, rec)
-
-				var invalidLocationError *port.InvalidLocationError
-				require.ErrorAs(t, err, &invalidLocationError)
-				require.Equal(t, port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "b.longitude",
-							Value:   180.1,
-						},
-					},
-				}, *invalidLocationError)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -193,17 +134,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_AddRecord() {
 			},
 			assert: func(t *testing.T, rec domain.Record, err error) {
 				require.Empty(t, rec)
-
-				var invalidLocationError *port.InvalidLocationError
-				require.ErrorAs(t, err, &invalidLocationError)
-				require.Equal(t, port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "b.latitude",
-							Value:   -90.1,
-						},
-					},
-				}, *invalidLocationError)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 		{
@@ -215,17 +146,7 @@ func (s *PostgresTestSuite) Test_PostgresRepository_AddRecord() {
 			},
 			assert: func(t *testing.T, rec domain.Record, err error) {
 				require.Empty(t, rec)
-
-				var invalidLocationError *port.InvalidLocationError
-				require.ErrorAs(t, err, &invalidLocationError)
-				require.Equal(t, port.InvalidLocationError{
-					Violations: []port.InvalidLocationErrorViolation{
-						{
-							Subject: "a.latitude",
-							Value:   90.1,
-						},
-					},
-				}, *invalidLocationError)
+				require.ErrorIs(t, err, errpack.ErrInvalidArgument)
 			},
 		},
 	}

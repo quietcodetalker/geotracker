@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/schema"
 	"gitlab.com/spacewalker/locations/internal/app/history/core/port"
+	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	"net/http"
 	"time"
@@ -55,14 +56,14 @@ func (h *HTTPHandler) getDistance(w http.ResponseWriter, r *http.Request) {
 
 	err := r.ParseForm()
 	if err != nil {
-		util.Respond(w, http.StatusOK, port.ErrToHTTP(&port.InvalidArgumentError{}))
+		util.Respond(w, http.StatusOK, errpack.ErrToHTTP(errpack.ErrInvalidArgument))
 		return
 	}
 
 	var dto getDistanceDTO
 	err = schemaDecoder.Decode(&dto, r.URL.Query())
 	if err != nil {
-		util.Respond(w, http.StatusOK, port.ErrToHTTP(&port.InvalidArgumentError{}))
+		util.Respond(w, http.StatusOK, errpack.ErrToHTTP(errpack.ErrInvalidArgument))
 		return
 	}
 
@@ -71,7 +72,7 @@ func (h *HTTPHandler) getDistance(w http.ResponseWriter, r *http.Request) {
 	if dto.From != "" {
 		from, err := time.Parse(time.RFC3339, dto.From)
 		if err != nil {
-			util.Respond(w, http.StatusOK, port.ErrToHTTP(&port.InvalidArgumentError{}))
+			util.Respond(w, http.StatusOK, errpack.ErrToHTTP(errpack.ErrInvalidArgument))
 			return
 		}
 		fromPtr = &from
@@ -80,7 +81,7 @@ func (h *HTTPHandler) getDistance(w http.ResponseWriter, r *http.Request) {
 	if dto.From != "" {
 		to, err := time.Parse(time.RFC3339, dto.To)
 		if err != nil {
-			util.Respond(w, http.StatusOK, port.ErrToHTTP(&port.InvalidArgumentError{}))
+			util.Respond(w, http.StatusOK, errpack.ErrToHTTP(errpack.ErrInvalidArgument))
 			return
 		}
 		toPtr = &to
@@ -93,7 +94,7 @@ func (h *HTTPHandler) getDistance(w http.ResponseWriter, r *http.Request) {
 		To:       toPtr,
 	})
 	if err != nil {
-		util.Respond(w, http.StatusOK, port.ErrToHTTP(err))
+		util.Respond(w, http.StatusOK, errpack.ErrToHTTP(err))
 		return
 	}
 

@@ -16,15 +16,6 @@ type HistoryServiceAddRecordRequest struct {
 	B      geo.Point `json:"b" validate:"validgeopoint"`
 }
 
-// HistoryServiceAddRecordResponse represents response object of HistoryService AddRecord method.
-type HistoryServiceAddRecordResponse struct {
-	UserID    int       `json:"user_id"`
-	A         geo.Point `json:"a"`
-	B         geo.Point `json:"b"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
 // HistoryServiceGetDistanceRequest represents request object of HistoryService GetDistance method.
 type HistoryServiceGetDistanceRequest struct {
 	UserID int       `json:"user_id" validate:"required,gt=0"`
@@ -51,7 +42,7 @@ type HistoryServiceGetDistanceByUsernameResponse struct {
 
 // HistoryService represents history service.
 type HistoryService interface {
-	AddRecord(ctx context.Context, req HistoryServiceAddRecordRequest) (HistoryServiceAddRecordResponse, error)
+	AddRecord(ctx context.Context, req HistoryServiceAddRecordRequest) (domain.Record, error)
 	GetDistanceByUsername(ctx context.Context, req HistoryServiceGetDistanceByUsernameRequest) (HistoryServiceGetDistanceByUsernameResponse, error)
 	GetDistance(ctx context.Context, req HistoryServiceGetDistanceRequest) (HistoryServiceGetDistanceResponse, error)
 }
