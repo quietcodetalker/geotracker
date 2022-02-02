@@ -10,6 +10,7 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/location/core/service"
 	"gitlab.com/spacewalker/locations/internal/pkg/config"
 	"gitlab.com/spacewalker/locations/internal/pkg/log"
+	"gitlab.com/spacewalker/locations/internal/pkg/middleware"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/location"
 	"google.golang.org/grpc"
@@ -56,9 +57,13 @@ func (a *App) Start() error {
 	grpcHandler := handler.NewGRPCInternalHandler(svc)
 
 	a.httpServer = util.NewHTTPServer(a.config.BindAddrHTTP, httpHandler)
-	a.grpcServer = util.NewGRPCServer(a.config.BindAddrGRPC, func(server *grpc.Server) {
-		pb.RegisterLocationInternalServer(server, grpcHandler)
-	})
+	a.grpcServer = util.NewGRPCServer(
+		a.config.BindAddrGRPC,
+		func(server *grpc.Server) {
+			pb.RegisterLocationInternalServer(server, grpcHandler)
+		},
+		grpc.UnaryInterceptor(middleware.LoggerUnaryServerInterceptor(a.logger)),
+	)
 
 	var httpErr, grpcErr error
 
