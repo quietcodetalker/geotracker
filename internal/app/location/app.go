@@ -76,7 +76,7 @@ func (a *App) Start() error {
 	go func() {
 		a.logger.Info(fmt.Sprintf("Starting HTTP server on %v", a.config.BindAddrHTTP), nil)
 		if httpErr = a.httpServer.Start(); httpErr != nil {
-			a.logger.Info(fmt.Sprintf("failed to start http server: %v", httpErr), nil)
+			a.logger.Error(fmt.Sprintf("failed to start http server: %v", httpErr), nil)
 		}
 		wg.Done()
 	}()
