@@ -2,49 +2,66 @@ package util
 
 import (
 	"context"
-	"fmt"
 	"github.com/google/uuid"
-	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
+	"google.golang.org/grpc/metadata"
+	"strconv"
+	"time"
 )
 
 // TraceIDCtxKey is a type key for trace id.
 type TraceIDCtxKey = struct{}
 
-// GenerateTraceID returns uuid as a string.
+// TraceIDMetadataKey TODO: description
+const TraceIDMetadataKey = "trace-id"
+
+// GenerateTraceID returns a new trace id as a string.
 //
-// Returns a generated id and any error encountered.
-//
-// Returned error wraps `ErrInternalError` in case of any error occurred.
-func GenerateTraceID() (string, error) {
-	id, err := uuid.NewUUID()
+// It returns uuid as the id. In case uuid generation is failed,
+// it returns unix timestamp.
+func GenerateTraceID() string {
+	uuid, err := uuid.NewUUID()
 	if err != nil {
-		return "", fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
+		return strconv.FormatInt(time.Now().Unix(), 10)
 	}
 
-	return id.String(), nil
+	return uuid.String()
 }
 
-// AddTraceID adds trace id to ctx and returns it.
-func AddTraceID(ctx context.Context, id string) context.Context {
+// AddTraceIDToCtx adds trace id to ctx and returns it.
+func AddTraceIDToCtx(ctx context.Context, id string) context.Context {
 	return context.WithValue(ctx, TraceIDCtxKey{}, id)
 }
 
-// GetTraceID retrieves trace id from ctx.
-// If ctx does cot contain trace id, it generates new traced id and adds the id to ctx.
+// GetTraceIDFromCtx retrieves trace id from ctx.
 //
-// It returns provided or updated context, retrieved or generated trace id and error.
-//
-// In case of any error while generating new trace id with GenerateTraceID,
-// provided context without changes, empty string and the error are returned.
-func GetTraceID(ctx context.Context) (context.Context, string, error) {
+// It returns id and ok which is true if token exists and false otherwise.
+func GetTraceIDFromCtx(ctx context.Context) (string, bool) {
 	id, ok := ctx.Value(TraceIDCtxKey{}).(string)
+	return id, ok
+}
+
+// AddTraceIDToMetadata TODO: description
+func AddTraceIDToMetadata(ctx context.Context, id string) context.Context {
+	md := metadata.Pairs(TraceIDMetadataKey, id)
+	mdCtx := metadata.NewOutgoingContext(ctx, md)
+
+	return mdCtx
+}
+
+// GetTraceIDFromMetadata TODO: description
+func GetTraceIDFromMetadata(ctx context.Context) (string, bool) {
+	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		id, err := GenerateTraceID()
-		if err != nil {
-			return ctx, "", err
-		}
-		return AddTraceID(ctx, id), id, nil
+		return "", false
 	}
 
-	return ctx, id, nil
+	value, ok := md[TraceIDMetadataKey]
+	if !ok {
+		return "", false
+	}
+	if len(value) == 0 {
+		return "", false
+	}
+
+	return value[0], true
 }
