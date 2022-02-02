@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"gitlab.com/spacewalker/locations/internal/pkg/log"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	"google.golang.org/grpc"
@@ -25,15 +24,16 @@ func LoggerUnaryServerInterceptor(logger log.Logger) func(
 	) (interface{}, error) {
 		start := time.Now()
 		fullMethod := info.FullMethod
-		request := fmt.Sprintf("%v", req)
 
-		traceID, ok := util.GetTraceIDFromMetadata(ctx)
+		traceID, ok := util.GetTraceIDFromCtx(ctx)
 		if !ok {
-			traceID = util.GenerateTraceID()
+			logger.Warn("trace id is not set", log.Fields{
+				"method":  fullMethod,
+				"request": req,
+			})
 		}
-		mdCtx := util.AddTraceIDToCtx(ctx, traceID)
 
-		m, err := handler(mdCtx, req)
+		m, err := handler(ctx, req)
 
 		st, _ := status.FromError(err)
 
@@ -41,7 +41,7 @@ func LoggerUnaryServerInterceptor(logger log.Logger) func(
 			"method":   fullMethod,
 			"duration": time.Since(start),
 			"code":     st.Code(),
-			"request":  request,
+			"request":  req,
 			"trace-id": traceID,
 		})
 
@@ -97,12 +97,10 @@ func LoggerUnaryClientInterceptor(logger log.Logger) func(
 
 		traceID, ok := util.GetTraceIDFromCtx(ctx)
 		if !ok {
-			logger.Warn("traceID is nil", log.Fields{
+			logger.Warn("trace id is not set", log.Fields{
 				"method":  method,
 				"request": req,
 			})
-		} else {
-			mdCtx = util.AddTraceIDToMetadata(ctx, traceID)
 		}
 
 		err := invoker(mdCtx, method, req, reply, cc, opts...)
