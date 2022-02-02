@@ -4,26 +4,40 @@ import (
 	"context"
 	"fmt"
 	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
+	"gitlab.com/spacewalker/locations/internal/pkg/log"
+	"gitlab.com/spacewalker/locations/internal/pkg/middleware"
 	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/location"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	log2 "log"
 )
 
 type GRPCClient struct {
-	addr string
+	addr   string
+	logger log.Logger
 }
 
 // NewGRPCClient TODO: add description
-func NewGRPCClient(addr string) *GRPCClient {
-	return &GRPCClient{addr: addr}
+func NewGRPCClient(addr string, logger log.Logger) *GRPCClient {
+	if logger == nil {
+		log2.Panic("logger must not be nil")
+	}
+
+	return &GRPCClient{
+		addr:   addr,
+		logger: logger,
+	}
 }
 
 // GetUserIDByUsername TODO: add description
 func (c *GRPCClient) GetUserIDByUsername(ctx context.Context, username string) (int, error) {
-	var opts []grpc.DialOption
+	opts := []grpc.DialOption{
+		grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(middleware.LoggerUnaryClientInterceptor(c.logger)),
+	}
 
-	opts = append(opts, grpc.WithInsecure())
+	grpc.WithInsecure()
 
 	conn, err := grpc.Dial(c.addr, opts...)
 	if err != nil {

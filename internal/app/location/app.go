@@ -51,7 +51,7 @@ func (a *App) Start() error {
 	}
 
 	repo := repository.NewPostgresRepository(db)
-	historyClient := historyclient.NewGRPCClient(a.config.HistoryAddr)
+	historyClient := historyclient.NewGRPCClient(a.config.HistoryAddr, a.logger)
 	svc := service.NewUserService(repo, historyClient, a.logger)
 	httpHandler := handler.NewHTTPHandler(svc, a.logger)
 	grpcHandler := handler.NewGRPCInternalHandler(svc)

@@ -6,29 +6,39 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
 	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
+	"gitlab.com/spacewalker/locations/internal/pkg/log"
+	"gitlab.com/spacewalker/locations/internal/pkg/middleware"
 	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/history"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	log2 "log"
 )
 
 type GRPCClient struct {
-	addr string
+	addr   string
+	logger log.Logger
 }
 
 // NewGRPCClient TODO: add description
-func NewGRPCClient(addr string) port.HistoryClient {
+func NewGRPCClient(addr string, logger log.Logger) port.HistoryClient {
+	if logger == nil {
+		log2.Panic("logger must not be nil")
+	}
+
 	return &GRPCClient{
-		addr: addr,
+		addr:   addr,
+		logger: logger,
 	}
 }
 
 // AddRecord TODO: add description
 func (c GRPCClient) AddRecord(ctx context.Context, req port.HistoryClientAddRecordRequest) (port.HistoryClientAddRecordResponse, error) {
-	var opts []grpc.DialOption
-
-	opts = append(opts, grpc.WithInsecure())
+	opts := []grpc.DialOption{
+		grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(middleware.LoggerUnaryClientInterceptor(c.logger)),
+	}
 
 	conn, err := grpc.Dial(c.addr, opts...)
 	if err != nil {
