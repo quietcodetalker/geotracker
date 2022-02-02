@@ -62,6 +62,7 @@ func LoggerMiddleware(logger log.Logger) func(handler http.Handler) http.Handler
 	}
 }
 
+// RecovererMiddleware TODO: description
 func RecovererMiddleware(logger log.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
