@@ -45,7 +45,7 @@ func (a *App) Start() error {
 		return fmt.Errorf("failed to open db: %v", err)
 	}
 
-	a.logger, err = log.NewZapLogger(true)
+	a.logger, err = log.NewZapLogger(a.config.AppEnv == "development")
 	if err != nil {
 		log2.Panic(err)
 	}

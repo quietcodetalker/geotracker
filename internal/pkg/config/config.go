@@ -6,6 +6,7 @@ import (
 
 // LocationConfig stores all configuration of user application
 type LocationConfig struct {
+	AppEnv       string `mapstructure:"APP_ENV"`
 	DBDriver     string `mapstructure:"DB_DRIVER"`
 	DBHost       string `mapstructure:"DB_HOST"`
 	DBPort       string `mapstructure:"DB_PORT"`
@@ -20,6 +21,7 @@ type LocationConfig struct {
 
 // HistoryConfig stores all configuration of user application
 type HistoryConfig struct {
+	AppEnv       string `mapstructure:"APP_ENV"`
 	DBDriver     string `mapstructure:"DB_DRIVER"`
 	DBHost       string `mapstructure:"DB_HOST"`
 	DBPort       string `mapstructure:"DB_PORT"`
@@ -47,6 +49,8 @@ func LoadConfig(name string, path string, config interface{}) error {
 	viper.SetConfigType("env")
 
 	viper.AutomaticEnv()
+
+	viper.SetDefault("AppEnv", "production")
 
 	err = viper.ReadInConfig()
 	if err != nil {
