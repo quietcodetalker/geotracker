@@ -48,3 +48,52 @@ func LoggerUnaryServerInterceptor(logger log.Logger) func(
 		return m, err
 	}
 }
+
+// LoggerUnaryClientInterceptor TODO: description
+func LoggerUnaryClientInterceptor(logger log.Logger) func(
+	ctx context.Context,
+	method string,
+	req interface{},
+	reply interface{},
+	cc *grpc.ClientConn,
+	invoker grpc.UnaryInvoker,
+	opts ...grpc.CallOption,
+) error {
+	return func(
+		ctx context.Context,
+		method string,
+		req interface{},
+		reply interface{},
+		cc *grpc.ClientConn,
+		invoker grpc.UnaryInvoker,
+		opts ...grpc.CallOption,
+	) error {
+		mdCtx := ctx
+
+		start := time.Now()
+
+		traceID, ok := util.GetTraceIDFromCtx(ctx)
+		if !ok {
+			logger.Warn("traceID is nil", log.Fields{
+				"method":  method,
+				"request": req,
+			})
+		} else {
+			mdCtx = util.AddTraceIDToMetadata(ctx, traceID)
+		}
+
+		err := invoker(mdCtx, method, req, reply, cc, opts...)
+
+		st, _ := status.FromError(err)
+
+		logger.Info("outgoing grpc request complete", log.Fields{
+			"method":   method,
+			"duration": time.Since(start),
+			"code":     st.Code(),
+			"request":  req,
+			"trace-id": traceID,
+		})
+
+		return err
+	}
+}
