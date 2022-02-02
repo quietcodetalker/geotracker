@@ -36,16 +36,10 @@ func ErrToHTTP(err error) (int, map[string]interface{}) {
 			},
 		}
 	case errors.Is(err, ErrInternalError):
-		msg := "internal error"
-		wrappedErr := errors.Unwrap(err)
-		if wrappedErr != nil {
-			msg = wrappedErr.Error()
-		}
-
 		return 500, map[string]interface{}{
 			"error": map[string]interface{}{
 				"code":    500,
-				"message": msg,
+				"message": "internal error",
 				"status":  "INTERNAL",
 			},
 		}
