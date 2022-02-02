@@ -34,7 +34,10 @@ func NewGRPCClient(addr string, logger log.Logger) *GRPCClient {
 func (c *GRPCClient) GetUserIDByUsername(ctx context.Context, username string) (int, error) {
 	opts := []grpc.DialOption{
 		grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(middleware.LoggerUnaryClientInterceptor(c.logger)),
+		grpc.WithChainUnaryInterceptor(
+			middleware.TracingUnaryClientInterceptor(c.logger),
+			middleware.LoggerUnaryClientInterceptor(c.logger),
+		),
 	}
 
 	grpc.WithInsecure()

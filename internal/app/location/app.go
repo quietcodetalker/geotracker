@@ -62,7 +62,10 @@ func (a *App) Start() error {
 		func(server *grpc.Server) {
 			pb.RegisterLocationInternalServer(server, grpcHandler)
 		},
-		grpc.UnaryInterceptor(middleware.LoggerUnaryServerInterceptor(a.logger)),
+		grpc.ChainUnaryInterceptor(
+			middleware.TracingUnaryServerInterceptor(a.logger),
+			middleware.LoggerUnaryServerInterceptor(a.logger),
+		),
 	)
 
 	var httpErr, grpcErr error

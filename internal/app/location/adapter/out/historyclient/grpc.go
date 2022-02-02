@@ -37,7 +37,10 @@ func NewGRPCClient(addr string, logger log.Logger) port.HistoryClient {
 func (c GRPCClient) AddRecord(ctx context.Context, req port.HistoryClientAddRecordRequest) (port.HistoryClientAddRecordResponse, error) {
 	opts := []grpc.DialOption{
 		grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(middleware.LoggerUnaryClientInterceptor(c.logger)),
+		grpc.WithChainUnaryInterceptor(
+			middleware.TracingUnaryClientInterceptor(c.logger),
+			middleware.LoggerUnaryClientInterceptor(c.logger),
+		),
 	}
 
 	conn, err := grpc.Dial(c.addr, opts...)
