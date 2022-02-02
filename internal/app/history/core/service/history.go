@@ -8,6 +8,7 @@ import (
 	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"gitlab.com/spacewalker/locations/internal/pkg/log"
+	log2 "log"
 	"time"
 )
 
@@ -23,6 +24,16 @@ func NewHistoryService(
 	locationClient port.LocationClient,
 	logger log.Logger,
 ) port.HistoryService {
+	if logger == nil {
+		log2.Panic("logger must not be nil")
+	}
+	if repo == nil {
+		logger.Panic("repo must not be nil", nil)
+	}
+	if locationClient == nil {
+		logger.Panic("locationClient must not be nil", nil)
+	}
+
 	return &historyService{
 		repo:           repo,
 		locationClient: locationClient,

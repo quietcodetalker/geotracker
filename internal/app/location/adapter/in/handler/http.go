@@ -27,11 +27,11 @@ type HTTPHandler struct {
 
 // NewHTTPHandler creates HTTPHandler and returns its pointer.
 func NewHTTPHandler(service port.UserService, logger log.Logger) *HTTPHandler {
-	if service == nil {
-		log2.Panic("service must not be nil")
-	}
 	if logger == nil {
 		log2.Panic("logger must not be nil")
+	}
+	if service == nil {
+		logger.Panic("service must not be nil", nil)
 	}
 
 	router := chi.NewRouter()
