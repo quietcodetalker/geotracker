@@ -7,19 +7,26 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/history/core/port"
 	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
+	"gitlab.com/spacewalker/locations/internal/pkg/log"
 	"time"
 )
 
 type historyService struct {
 	repo           port.HistoryRepository
 	locationClient port.LocationClient
+	logger         log.Logger
 }
 
 // NewHistoryService creates new instance of history service and returns its pointer.
-func NewHistoryService(repo port.HistoryRepository, locationClient port.LocationClient) port.HistoryService {
+func NewHistoryService(
+	repo port.HistoryRepository,
+	locationClient port.LocationClient,
+	logger log.Logger,
+) port.HistoryService {
 	return &historyService{
 		repo:           repo,
 		locationClient: locationClient,
+		logger:         logger,
 	}
 }
 

@@ -5,7 +5,10 @@ import (
 	"github.com/gorilla/schema"
 	"gitlab.com/spacewalker/locations/internal/app/history/core/port"
 	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
+	"gitlab.com/spacewalker/locations/internal/pkg/log"
+	"gitlab.com/spacewalker/locations/internal/pkg/middlewares"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
+	log2 "log"
 	"net/http"
 	"time"
 )
@@ -17,20 +20,28 @@ var (
 // HTTPHandler is a handler that serves http requests.
 type HTTPHandler struct {
 	service port.HistoryService
-
-	router *chi.Mux
+	router  *chi.Mux
+	logger  log.Logger
 }
 
 func (h *HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.router.ServeHTTP(w, r)
 }
 
-func NewHTTPHandler(service port.HistoryService) *HTTPHandler {
+func NewHTTPHandler(service port.HistoryService, logger log.Logger) *HTTPHandler {
+	if service == nil {
+		log2.Panic("service must not be nil")
+	}
+	if logger == nil {
+		log2.Panic("logger must not be nil")
+	}
+
 	router := chi.NewRouter()
 
 	handler := &HTTPHandler{
 		service: service,
 		router:  router,
+		logger:  logger,
 	}
 
 	handler.setupRoutes()
@@ -39,6 +50,9 @@ func NewHTTPHandler(service port.HistoryService) *HTTPHandler {
 }
 
 func (h *HTTPHandler) setupRoutes() {
+	h.router.Use(middlewares.LoggerMiddleware(h.logger))
+	h.router.Use(middlewares.RecovererMiddleware(h.logger))
+
 	users := chi.NewRouter()
 
 	users.Method(http.MethodGet, "/{username}/distance", http.HandlerFunc(h.getDistance))

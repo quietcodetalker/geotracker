@@ -9,10 +9,11 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/history/adapter/out/repository"
 	"gitlab.com/spacewalker/locations/internal/app/history/core/service"
 	"gitlab.com/spacewalker/locations/internal/pkg/config"
+	"gitlab.com/spacewalker/locations/internal/pkg/log"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/history"
 	"google.golang.org/grpc"
-	"log"
+	log2 "log"
 	"strings"
 	"sync"
 )
@@ -22,6 +23,7 @@ type App struct {
 	config     config.HistoryConfig
 	httpServer *util.HTTPServer
 	grpcServer *util.GRPCServer
+	logger     log.Logger
 }
 
 // NewApp creates and instance of history application and returns its pointer.
@@ -42,10 +44,15 @@ func (a *App) Start() error {
 		return fmt.Errorf("failed to open db: %v", err)
 	}
 
+	a.logger, err = log.NewZapLogger(true)
+	if err != nil {
+		log2.Panic(err)
+	}
+
 	repo := repository.NewPostgresRepository(db)
 	locationClient := locationclient.NewGRPCClient(a.config.LocationAddr)
-	svc := service.NewHistoryService(repo, locationClient)
-	httpHandler := handler.NewHTTPHandler(svc)
+	svc := service.NewHistoryService(repo, locationClient, a.logger)
+	httpHandler := handler.NewHTTPHandler(svc, a.logger)
 	grpcHandler := handler.NewGRPCHandler(svc)
 
 	a.httpServer = util.NewHTTPServer(a.config.BindAddrHTTP, httpHandler)
@@ -59,17 +66,17 @@ func (a *App) Start() error {
 	wg.Add(2)
 
 	go func() {
-		log.Printf("Starting HTTP server on %v", a.config.BindAddrHTTP)
+		a.logger.Info(fmt.Sprintf("Starting HTTP server on %v", a.config.BindAddrHTTP), nil)
 		if httpErr = a.httpServer.Start(); httpErr != nil {
-			log.Printf("failed to start http server: %v", httpErr)
+			a.logger.Info(fmt.Sprintf("failed to start http server: %v", httpErr), nil)
 		}
 		wg.Done()
 	}()
 
 	go func() {
-		log.Printf("Starting gRPC server on %v", a.config.BindAddrGRPC)
+		a.logger.Info(fmt.Sprintf("Starting gRPC server on %v", a.config.BindAddrGRPC), nil)
 		if grpcErr = a.grpcServer.Start(); grpcErr != nil {
-			log.Printf("failed to start grpc server: %v", grpcErr)
+			a.logger.Info(fmt.Sprintf("failed to start grpc server: %v", grpcErr), nil)
 		}
 		wg.Done()
 	}()
@@ -99,13 +106,13 @@ func (a *App) Stop(ctx context.Context) error {
 
 	go func() {
 		if err := a.httpServer.Stop(context.Background()); err != nil {
-			log.Printf("failed to stop http server :%v", err)
+			a.logger.Info(fmt.Sprintf("failed to stop http server :%v", err), nil)
 		}
 		wg.Done()
 	}()
 	go func() {
 		if err := a.grpcServer.Stop(context.Background()); err != nil {
-			log.Printf("failed to stop grpc server :%v", err)
+			a.logger.Info(fmt.Sprintf("failed to stop grpc server :%v", err), nil)
 		}
 		wg.Done()
 	}()
