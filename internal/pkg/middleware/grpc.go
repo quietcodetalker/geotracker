@@ -31,9 +31,9 @@ func LoggerUnaryServerInterceptor(logger log.Logger) func(
 		if !ok {
 			traceID = util.GenerateTraceID()
 		}
-		util.AddTraceIDToCtx(ctx, traceID)
+		mdCtx := util.AddTraceIDToCtx(ctx, traceID)
 
-		m, err := handler(ctx, req)
+		m, err := handler(mdCtx, req)
 
 		st, _ := status.FromError(err)
 
