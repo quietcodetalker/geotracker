@@ -1,4 +1,4 @@
-package middlewares
+package middleware
 
 import (
 	"gitlab.com/spacewalker/locations/internal/pkg/errpack"

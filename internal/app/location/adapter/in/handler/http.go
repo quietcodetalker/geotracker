@@ -8,7 +8,7 @@ import (
 	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"gitlab.com/spacewalker/locations/internal/pkg/log"
-	"gitlab.com/spacewalker/locations/internal/pkg/middlewares"
+	"gitlab.com/spacewalker/locations/internal/pkg/middleware"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	log2 "log"
 	"net/http"
@@ -52,8 +52,8 @@ func (h *HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HTTPHandler) setupRoutes() {
-	h.router.Use(middlewares.LoggerMiddleware(h.logger))
-	h.router.Use(middlewares.RecovererMiddleware(h.logger))
+	h.router.Use(middleware.LoggerMiddleware(h.logger))
+	h.router.Use(middleware.RecovererMiddleware(h.logger))
 
 	users := chi.NewRouter()
 
