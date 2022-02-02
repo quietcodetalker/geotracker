@@ -7,6 +7,7 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
 	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
+	"gitlab.com/spacewalker/locations/internal/pkg/log"
 	"gitlab.com/spacewalker/locations/internal/pkg/util/pagination"
 	"time"
 )
@@ -14,13 +15,19 @@ import (
 type userService struct {
 	repo          port.UserRepository
 	historyClient port.HistoryClient
+	logger        log.Logger
 }
 
 // NewUserService creates instance of UserService and returns its pointer.
-func NewUserService(repo port.UserRepository, historyClient port.HistoryClient) port.UserService {
+func NewUserService(
+	repo port.UserRepository,
+	historyClient port.HistoryClient,
+	logger log.Logger,
+) port.UserService {
 	return &userService{
 		repo:          repo,
 		historyClient: historyClient,
+		logger:        logger,
 	}
 }
 

@@ -7,8 +7,10 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
 	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
+	"gitlab.com/spacewalker/locations/internal/pkg/log"
+	"gitlab.com/spacewalker/locations/internal/pkg/middlewares"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
-	"google.golang.org/grpc/codes"
+	log2 "log"
 	"net/http"
 )
 
@@ -20,15 +22,24 @@ var (
 type HTTPHandler struct {
 	service port.UserService
 	router  *chi.Mux
+	logger  log.Logger
 }
 
 // NewHTTPHandler creates HTTPHandler and returns its pointer.
-func NewHTTPHandler(service port.UserService) *HTTPHandler {
+func NewHTTPHandler(service port.UserService, logger log.Logger) *HTTPHandler {
+	if service == nil {
+		log2.Panic("service must not be nil")
+	}
+	if logger == nil {
+		log2.Panic("logger must not be nil")
+	}
+
 	router := chi.NewRouter()
 
 	handler := &HTTPHandler{
 		service: service,
 		router:  router,
+		logger:  logger,
 	}
 
 	handler.setupRoutes()
@@ -41,6 +52,9 @@ func (h *HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HTTPHandler) setupRoutes() {
+	h.router.Use(middlewares.LoggerMiddleware(h.logger))
+	h.router.Use(middlewares.RecovererMiddleware(h.logger))
+
 	users := chi.NewRouter()
 
 	users.Method(http.MethodPut, "/{username}/location", http.HandlerFunc(h.setUserLocation))
