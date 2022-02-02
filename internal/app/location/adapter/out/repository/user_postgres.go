@@ -56,7 +56,7 @@ func (q *postgresQueries) CreateUser(ctx context.Context, arg port.CreateUserArg
 				return domain.User{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 			}
 		}
-		return domain.User{}, fmt.Errorf("%w", errpack.ErrInternalError)
+		return domain.User{}, fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 	}
 
 	return user, nil
@@ -91,7 +91,7 @@ func (q *postgresQueries) GetByUsername(ctx context.Context, username string) (d
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.User{}, fmt.Errorf("%w", errpack.ErrNotFound)
 		}
-		return domain.User{}, fmt.Errorf("%w", errpack.ErrInternalError)
+		return domain.User{}, fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 	}
 
 	return user, nil
@@ -134,7 +134,7 @@ func (r *postgresRepository) SetUserLocation(ctx context.Context, arg port.UserR
 			var glErr error
 			prevLocation, glErr = q.GetLocation(ctx, user.ID)
 			if glErr != nil && !errors.Is(glErr, errpack.ErrNotFound) {
-				return fmt.Errorf("%w", errpack.ErrInternalError)
+				return fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 			}
 		}
 		if errors.Is(err, errpack.ErrNotFound) {
@@ -147,7 +147,7 @@ func (r *postgresRepository) SetUserLocation(ctx context.Context, arg port.UserR
 		}
 		if err != nil {
 			// ErrInternalError occurred.
-			return fmt.Errorf("%w", errpack.ErrInternalError)
+			return fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 		}
 
 		location, err = q.SetLocation(ctx, port.LocationRepositorySetLocationRequest{
@@ -209,7 +209,7 @@ func (q *postgresQueries) ListUsersInRadius(ctx context.Context, arg port.UserRe
 		if errors.Is(err, sql.ErrNoRows) {
 			return port.UserRepositoryListUsersInRadiusResponse{}, nil
 		}
-		return port.UserRepositoryListUsersInRadiusResponse{}, fmt.Errorf("%w", errpack.ErrInternalError)
+		return port.UserRepositoryListUsersInRadiusResponse{}, fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 	}
 	defer rows.Close()
 
@@ -229,7 +229,7 @@ func (q *postgresQueries) ListUsersInRadius(ctx context.Context, arg port.UserRe
 			&user.CreatedAt,
 			&user.UpdatedAt,
 		); err != nil {
-			return port.UserRepositoryListUsersInRadiusResponse{}, fmt.Errorf("%w", errpack.ErrInternalError)
+			return port.UserRepositoryListUsersInRadiusResponse{}, fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 		}
 		users = append(users, user)
 	}

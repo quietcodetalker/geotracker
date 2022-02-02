@@ -37,20 +37,20 @@ func NewPostgresRepository(db *sql.DB) port.Repository {
 func (r *postgresRepository) execTx(ctx context.Context, fn func(*postgresQueries) error) error {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		return fmt.Errorf("%w", errpack.ErrInternalError)
+		return fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 	}
 
 	q := newPostgresQueries(tx)
 	err = fn(q)
 	if err != nil {
 		if rbErr := tx.Rollback(); rbErr != nil {
-			return fmt.Errorf("%w", errpack.ErrInternalError)
+			return fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 		}
-		return fmt.Errorf("%w", errpack.ErrInternalError)
+		return fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 	}
 
 	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("%w", errpack.ErrInternalError)
+		return fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 	}
 
 	return nil

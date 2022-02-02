@@ -25,10 +25,10 @@ func ErrToGRPC(err error) error {
 }
 
 // ErrToHTTP converts err to representation of JSON object.
-func ErrToHTTP(err error) map[string]interface{} {
+func ErrToHTTP(err error) (int, map[string]interface{}) {
 	switch {
 	case err == nil:
-		return map[string]interface{}{
+		return 200, map[string]interface{}{
 			"error": map[string]interface{}{
 				"code":    200,
 				"message": "OK",
@@ -36,15 +36,21 @@ func ErrToHTTP(err error) map[string]interface{} {
 			},
 		}
 	case errors.Is(err, ErrInternalError):
-		return map[string]interface{}{
+		msg := "internal error"
+		wrappedErr := errors.Unwrap(err)
+		if wrappedErr != nil {
+			msg = wrappedErr.Error()
+		}
+
+		return 500, map[string]interface{}{
 			"error": map[string]interface{}{
 				"code":    500,
-				"message": err.Error(),
+				"message": msg,
 				"status":  "INTERNAL",
 			},
 		}
 	case errors.Is(err, ErrFailedPrecondition):
-		return map[string]interface{}{
+		return 422, map[string]interface{}{
 			"error": map[string]interface{}{
 				"code":    422,
 				"message": err.Error(),
@@ -52,7 +58,7 @@ func ErrToHTTP(err error) map[string]interface{} {
 			},
 		}
 	case errors.Is(err, ErrInvalidArgument):
-		return map[string]interface{}{
+		return 400, map[string]interface{}{
 			"error": map[string]interface{}{
 				"code":    400,
 				"message": err.Error(),
@@ -60,7 +66,7 @@ func ErrToHTTP(err error) map[string]interface{} {
 			},
 		}
 	case errors.Is(err, ErrNotFound):
-		return map[string]interface{}{
+		return 404, map[string]interface{}{
 			"error": map[string]interface{}{
 				"code":    404,
 				"message": err.Error(),
@@ -68,7 +74,7 @@ func ErrToHTTP(err error) map[string]interface{} {
 			},
 		}
 	default:
-		return map[string]interface{}{
+		return 500, map[string]interface{}{
 			"error": map[string]interface{}{
 				"code":    500,
 				"message": "unknown error",

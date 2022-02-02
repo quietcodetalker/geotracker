@@ -27,7 +27,7 @@ func (c *GRPCClient) GetUserIDByUsername(ctx context.Context, username string) (
 
 	conn, err := grpc.Dial(c.addr, opts...)
 	if err != nil {
-		return 0, fmt.Errorf("%w", errpack.ErrInternalError)
+		return 0, fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 	}
 	defer conn.Close()
 
@@ -37,13 +37,13 @@ func (c *GRPCClient) GetUserIDByUsername(ctx context.Context, username string) (
 	if err != nil {
 		st, ok := status.FromError(err)
 		if !ok {
-			return 0, fmt.Errorf("%w", errpack.ErrInternalError)
+			return 0, fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 		}
 		switch st.Code() {
 		case codes.NotFound:
 			return 0, fmt.Errorf("%w", errpack.ErrNotFound)
 		default:
-			return 0, fmt.Errorf("%w", errpack.ErrInternalError)
+			return 0, fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 		}
 	}
 

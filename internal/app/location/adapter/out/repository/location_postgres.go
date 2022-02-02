@@ -58,7 +58,7 @@ func (q *postgresQueries) SetLocation(ctx context.Context, arg port.LocationRepo
 				return domain.Location{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 			}
 		}
-		return domain.Location{}, fmt.Errorf("%w", errpack.ErrInternalError)
+		return domain.Location{}, fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 	}
 
 	location.Point = geo.Point(pgPoint)
@@ -97,7 +97,7 @@ func (q *postgresQueries) GetLocation(ctx context.Context, userID int) (domain.L
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Location{}, fmt.Errorf("%w", errpack.ErrNotFound)
 		}
-		return domain.Location{}, fmt.Errorf("%w", errpack.ErrInternalError)
+		return domain.Location{}, fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 	}
 
 	location.Point = geo.Point(point)

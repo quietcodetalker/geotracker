@@ -32,7 +32,7 @@ func (c GRPCClient) AddRecord(ctx context.Context, req port.HistoryClientAddReco
 
 	conn, err := grpc.Dial(c.addr, opts...)
 	if err != nil {
-		return port.HistoryClientAddRecordResponse{}, fmt.Errorf("%w", errpack.ErrInternalError)
+		return port.HistoryClientAddRecordResponse{}, fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 	}
 	defer conn.Close()
 
@@ -53,13 +53,13 @@ func (c GRPCClient) AddRecord(ctx context.Context, req port.HistoryClientAddReco
 	if err != nil {
 		st, ok := status.FromError(err)
 		if !ok {
-			return port.HistoryClientAddRecordResponse{}, fmt.Errorf("%w", errpack.ErrInternalError)
+			return port.HistoryClientAddRecordResponse{}, fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 		}
 		switch st.Code() {
 		case codes.InvalidArgument:
 			return port.HistoryClientAddRecordResponse{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 		default:
-			return port.HistoryClientAddRecordResponse{}, fmt.Errorf("%w", errpack.ErrInternalError)
+			return port.HistoryClientAddRecordResponse{}, fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 		}
 	}
 

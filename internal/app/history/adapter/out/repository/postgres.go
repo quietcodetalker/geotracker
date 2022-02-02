@@ -73,7 +73,7 @@ func (r postgresRepository) AddRecord(ctx context.Context, req port.HistoryRepos
 				return domain.Record{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 			}
 		}
-		return domain.Record{}, fmt.Errorf("%w", errpack.ErrInternalError)
+		return domain.Record{}, fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 	}
 
 	record.A = geo.Point(a)
@@ -105,7 +105,7 @@ func (r postgresRepository) GetDistance(ctx context.Context, req port.HistoryRep
 		if errors.Is(err, sql.ErrNoRows) {
 			return 0, nil
 		}
-		return 0, fmt.Errorf("%w", errpack.ErrInternalError)
+		return 0, fmt.Errorf("%w: %v", errpack.ErrInternalError, err)
 	}
 
 	return distance, nil

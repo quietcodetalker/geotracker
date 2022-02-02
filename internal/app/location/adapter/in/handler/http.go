@@ -53,14 +53,16 @@ func (h *HTTPHandler) setUserLocation(w http.ResponseWriter, r *http.Request) {
 	var dto port.UserServiceSetUserLocationRequest
 
 	if err := util.DecodeBody(r, &dto); err != nil {
-		util.Respond(w, http.StatusOK, errpack.ErrToHTTP(fmt.Errorf("%w", errpack.ErrInternalError)))
+		status, body := errpack.ErrToHTTP(fmt.Errorf("%w: %v", errpack.ErrInternalError, err))
+		util.Respond(w, status, body)
 		return
 	}
 	dto.Username = chi.URLParam(r, "username")
 
 	res, err := h.service.SetUserLocation(r.Context(), dto)
 	if err != nil {
-		util.Respond(w, http.StatusOK, errpack.ErrToHTTP(err))
+		status, body := errpack.ErrToHTTP(err)
+		util.Respond(w, status, body)
 		return
 	}
 
@@ -81,7 +83,8 @@ func (h *HTTPHandler) listUsersInRadius(w http.ResponseWriter, r *http.Request) 
 
 	err := r.ParseForm()
 	if err != nil {
-		util.Respond(w, http.StatusOK, errpack.ErrToHTTP(fmt.Errorf("%w", errpack.ErrInternalError)))
+		status, body := errpack.ErrToHTTP(fmt.Errorf("%w: %v", errpack.ErrInternalError, err))
+		util.Respond(w, status, body)
 		return
 	}
 
@@ -89,7 +92,8 @@ func (h *HTTPHandler) listUsersInRadius(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		fmt.Println(err)
 		// TODO: check whether it makes sense to handle different errors
-		util.Respond(w, http.StatusOK, errpack.ErrToHTTP(fmt.Errorf("%w", errpack.ErrInvalidArgument)))
+		status, body := errpack.ErrToHTTP(fmt.Errorf("%w", errpack.ErrInvalidArgument))
+		util.Respond(w, status, body)
 		return
 	}
 
@@ -105,19 +109,10 @@ func (h *HTTPHandler) listUsersInRadius(w http.ResponseWriter, r *http.Request) 
 
 	res, err = h.service.ListUsersInRadius(r.Context(), req)
 	if err != nil {
-		util.Respond(w, http.StatusOK, errpack.ErrToHTTP(err))
+		status, body := errpack.ErrToHTTP(err)
+		util.Respond(w, status, body)
 		return
 	}
 
 	util.Respond(w, http.StatusOK, res)
-}
-
-type httpError struct {
-	Code    uint32     `json:"code"`
-	Message string     `json:"message"`
-	Status  codes.Code `json:"status"`
-}
-
-func (e httpError) Error() string {
-	return e.Message
 }
