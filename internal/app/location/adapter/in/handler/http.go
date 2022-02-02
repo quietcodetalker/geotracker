@@ -67,7 +67,7 @@ func (h *HTTPHandler) setUserLocation(w http.ResponseWriter, r *http.Request) {
 	var dto port.UserServiceSetUserLocationRequest
 
 	if err := util.DecodeBody(r, &dto); err != nil {
-		status, body := errpack.ErrToHTTP(fmt.Errorf("%w: %v", errpack.ErrInternalError, err))
+		status, body := errpack.ErrToHTTP(errpack.ErrInvalidArgument)
 		util.Respond(w, status, body)
 		return
 	}
@@ -97,7 +97,7 @@ func (h *HTTPHandler) listUsersInRadius(w http.ResponseWriter, r *http.Request) 
 
 	err := r.ParseForm()
 	if err != nil {
-		status, body := errpack.ErrToHTTP(fmt.Errorf("%w: %v", errpack.ErrInternalError, err))
+		status, body := errpack.ErrToHTTP(errpack.ErrInvalidArgument)
 		util.Respond(w, status, body)
 		return
 	}
