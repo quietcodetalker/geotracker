@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"gitlab.com/spacewalker/locations/internal/pkg/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
@@ -22,15 +23,17 @@ func LoggerUnaryServerInterceptor(logger log.Logger) func(
 	) (interface{}, error) {
 		start := time.Now()
 		fullMethod := info.FullMethod
+		request := fmt.Sprintf("%v", req)
 
 		m, err := handler(ctx, req)
 
 		st, _ := status.FromError(err)
 
-		logger.Info("request complete", log.Fields{
+		logger.Info("grpc request complete", log.Fields{
 			"method":   fullMethod,
 			"duration": time.Since(start),
 			"code":     st.Code(),
+			"request":  request,
 		})
 
 		return m, err

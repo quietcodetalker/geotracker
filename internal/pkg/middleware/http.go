@@ -51,7 +51,7 @@ func LoggerMiddleware(logger log.Logger) func(handler http.Handler) http.Handler
 
 			duration := time.Since(start)
 
-			logger.Info("request complete", log.Fields{
+			logger.Info("http request complete", log.Fields{
 				"uri":      uri,
 				"method":   method,
 				"duration": duration,
