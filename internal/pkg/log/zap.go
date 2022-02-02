@@ -41,6 +41,8 @@ func (z *zapLogger) Print(level Level, msg string, fields Fields) {
 	switch level {
 	case DebugLevel:
 		z.logger.Debug(msg, zFields...)
+	case WarnLevel:
+		z.logger.Warn(msg, zFields...)
 	case ErrorLevel:
 		z.logger.Error(msg, zFields...)
 	case PanicLevel:
@@ -63,6 +65,11 @@ func (z *zapLogger) Debug(msg string, fields Fields) {
 // Info ...
 func (z *zapLogger) Info(msg string, fields Fields) {
 	z.Print(InfoLevel, msg, fields)
+}
+
+// Warn ...
+func (z *zapLogger) Warn(msg string, fields Fields) {
+	z.Print(WarnLevel, msg, fields)
 }
 
 // Error ...

@@ -8,6 +8,8 @@ const (
 	DebugLevel = iota - 1
 	// InfoLevel is the default logging level.
 	InfoLevel
+	// WarnLevel TODO: add description
+	WarnLevel
 	// ErrorLevel TODO: add description
 	ErrorLevel
 	// PanicLevel TODO: add description
@@ -24,6 +26,7 @@ type Logger interface {
 	Print(level Level, msg string, fields Fields)
 	Debug(msg string, fields Fields)
 	Info(msg string, fields Fields)
+	Warn(msg string, fields Fields)
 	Error(msg string, fields Fields)
 	Fatal(msg string, fields Fields)
 	Panic(msg string, fields Fields)
