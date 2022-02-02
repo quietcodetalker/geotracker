@@ -29,10 +29,19 @@ func (r *loggingResponseWriter) WriteHeader(statusCode int) {
 	r.responseData.status = statusCode
 }
 
+// LoggerMiddleware TODO: description
 func LoggerMiddleware(logger log.Logger) func(handler http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
+
+			ctx := r.Context()
+
+			traceID, ok := util.GetTraceIDFromCtx(r.Context())
+			if !ok {
+				traceID = util.GenerateTraceID()
+				ctx = util.AddTraceIDToCtx(r.Context(), traceID)
+			}
 
 			responseData := &responseData{
 				status: 0,
@@ -47,16 +56,17 @@ func LoggerMiddleware(logger log.Logger) func(handler http.Handler) http.Handler
 			uri := r.RequestURI
 			method := r.Method
 
-			next.ServeHTTP(&lw, r)
+			next.ServeHTTP(&lw, r.WithContext(ctx))
 
 			duration := time.Since(start)
 
-			logger.Info("http request complete", log.Fields{
-				"uri":      uri,
-				"method":   method,
-				"duration": duration,
-				"status":   responseData.status,
-				"size":     responseData.size,
+			logger.Info("incoming http request complete", log.Fields{
+				"uri":           uri,
+				"method":        method,
+				"duration":      duration,
+				"status":        responseData.status,
+				"size":          responseData.size,
+				"trace-traceID": traceID,
 			})
 		})
 	}
