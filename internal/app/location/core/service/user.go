@@ -8,6 +8,7 @@ import (
 	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"gitlab.com/spacewalker/locations/internal/pkg/log"
+	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	"gitlab.com/spacewalker/locations/internal/pkg/util/pagination"
 	log2 "log"
 	"time"
@@ -44,7 +45,12 @@ func NewUserService(
 
 // SetUserLocation sets user's location by given username.
 func (s *userService) SetUserLocation(ctx context.Context, req port.UserServiceSetUserLocationRequest) (port.UserServiceSetUserLocationResponse, error) {
-	if err := validate.Struct(req); err != nil {
+	var err error
+	defer func() {
+		util.LogInternalError(ctx, s.logger, err, req)
+	}()
+
+	if err = validate.Struct(req); err != nil {
 		// TODO: check different errors?
 		return port.UserServiceSetUserLocationResponse{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 	}
@@ -76,7 +82,12 @@ func (s *userService) SetUserLocation(ctx context.Context, req port.UserServiceS
 
 // ListUsersInRadius finds users by given location and radius.
 func (s *userService) ListUsersInRadius(ctx context.Context, req port.UserServiceListUsersInRadiusRequest) (port.UserServiceListUsersInRadiusResponse, error) {
-	if err := validate.Struct(req); err != nil {
+	var err error
+	defer func() {
+		util.LogInternalError(ctx, s.logger, err, req)
+	}()
+
+	if err = validate.Struct(req); err != nil {
 		// TODO: check different errors
 		return port.UserServiceListUsersInRadiusResponse{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 	}
@@ -127,6 +138,11 @@ func (s *userService) ListUsersInRadius(ctx context.Context, req port.UserServic
 //
 // Any other error occurred in `GetByUsername` is returned.
 func (s *userService) GetByUsername(ctx context.Context, username string) (domain.User, error) {
+	var err error
+	defer func() {
+		util.LogInternalError(ctx, s.logger, err, username)
+	}()
+
 	if username == "" {
 		return domain.User{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 	}

@@ -8,6 +8,7 @@ import (
 	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"gitlab.com/spacewalker/locations/internal/pkg/log"
+	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	log2 "log"
 	"time"
 )
@@ -49,7 +50,12 @@ func NewHistoryService(
 //
 // If a call to `AddRecord` repository method fails, any returned error is propagated.
 func (s *historyService) AddRecord(ctx context.Context, req port.HistoryServiceAddRecordRequest) (domain.Record, error) {
-	if err := validate.Struct(req); err != nil {
+	var err error
+	defer func() {
+		util.LogInternalError(ctx, s.logger, err, req)
+	}()
+
+	if err = validate.Struct(req); err != nil {
 		// TODO: handle different errors
 		return domain.Record{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 	}
@@ -69,7 +75,12 @@ func (s *historyService) AddRecord(ctx context.Context, req port.HistoryServiceA
 
 // GetDistance calculates distance that particular user got through in given time period.
 func (s *historyService) GetDistance(ctx context.Context, req port.HistoryServiceGetDistanceRequest) (port.HistoryServiceGetDistanceResponse, error) {
-	if err := validate.Struct(req); err != nil {
+	var err error
+	defer func() {
+		util.LogInternalError(ctx, s.logger, err, req)
+	}()
+
+	if err = validate.Struct(req); err != nil {
 		return port.HistoryServiceGetDistanceResponse{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 	}
 
@@ -83,7 +94,12 @@ func (s *historyService) GetDistance(ctx context.Context, req port.HistoryServic
 
 // GetDistanceByUsername calculates distance that particular user got through in given time period.
 func (s *historyService) GetDistanceByUsername(ctx context.Context, req port.HistoryServiceGetDistanceByUsernameRequest) (port.HistoryServiceGetDistanceByUsernameResponse, error) {
-	if err := validate.Struct(req); err != nil {
+	var err error
+	defer func() {
+		util.LogInternalError(ctx, s.logger, err, req)
+	}()
+
+	if err = validate.Struct(req); err != nil {
 		return port.HistoryServiceGetDistanceByUsernameResponse{}, fmt.Errorf("%w", errpack.ErrInvalidArgument)
 	}
 	switch {
