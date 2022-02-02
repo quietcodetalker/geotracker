@@ -9,36 +9,19 @@ type zapLogger struct {
 }
 
 // NewZapLogger returns a pointer that points to a new instance of zapLogger.
-func NewZapLogger(level Level) (Logger, error) {
-	zapLevel := zap.NewAtomicLevelAt(zap.InfoLevel)
+func NewZapLogger(development bool) (Logger, error) {
+	var logger *zap.Logger
+	var err error
 
-	switch level {
-	case DebugLevel:
-		zapLevel = zap.NewAtomicLevelAt(zap.DebugLevel)
-	case InfoLevel:
-		zapLevel = zap.NewAtomicLevelAt(zap.InfoLevel)
-	case ErrorLevel:
-		zapLevel = zap.NewAtomicLevelAt(zap.ErrorLevel)
-	case PanicLevel:
-		zapLevel = zap.NewAtomicLevelAt(zap.PanicLevel)
-	case FatalLevel:
-		zapLevel = zap.NewAtomicLevelAt(zap.FatalLevel)
+	options := []zap.Option{
+		zap.AddCallerSkip(2),
 	}
 
-	cfg := zap.Config{
-		Level:       zapLevel,
-		Development: false,
-		Sampling: &zap.SamplingConfig{
-			Initial:    100,
-			Thereafter: 100,
-		},
-		Encoding:         "json",
-		EncoderConfig:    zap.NewProductionEncoderConfig(),
-		OutputPaths:      []string{"stderr"},
-		ErrorOutputPaths: []string{"stderr"},
+	if development {
+		logger, err = zap.NewDevelopment(options...)
+	} else {
+		logger, err = zap.NewProduction(options...)
 	}
-
-	logger, err := cfg.Build()
 	if err != nil {
 		return nil, err
 	}
