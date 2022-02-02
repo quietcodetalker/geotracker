@@ -22,8 +22,9 @@ type GRPCServer struct {
 func NewGRPCServer(
 	bindAddr string,
 	registerServer func(*grpc.Server),
+	options ...grpc.ServerOption,
 ) *GRPCServer {
-	server := grpc.NewServer()
+	server := grpc.NewServer(options...)
 	registerServer(server)
 
 	return &GRPCServer{
