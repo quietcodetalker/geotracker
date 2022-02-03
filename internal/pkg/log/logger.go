@@ -1,3 +1,5 @@
+//go:generate mockgen -destination=mock/mock_log.go -package=mocklog . Logger
+
 package log
 
 // Level represents a logging priority.

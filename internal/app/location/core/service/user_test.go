@@ -12,6 +12,7 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/location/core/service"
 	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
+	mocklog "gitlab.com/spacewalker/locations/internal/pkg/log/mock"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	"testing"
 	"time"
@@ -361,8 +362,8 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 			repo := mock.NewMockUserRepository(ctrl)
 			historyClient := mock.NewMockHistoryClient(ctrl)
 			tc.buildStubs(repo, historyClient)
-
-			svc := service.NewUserService(repo, historyClient)
+			logger := mocklog.NewMockLogger(ctrl)
+			svc := service.NewUserService(repo, historyClient, logger)
 
 			_, _ = svc.SetUserLocation(context.Background(), tc.arg)
 		})
@@ -694,8 +695,8 @@ func (s *UserSvcTestSuite) Test_UserService_ListUsersInRadius() {
 			repo := mock.NewMockUserRepository(ctrl)
 			historyClient := mock.NewMockHistoryClient(ctrl)
 			tc.buildStubs(repo, historyClient)
-
-			svc := service.NewUserService(repo, historyClient)
+			logger := mocklog.NewMockLogger(ctrl)
+			svc := service.NewUserService(repo, historyClient, logger)
 
 			res, err := svc.ListUsersInRadius(context.Background(), tc.req)
 
@@ -785,8 +786,8 @@ func (s *UserSvcTestSuite) Test_UserService_GetByUsername() {
 			repo := mock.NewMockUserRepository(ctrl)
 			historyClient := mock.NewMockHistoryClient(ctrl)
 			tc.buildStubs(repo)
-
-			svc := service.NewUserService(repo, historyClient)
+			logger := mocklog.NewMockLogger(ctrl)
+			svc := service.NewUserService(repo, historyClient, logger)
 
 			user, err := svc.GetByUsername(context.Background(), tc.username)
 			if tc.hasError {
