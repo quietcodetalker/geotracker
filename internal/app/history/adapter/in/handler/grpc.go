@@ -26,8 +26,9 @@ func NewGRPCHandler(service port.HistoryService) *GRPCHandler {
 	}
 }
 
+// AddRecord TODO: description
 func (h *GRPCHandler) AddRecord(ctx context.Context, req *pb.AddRecordRequest) (*pb.AddRecordResponse, error) {
-	if req.A == nil || req.B == nil {
+	if req.A == nil || req.B == nil || req.Timestamp == nil {
 		// TODO: specify error
 		return nil, errpack.ErrToGRPC(fmt.Errorf("%w", errpack.ErrInvalidArgument))
 	}
