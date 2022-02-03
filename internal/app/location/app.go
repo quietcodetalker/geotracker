@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/go-chi/chi/v5"
 	"gitlab.com/spacewalker/locations/internal/app/location/adapter/in/handler"
 	"gitlab.com/spacewalker/locations/internal/app/location/adapter/out/historyclient"
 	"gitlab.com/spacewalker/locations/internal/app/location/adapter/out/repository"
@@ -56,7 +57,10 @@ func (a *App) Start() error {
 	httpHandler := handler.NewHTTPHandler(svc, a.logger)
 	grpcHandler := handler.NewGRPCInternalHandler(svc)
 
-	a.httpServer = util.NewHTTPServer(a.config.BindAddrHTTP, httpHandler)
+	rootHandler := chi.NewRouter()
+	rootHandler.Mount("/v1", httpHandler)
+
+	a.httpServer = util.NewHTTPServer(a.config.BindAddrHTTP, rootHandler)
 	a.grpcServer = util.NewGRPCServer(
 		a.config.BindAddrGRPC,
 		func(server *grpc.Server) {
