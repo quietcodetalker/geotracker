@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/go-chi/chi/v5"
+	middleware2 "github.com/go-chi/chi/v5/middleware"
 	"github.com/gorilla/schema"
 	"gitlab.com/spacewalker/locations/internal/app/history/core/port"
 	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
@@ -50,8 +51,11 @@ func NewHTTPHandler(service port.HistoryService, logger log.Logger) *HTTPHandler
 }
 
 func (h *HTTPHandler) setupRoutes() {
-	h.router.Use(middleware.LoggerMiddleware(h.logger))
-	h.router.Use(middleware.RecovererMiddleware(h.logger))
+	h.router.Use(
+		middleware.LoggerMiddleware(h.logger),
+		middleware.RecovererMiddleware(h.logger),
+		middleware2.SetHeader("Content-Type", "application/json"),
+	)
 
 	users := chi.NewRouter()
 
@@ -95,7 +99,7 @@ func (h *HTTPHandler) getDistance(w http.ResponseWriter, r *http.Request) {
 		fromPtr = &from
 	}
 
-	if dto.From != "" {
+	if dto.To != "" {
 		to, err := time.Parse(time.RFC3339, dto.To)
 		if err != nil {
 			status, body := errpack.ErrToHTTP(errpack.ErrInvalidArgument)
