@@ -3,6 +3,8 @@ package handler
 import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	middleware2 "github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/gorilla/schema"
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
 	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
@@ -52,8 +54,19 @@ func (h *HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HTTPHandler) setupRoutes() {
-	h.router.Use(middleware.LoggerMiddleware(h.logger))
-	h.router.Use(middleware.RecovererMiddleware(h.logger))
+	h.router.Use(
+		middleware.LoggerMiddleware(h.logger),
+		middleware.RecovererMiddleware(h.logger),
+		cors.Handler(cors.Options{
+			AllowedOrigins:   []string{"https://*", "http://*"},
+			AllowedMethods:   []string{"GET", "POST"},
+			AllowedHeaders:   []string{"Accept", "Content-Type"},
+			AllowCredentials: false,
+			MaxAge:           300,
+		}),
+		middleware2.AllowContentType("application/json"),
+		middleware2.SetHeader("Content-Type", "application/json"),
+	)
 
 	users := chi.NewRouter()
 
