@@ -1,12 +1,16 @@
-//go:build integration
-// +build integration
-
 package handler_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
+
 	"github.com/gavv/httpexpect"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
@@ -14,12 +18,8 @@ import (
 	"gitlab.com/spacewalker/locations/internal/app/history/adapter/in/handler"
 	"gitlab.com/spacewalker/locations/internal/app/history/core/port"
 	"gitlab.com/spacewalker/locations/internal/app/history/core/port/mock"
-	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	mocklog "gitlab.com/spacewalker/locations/internal/pkg/log/mock"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-	"time"
+	"gitlab.com/spacewalker/locations/internal/pkg/util"
 )
 
 // HistoryHTTPHandlerTestSuite is a test suite that covers history http handler functionality.
@@ -41,274 +41,310 @@ func TestUserHTTPHandlerTestSuite(t *testing.T) {
 }
 
 func (s *HistoryHTTPHandlerTestSuite) Test_GetDistance() {
-	validFromStr := "2021-09-02T11:26:18+00:00"
-	validFrom, err := time.Parse(time.RFC3339, validFromStr)
-	require.NoError(s.T(), err)
-	validToStr := "2022-09-02T11:26:18+00:00"
-	validTo, err := time.Parse(time.RFC3339, validToStr)
-	require.NoError(s.T(), err)
-	username := "johnsmith"
+	invalidUsernameCharacterSet := "!@#$%^&*()_+=-'\""
+	getUserDistancePath := "/users/{validUsername}/distance"
+	validUsername := util.RandomUsername()
+	util.RandomString(1, 1, invalidUsernameCharacterSet)
+	from, to := util.RandomTimeInterval()
+	validFromStr := from.Format("2006-01-02T15:04:05-07:00")
+	validToStr := to.Format("2006-01-02T15:04:05-07:00")
+	distance := util.RandomFloat64(0.0, 1000.0)
+	invaildTimestampStr := "invalid"
+	customErrMsg := util.RandomString(4, 10, util.CharacterSetAlphanumeric)
 
 	testCases := []struct {
 		name             string
+		path             string
 		urlParams        []interface{}
 		queryParams      map[string]interface{}
-		buildStubs       func(svc *mock.MockHistoryService)
+		headers          map[string]string
+		buildStubs       func(service *mock.MockHistoryService)
 		expectedStatus   int
-		expectedResponse string
+		expectedResponse interface{}
 	}{
 		{
-			name:      "it returns INVALID_ARGUMENT if `from` query param contains invalid timestamp value",
-			urlParams: []interface{}{"any"},
-			queryParams: map[string]interface{}{
-				"from": "invalid",
-				"to":   "2021-09-02T11:26:18+00:00",
-			},
-			buildStubs: func(svc *mock.MockHistoryService) {
-				svc.EXPECT().GetDistanceByUsername(gomock.Any(), gomock.Any()).Times(0)
-			},
-			expectedStatus: http.StatusBadRequest,
-			expectedResponse: `
-{
-	"error": {
-		"code": 400,
-		"message": "invalid argument",
-		"status": "INVALID_ARGUMENT"
-	}
-}
-`,
-		},
-		{
-			name:      "it returns INVALID_ARGUMENT if `to` query param contains invalid timestamp value",
-			urlParams: []interface{}{"any"},
-			queryParams: map[string]interface{}{
-				"from": "2021-09-02T11:26:18+00:00",
-				"to":   "invalid",
-			},
-			buildStubs: func(svc *mock.MockHistoryService) {
-				svc.EXPECT().GetDistanceByUsername(gomock.Any(), gomock.Any()).Times(0)
-			},
-			expectedStatus: http.StatusBadRequest,
-			expectedResponse: `
-{
-	"error": {
-		"code": 400,
-		"message": "invalid argument",
-		"status": "INVALID_ARGUMENT"
-	}
-}
-`,
-		},
-		{
-			name:      "it passes both `to` and `from` query params to the service",
-			urlParams: []interface{}{username},
+			name:      "it responds with OK if valid `validUsername`, `from` and `to` are provided",
+			path:      getUserDistancePath,
+			urlParams: []interface{}{validUsername},
 			queryParams: map[string]interface{}{
 				"from": validFromStr,
 				"to":   validToStr,
 			},
+			headers: map[string]string{
+				"Content-Type": "application/json",
+			},
 			buildStubs: func(svc *mock.MockHistoryService) {
 				svc.EXPECT().
-					GetDistanceByUsername(gomock.Any(), gomock.Eq(
-						port.HistoryServiceGetDistanceByUsernameRequest{
-							Username: username,
-							From:     &validFrom,
-							To:       &validTo,
-						},
-					)).
-					Times(1)
+					GetDistanceByUsername(
+						gomock.Any(),
+						EqHistoryServiceGetDistanceByUsernameRequest(port.HistoryServiceGetDistanceByUsernameRequest{
+							Username: validUsername,
+							From:     &from,
+							To:       &to,
+						}),
+					).
+					Times(1).
+					Return(port.HistoryServiceGetDistanceByUsernameResponse{
+						Distance: distance,
+					}, nil)
 			},
-			expectedStatus:   0,
-			expectedResponse: "",
+			expectedStatus: http.StatusOK,
+			expectedResponse: port.HistoryServiceGetDistanceByUsernameResponse{
+				Distance: distance,
+			},
 		},
 		{
-			name:      "it passes both `to` query params  to the service if `from` missing",
-			urlParams: []interface{}{username},
+			name:      "it responds with OK if valid `validUsername` and `from` are provided without `to`",
+			path:      getUserDistancePath,
+			urlParams: []interface{}{validUsername},
 			queryParams: map[string]interface{}{
 				"from": validFromStr,
 			},
+			headers: map[string]string{
+				"Content-Type": "application/json",
+			},
 			buildStubs: func(svc *mock.MockHistoryService) {
 				svc.EXPECT().
-					GetDistanceByUsername(gomock.Any(), gomock.Eq(
-						port.HistoryServiceGetDistanceByUsernameRequest{
-							Username: username,
-							From:     &validFrom,
+					GetDistanceByUsername(
+						gomock.Any(),
+						EqHistoryServiceGetDistanceByUsernameRequest(port.HistoryServiceGetDistanceByUsernameRequest{
+							Username: validUsername,
+							From:     &from,
 							To:       nil,
-						},
-					)).
-					Times(1)
+						}),
+					).
+					Times(1).
+					Return(port.HistoryServiceGetDistanceByUsernameResponse{
+						Distance: distance,
+					}, nil)
 			},
-			expectedStatus:   0,
-			expectedResponse: "",
+			expectedStatus: http.StatusOK,
+			expectedResponse: port.HistoryServiceGetDistanceByUsernameResponse{
+				Distance: distance,
+			},
 		},
 		{
-			name:      "it passes both `from` query params  to the service if `to` missing",
-			urlParams: []interface{}{username},
+			name:      "it responds with OK if valid `validUsername` and `to` are provided without `from`",
+			path:      getUserDistancePath,
+			urlParams: []interface{}{validUsername},
 			queryParams: map[string]interface{}{
 				"to": validToStr,
 			},
+			headers: map[string]string{
+				"Content-Type": "application/json",
+			},
 			buildStubs: func(svc *mock.MockHistoryService) {
 				svc.EXPECT().
-					GetDistanceByUsername(gomock.Any(), gomock.Eq(
-						port.HistoryServiceGetDistanceByUsernameRequest{
-							Username: username,
+					GetDistanceByUsername(
+						gomock.Any(),
+						EqHistoryServiceGetDistanceByUsernameRequest(port.HistoryServiceGetDistanceByUsernameRequest{
+							Username: validUsername,
 							From:     nil,
-							To:       &validTo,
-						},
-					)).
-					Times(1)
+							To:       &to,
+						}),
+					).
+					Times(1).
+					Return(port.HistoryServiceGetDistanceByUsernameResponse{
+						Distance: distance,
+					}, nil)
 			},
-			expectedStatus:   0,
-			expectedResponse: "",
+			expectedStatus: http.StatusOK,
+			expectedResponse: port.HistoryServiceGetDistanceByUsernameResponse{
+				Distance: distance,
+			},
 		},
 		{
-			name:        "it does not pass both `from` and `to` to the service if both of them missing",
-			urlParams:   []interface{}{username},
+			name:        "it responds with OK if valid `validUsername` is provided without `to` and `from`",
+			path:        getUserDistancePath,
+			urlParams:   []interface{}{validUsername},
 			queryParams: nil,
+			headers: map[string]string{
+				"Content-Type": "application/json",
+			},
 			buildStubs: func(svc *mock.MockHistoryService) {
 				svc.EXPECT().
-					GetDistanceByUsername(gomock.Any(), gomock.Eq(
-						port.HistoryServiceGetDistanceByUsernameRequest{
-							Username: username,
+					GetDistanceByUsername(
+						gomock.Any(),
+						EqHistoryServiceGetDistanceByUsernameRequest(port.HistoryServiceGetDistanceByUsernameRequest{
+							Username: validUsername,
 							From:     nil,
 							To:       nil,
-						},
-					)).
-					Times(1)
+						}),
+					).
+					Times(1).
+					Return(port.HistoryServiceGetDistanceByUsernameResponse{
+						Distance: distance,
+					}, nil)
 			},
-			expectedStatus:   0,
-			expectedResponse: "",
+			expectedStatus: http.StatusOK,
+			expectedResponse: port.HistoryServiceGetDistanceByUsernameResponse{
+				Distance: distance,
+			},
 		},
 		{
-			name:        "it responds with `` if the service return `ErrInternalError`",
-			urlParams:   []interface{}{username},
-			queryParams: nil,
-			buildStubs: func(svc *mock.MockHistoryService) {
-				svc.EXPECT().
-					GetDistanceByUsername(gomock.Any(), gomock.Any()).
-					Times(1).
-					Return(port.HistoryServiceGetDistanceByUsernameResponse{}, fmt.Errorf("%w", errpack.ErrInternalError))
+			name:      "it responds with BAD_REQUEST if invalid `from` is provided",
+			path:      getUserDistancePath,
+			urlParams: []interface{}{validUsername},
+			queryParams: map[string]interface{}{
+				"from": invaildTimestampStr,
 			},
-			expectedStatus: http.StatusInternalServerError,
-			expectedResponse: `
-{
-	"error": {
-		"code": 500,
-		"message": "internal error",
-		"status": "INTERNAL"
-	}
-}
-`,
-		},
-		{
-			name:        "it responds with `` if the service return an unknown error",
-			urlParams:   []interface{}{username},
-			queryParams: nil,
-			buildStubs: func(svc *mock.MockHistoryService) {
-				svc.EXPECT().
-					GetDistanceByUsername(gomock.Any(), gomock.Any()).
-					Times(1).
-					Return(port.HistoryServiceGetDistanceByUsernameResponse{}, errors.New("test error"))
+			headers: map[string]string{
+				"Content-Type": "application/json",
 			},
-			expectedStatus: http.StatusInternalServerError,
-			expectedResponse: `
-{
-	"error": {
-		"code": 500,
-		"message": "unknown error",
-		"status": "UNKNOWN"
-	}
-}
-`,
-		},
-		{
-			name:        "it responds with `FAILED_PRECONDITION` if the service return `ErrFailedPrecondition`",
-			urlParams:   []interface{}{username},
-			queryParams: nil,
 			buildStubs: func(svc *mock.MockHistoryService) {
 				svc.EXPECT().
-					GetDistanceByUsername(gomock.Any(), gomock.Any()).
-					Times(1).
-					Return(
-						port.HistoryServiceGetDistanceByUsernameResponse{},
-						fmt.Errorf(
-							"%w: %v",
-							errpack.ErrFailedPrecondition,
-							errors.New("test error"),
-						),
-					)
-			},
-			expectedStatus: http.StatusUnprocessableEntity,
-			expectedResponse: `
-{
-	"error": {
-		"code": 422,
-		"message": "failed precondition: test error",
-		"status": "FAILED_PRECONDITION"
-	}
-}
-`,
-		},
-		{
-			name:        "it responds with `INVALID_ARGUMENT` if the service return `ErrInvalidArgument`",
-			urlParams:   []interface{}{username},
-			queryParams: nil,
-			buildStubs: func(svc *mock.MockHistoryService) {
-				svc.EXPECT().
-					GetDistanceByUsername(gomock.Any(), gomock.Any()).
-					Times(1).
-					Return(
-						port.HistoryServiceGetDistanceByUsernameResponse{},
-						fmt.Errorf(
-							"%w: %v",
-							errpack.ErrInvalidArgument,
-							errors.New("test error"),
-						),
-					)
+					GetDistanceByUsername(
+						gomock.Any(),
+						gomock.Any(),
+					).
+					Times(0)
 			},
 			expectedStatus: http.StatusBadRequest,
-			expectedResponse: `
-{
-	"error": {
-		"code": 400,
-		"message": "invalid argument: test error",
-		"status": "INVALID_ARGUMENT"
-	}
-}
-`,
+			expectedResponse: map[string]interface{}{
+				"error": map[string]interface{}{
+					"code":    400,
+					"message": "invalid argument",
+					"status":  "INVALID_ARGUMENT",
+				},
+			},
 		},
 		{
-			name:        "it responds with `NOT_FOUND` if the service return `ErrNotFound`",
-			urlParams:   []interface{}{username},
-			queryParams: nil,
+			name:      "it responds with BAD_REQUEST if invalid `to` is provided",
+			path:      getUserDistancePath,
+			urlParams: []interface{}{validUsername},
+			queryParams: map[string]interface{}{
+				"to": invaildTimestampStr,
+			},
+			headers: map[string]string{
+				"Content-Type": "application/json",
+			},
 			buildStubs: func(svc *mock.MockHistoryService) {
 				svc.EXPECT().
-					GetDistanceByUsername(gomock.Any(), gomock.Any()).
+					GetDistanceByUsername(
+						gomock.Any(),
+						gomock.Any(),
+					).
+					Times(0)
+			},
+			expectedStatus: http.StatusBadRequest,
+			expectedResponse: map[string]interface{}{
+				"error": map[string]interface{}{
+					"code":    400,
+					"message": "invalid argument",
+					"status":  "INVALID_ARGUMENT",
+				},
+			},
+		},
+		{
+			name:        "it responds with NOT_FOUND if service returns ErrNotFound",
+			path:        getUserDistancePath,
+			urlParams:   []interface{}{validUsername},
+			queryParams: nil,
+			headers: map[string]string{
+				"Content-Type": "application/json",
+			},
+			buildStubs: func(svc *mock.MockHistoryService) {
+				svc.EXPECT().
+					GetDistanceByUsername(
+						gomock.Any(),
+						EqHistoryServiceGetDistanceByUsernameRequest(port.HistoryServiceGetDistanceByUsernameRequest{
+							Username: validUsername,
+							From:     nil,
+							To:       nil,
+						}),
+					).
 					Times(1).
 					Return(
-						port.HistoryServiceGetDistanceByUsernameResponse{},
-						fmt.Errorf(
-							"%w: %v",
-							errpack.ErrNotFound,
-							errors.New("test error"),
-						),
+						port.HistoryServiceGetDistanceByUsernameResponse{
+							Distance: distance,
+						},
+						fmt.Errorf("%w: %v", errpack.ErrNotFound, errors.New(customErrMsg)),
 					)
 			},
 			expectedStatus: http.StatusNotFound,
-			expectedResponse: `
-{
-	"error": {
-		"code": 404,
-		"message": "not found: test error",
-		"status": "NOT_FOUND"
-	}
-}
-`,
+			expectedResponse: map[string]interface{}{
+				"error": map[string]interface{}{
+					"code":    404,
+					"message": fmt.Sprintf("%s: %s", errpack.ErrNotFound.Error(), customErrMsg),
+					"status":  "NOT_FOUND",
+				},
+			},
+		},
+		{
+			name:        "it responds with INTERNAL if service returns ErrInternalError",
+			path:        getUserDistancePath,
+			urlParams:   []interface{}{validUsername},
+			queryParams: nil,
+			headers: map[string]string{
+				"Content-Type": "application/json",
+			},
+			buildStubs: func(svc *mock.MockHistoryService) {
+				svc.EXPECT().
+					GetDistanceByUsername(
+						gomock.Any(),
+						EqHistoryServiceGetDistanceByUsernameRequest(port.HistoryServiceGetDistanceByUsernameRequest{
+							Username: validUsername,
+							From:     nil,
+							To:       nil,
+						}),
+					).
+					Times(1).
+					Return(
+						port.HistoryServiceGetDistanceByUsernameResponse{
+							Distance: distance,
+						},
+						fmt.Errorf("%w: %v", errpack.ErrInternalError, errors.New(customErrMsg)),
+					)
+			},
+			expectedStatus: http.StatusInternalServerError,
+			expectedResponse: map[string]interface{}{
+				"error": map[string]interface{}{
+					"code":    500,
+					"message": errpack.ErrInternalError.Error(),
+					"status":  "INTERNAL",
+				},
+			},
+		},
+		{
+			name:        "it responds with UNKNOWN if service returns an unknown error",
+			path:        getUserDistancePath,
+			urlParams:   []interface{}{validUsername},
+			queryParams: nil,
+			headers: map[string]string{
+				"Content-Type": "application/json",
+			},
+			buildStubs: func(svc *mock.MockHistoryService) {
+				svc.EXPECT().
+					GetDistanceByUsername(
+						gomock.Any(),
+						EqHistoryServiceGetDistanceByUsernameRequest(port.HistoryServiceGetDistanceByUsernameRequest{
+							Username: validUsername,
+							From:     nil,
+							To:       nil,
+						}),
+					).
+					Times(1).
+					Return(
+						port.HistoryServiceGetDistanceByUsernameResponse{
+							Distance: distance,
+						},
+						fmt.Errorf("%v", errors.New(customErrMsg)),
+					)
+			},
+			expectedStatus: http.StatusInternalServerError,
+			expectedResponse: map[string]interface{}{
+				"error": map[string]interface{}{
+					"code":    500,
+					"message": "unknown error",
+					"status":  "UNKNOWN",
+				},
+			},
 		},
 	}
 
 	for _, tc := range testCases {
 		tc := tc
-		s.T().Run(tc.name, func(t *testing.T) {
+		s.Run(tc.name, func() {
 			ctrl := gomock.NewController(s.T())
 
 			svc := mock.NewMockHistoryService(ctrl)
@@ -325,21 +361,24 @@ func (s *HistoryHTTPHandlerTestSuite) Test_GetDistance() {
 
 			e := httpexpect.New(s.T(), server.URL)
 
-			req := e.GET("/users/{username}/distance", tc.urlParams...)
+			req := e.GET(tc.path, tc.urlParams...).WithHeaders(tc.headers)
+
 			for k, v := range tc.queryParams {
 				req = req.WithQuery(k, v)
 			}
 
-			response := req.Expect()
-			if tc.expectedStatus != 0 {
-				response = response.Status(tc.expectedStatus)
-			}
-			if tc.expectedResponse != "" {
-				var obj interface{}
-				err := json.Unmarshal([]byte(tc.expectedResponse), &obj)
-				require.NoError(t, err)
+			res := req.Expect()
 
-				response.JSON().Equal(obj)
+			res.Header("Content-Type").Equal("application/json")
+
+			res.Status(tc.expectedStatus)
+			if tc.expectedResponse != nil {
+				var b bytes.Buffer
+				err := json.NewEncoder(&b).Encode(tc.expectedResponse)
+				require.NoError(s.T(), err)
+				res.Body().Equal(b.String())
+			} else {
+				res.NoContent()
 			}
 		})
 	}
