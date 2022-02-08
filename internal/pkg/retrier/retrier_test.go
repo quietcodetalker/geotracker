@@ -40,6 +40,7 @@ func TestRetrier_Exec(t *testing.T) {
 		name               string
 		config             retrier.Config
 		recorder           *recorder
+		ctxTimeout         time.Duration
 		expectedTimestamps []time.Time
 		expectedRes        interface{}
 		expectedErr        error
@@ -56,6 +57,7 @@ func TestRetrier_Exec(t *testing.T) {
 				result: "test0",
 				err:    errors.New("test0"),
 			},
+			ctxTimeout: time.Hour,
 			expectedTimestamps: []time.Time{
 				time.Now(),
 				time.Now().Add(3 * time.Second),
@@ -76,6 +78,7 @@ func TestRetrier_Exec(t *testing.T) {
 				result: "test1",
 				err:    errors.New("test1"),
 			},
+			ctxTimeout: time.Hour,
 			expectedTimestamps: []time.Time{
 				time.Now(),
 				time.Now().Add(3 * time.Second),
@@ -96,6 +99,7 @@ func TestRetrier_Exec(t *testing.T) {
 				result: "test2",
 				err:    errors.New("test2"),
 			},
+			ctxTimeout: time.Hour,
 			expectedTimestamps: []time.Time{
 				time.Now(),
 				time.Now().Add(3 * time.Second),
@@ -104,7 +108,7 @@ func TestRetrier_Exec(t *testing.T) {
 			expectedErr: nil,
 		},
 		{
-			name: "3_custom_isSuccessful",
+			name: "3 custom isSuccessful",
 			config: retrier.Config{
 				Delay:   3 * time.Second,
 				Retries: 3,
@@ -117,11 +121,30 @@ func TestRetrier_Exec(t *testing.T) {
 				result: "test3",
 				err:    errors.New("invalid_argument"),
 			},
+			ctxTimeout: time.Hour,
 			expectedTimestamps: []time.Time{
 				time.Now(),
 			},
 			expectedRes: nil,
 			expectedErr: errors.New("invalid_argument"),
+		},
+		{
+			name: "4 conetxt deadline exceeded",
+			config: retrier.Config{
+				Delay:   3 * time.Second,
+				Retries: 3,
+			},
+			recorder: &recorder{
+				times:  3,
+				result: "test3",
+				err:    errors.New("invalid_argument"),
+			},
+			ctxTimeout: time.Second,
+			expectedTimestamps: []time.Time{
+				time.Now(),
+			},
+			expectedRes: nil,
+			expectedErr: context.DeadlineExceeded,
 		},
 	}
 
@@ -143,8 +166,11 @@ func TestRetrier_Exec(t *testing.T) {
 			var res interface{}
 			var err error
 
+			ctx, cancel := context.WithTimeout(context.Background(), tc.ctxTimeout)
+			defer cancel()
+
 			go func() {
-				res, err = r.Exec(context.Background(), rec.do(fn))
+				res, err = r.Exec(ctx, rec.do(fn))
 				wg.Done()
 			}()
 			wg.Wait()
