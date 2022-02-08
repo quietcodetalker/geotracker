@@ -3,8 +3,9 @@ package port
 
 import (
 	"context"
-	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"time"
+
+	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 )
 
 type HistoryClientAddRecordRequest struct {
@@ -21,10 +22,6 @@ type HistoryClientAddRecordResponse struct {
 	Timestamp time.Time `json:"timestamp"`
 }
 
-type HistoryClientGetDistanceRequest struct{}
-type HistoryClientGetDistanceResponse struct{}
-
 type HistoryClient interface {
 	AddRecord(ctx context.Context, req HistoryClientAddRecordRequest) (HistoryClientAddRecordResponse, error)
-	GetDistance(ctx context.Context, req HistoryClientGetDistanceRequest) (HistoryClientGetDistanceResponse, error)
 }
