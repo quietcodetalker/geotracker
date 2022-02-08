@@ -3,6 +3,8 @@ package historyclient
 import (
 	"context"
 	"fmt"
+	log2 "log"
+
 	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
 	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
@@ -13,7 +15,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	log2 "log"
 )
 
 type GRPCClient struct {
@@ -82,8 +83,4 @@ func (c GRPCClient) AddRecord(ctx context.Context, req port.HistoryClientAddReco
 		B:         geo.Point{res.B.Longitude, res.B.Latitude},
 		Timestamp: res.Timestamp.AsTime(),
 	}, nil
-}
-
-func (c GRPCClient) GetDistance(ctx context.Context, req port.HistoryClientGetDistanceRequest) (port.HistoryClientGetDistanceResponse, error) {
-	panic("implement me")
 }
