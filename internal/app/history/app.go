@@ -4,20 +4,25 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	log2 "log"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/go-chi/chi/v5"
+	"github.com/sony/gobreaker"
 	"gitlab.com/spacewalker/locations/internal/app/history/adapter/in/handler"
 	"gitlab.com/spacewalker/locations/internal/app/history/adapter/out/locationclient"
 	"gitlab.com/spacewalker/locations/internal/app/history/adapter/out/repository"
 	"gitlab.com/spacewalker/locations/internal/app/history/core/service"
 	"gitlab.com/spacewalker/locations/internal/pkg/config"
+	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
 	"gitlab.com/spacewalker/locations/internal/pkg/log"
 	"gitlab.com/spacewalker/locations/internal/pkg/middleware"
+	"gitlab.com/spacewalker/locations/internal/pkg/retrier"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/history"
 	"google.golang.org/grpc"
-	log2 "log"
-	"strings"
-	"sync"
 )
 
 // App is a history application.
@@ -51,9 +56,27 @@ func (a *App) Start() error {
 		log2.Panic(err)
 	}
 
+	cb := gobreaker.NewCircuitBreaker(gobreaker.Settings{
+		Name:        "historyclient",
+		MaxRequests: 3,
+		Interval:    5 * time.Second,
+		Timeout:     7 * time.Second,
+		IsSuccessful: func(err error) bool {
+			return !errors.Is(err, errpack.ErrInternalError)
+		},
+	})
+	re := retrier.New(retrier.Config{
+		Delay:   3 * time.Second,
+		Retries: 3,
+		IsSuccessful: func(err error) bool {
+			return !errors.Is(err, errpack.ErrInternalError)
+		},
+	})
+
 	repo := repository.NewPostgresRepository(db)
 	locationClient := locationclient.NewGRPCClient(a.config.LocationAddr, a.logger)
-	svc := service.NewHistoryService(repo, locationClient, a.logger)
+	proxifiedLocationClient := locationclient.NewProxy(locationClient, cb, re)
+	svc := service.NewHistoryService(repo, proxifiedLocationClient, a.logger)
 	httpHandler := handler.NewHTTPHandler(svc, a.logger)
 	grpcHandler := handler.NewGRPCHandler(svc)
 
