@@ -103,6 +103,26 @@ func TestRetrier_Exec(t *testing.T) {
 			expectedRes: "test2",
 			expectedErr: nil,
 		},
+		{
+			name: "3_custom_isSuccessful",
+			config: retrier.Config{
+				Delay:   3 * time.Second,
+				Retries: 3,
+				IsSuccessful: func(err error) bool {
+					return err == nil || err.Error() == "invalid_argument"
+				},
+			},
+			recorder: &recorder{
+				times:  3,
+				result: "test3",
+				err:    errors.New("invalid_argument"),
+			},
+			expectedTimestamps: []time.Time{
+				time.Now(),
+			},
+			expectedRes: nil,
+			expectedErr: errors.New("invalid_argument"),
+		},
 	}
 
 	for _, tc := range testCases {
