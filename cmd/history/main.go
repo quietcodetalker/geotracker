@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
-	"gitlab.com/spacewalker/locations/internal/app/history"
-	"gitlab.com/spacewalker/locations/internal/pkg/config"
 	"log"
 	"os"
 	"os/signal"
 	"path"
 	"runtime"
 	"syscall"
+
+	"gitlab.com/spacewalker/locations/internal/app/history"
+	"gitlab.com/spacewalker/locations/internal/pkg/config"
 )
 
 func main() {
