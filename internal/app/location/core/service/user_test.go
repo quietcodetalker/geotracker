@@ -3,6 +3,9 @@ package service_test
 import (
 	"context"
 	"errors"
+	"testing"
+	"time"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -14,8 +17,6 @@ import (
 	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	mocklog "gitlab.com/spacewalker/locations/internal/pkg/log/mock"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
-	"testing"
-	"time"
 )
 
 type UserSvcTestSuite struct {
