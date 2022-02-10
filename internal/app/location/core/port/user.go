@@ -32,8 +32,8 @@ type UserServiceListUsersInRadiusRequest struct {
 
 // UserServiceListUsersInRadiusResponse TODO: add description
 type UserServiceListUsersInRadiusResponse struct {
-	Users         []domain.User
-	NextPageToken string
+	Users         []domain.User `json:"users"`
+	NextPageToken string        `json:"next_page_token"`
 }
 
 // UserService represents user service.
