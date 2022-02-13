@@ -9,14 +9,14 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
-	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
-	"gitlab.com/spacewalker/locations/internal/app/location/core/port/mock"
-	"gitlab.com/spacewalker/locations/internal/app/location/core/service"
-	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
-	"gitlab.com/spacewalker/locations/internal/pkg/geo"
-	mocklog "gitlab.com/spacewalker/locations/internal/pkg/log/mock"
-	"gitlab.com/spacewalker/locations/internal/pkg/util"
+	"gitlab.com/spacewalker/geotracker/internal/app/location/core/domain"
+	"gitlab.com/spacewalker/geotracker/internal/app/location/core/port"
+	"gitlab.com/spacewalker/geotracker/internal/app/location/core/port/mock"
+	"gitlab.com/spacewalker/geotracker/internal/app/location/core/service"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/errpack"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/geo"
+	mocklog "gitlab.com/spacewalker/geotracker/internal/pkg/log/mock"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/util"
 )
 
 type UserSvcTestSuite struct {

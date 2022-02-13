@@ -2,11 +2,12 @@ package repository_test
 
 import (
 	"fmt"
+
 	"github.com/stretchr/testify/require"
-	"gitlab.com/spacewalker/locations/internal/app/location/adapter/out/repository"
-	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
-	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
-	"gitlab.com/spacewalker/locations/internal/pkg/geo"
+	"gitlab.com/spacewalker/geotracker/internal/app/location/adapter/out/repository"
+	"gitlab.com/spacewalker/geotracker/internal/app/location/core/domain"
+	"gitlab.com/spacewalker/geotracker/internal/app/location/core/port"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/geo"
 )
 
 var seedUsersQuery = fmt.Sprintf(

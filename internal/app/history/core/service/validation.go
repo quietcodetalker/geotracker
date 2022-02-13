@@ -1,9 +1,10 @@
 package service
 
 import (
-	"github.com/go-playground/validator/v10"
-	"gitlab.com/spacewalker/locations/internal/pkg/validation"
 	"log"
+
+	"github.com/go-playground/validator/v10"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/validation"
 )
 
 var validate *validator.Validate

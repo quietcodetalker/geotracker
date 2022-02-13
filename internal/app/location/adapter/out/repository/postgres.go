@@ -4,8 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
-	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
+
+	"gitlab.com/spacewalker/geotracker/internal/app/location/core/port"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/errpack"
 )
 
 const (

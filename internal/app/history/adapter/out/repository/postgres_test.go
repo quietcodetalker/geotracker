@@ -3,15 +3,16 @@ package repository_test
 import (
 	"database/sql"
 	"fmt"
+	"path"
+	"runtime"
+	"testing"
+
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/spacewalker/locations/internal/pkg/config"
-	"gitlab.com/spacewalker/locations/internal/pkg/util"
-	"path"
-	"runtime"
-	"testing"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/config"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/util"
 
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
@@ -30,7 +31,7 @@ func (s *PostgresTestSuite) SetupSuite() {
 	_, filename, _, _ := runtime.Caller(0)
 	rootDir := path.Join(path.Dir(filename), "../../../../../..")
 
-	cfg, err := config.LoadLocationConfig(
+	cfg, err := config.LoadHistoryConfig(
 		"history_test",
 		path.Join(rootDir, "configs"),
 	)

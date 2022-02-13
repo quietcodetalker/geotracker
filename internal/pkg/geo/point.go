@@ -3,7 +3,8 @@ package geo
 import (
 	"database/sql/driver"
 	"fmt"
-	"gitlab.com/spacewalker/locations/internal/pkg/util"
+
+	"gitlab.com/spacewalker/geotracker/internal/pkg/util"
 )
 
 // Point represents coordinates [longitude, latitude] of the geographic position.

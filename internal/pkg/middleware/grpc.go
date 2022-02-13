@@ -2,11 +2,12 @@ package middleware
 
 import (
 	"context"
-	"gitlab.com/spacewalker/locations/internal/pkg/log"
-	"gitlab.com/spacewalker/locations/internal/pkg/util"
+	"time"
+
+	"gitlab.com/spacewalker/geotracker/internal/pkg/log"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/util"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
-	"time"
 )
 
 // LoggerUnaryServerInterceptor TODO: description

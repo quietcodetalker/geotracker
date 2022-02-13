@@ -3,15 +3,16 @@ package service
 import (
 	"context"
 	"fmt"
-	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
-	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
-	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
-	"gitlab.com/spacewalker/locations/internal/pkg/geo"
-	"gitlab.com/spacewalker/locations/internal/pkg/log"
-	"gitlab.com/spacewalker/locations/internal/pkg/util"
-	"gitlab.com/spacewalker/locations/internal/pkg/util/pagination"
 	log2 "log"
 	"time"
+
+	"gitlab.com/spacewalker/geotracker/internal/app/location/core/domain"
+	"gitlab.com/spacewalker/geotracker/internal/app/location/core/port"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/errpack"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/geo"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/log"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/util"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/util/pagination"
 )
 
 type userService struct {

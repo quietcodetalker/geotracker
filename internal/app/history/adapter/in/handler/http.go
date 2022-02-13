@@ -9,11 +9,11 @@ import (
 	middleware2 "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/gorilla/schema"
-	"gitlab.com/spacewalker/locations/internal/app/history/core/port"
-	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
-	"gitlab.com/spacewalker/locations/internal/pkg/log"
-	"gitlab.com/spacewalker/locations/internal/pkg/middleware"
-	"gitlab.com/spacewalker/locations/internal/pkg/util"
+	"gitlab.com/spacewalker/geotracker/internal/app/history/core/port"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/errpack"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/log"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/middleware"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/util"
 )
 
 var (

@@ -1,4 +1,4 @@
-module gitlab.com/spacewalker/locations
+module gitlab.com/spacewalker/geotracker
 
 go 1.17
 

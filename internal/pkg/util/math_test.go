@@ -1,9 +1,10 @@
 package util_test
 
 import (
-	"github.com/stretchr/testify/require"
-	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/util"
 )
 
 func TestTrunc(t *testing.T) {

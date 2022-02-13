@@ -3,8 +3,9 @@ package util
 import (
 	"context"
 	"errors"
-	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
-	"gitlab.com/spacewalker/locations/internal/pkg/log"
+
+	"gitlab.com/spacewalker/geotracker/internal/pkg/errpack"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/log"
 )
 
 // LogInternalError logs error with loggin level ERROR in case of ErrInternalError

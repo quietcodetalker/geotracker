@@ -2,9 +2,10 @@ package handler
 
 import (
 	"context"
-	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
-	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
-	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/location"
+
+	"gitlab.com/spacewalker/geotracker/internal/app/location/core/port"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/errpack"
+	pb "gitlab.com/spacewalker/geotracker/pkg/api/proto/v1/location"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 
-	"gitlab.com/spacewalker/locations/internal/app/history/core/port"
+	"gitlab.com/spacewalker/geotracker/internal/app/history/core/port"
 
-	"gitlab.com/spacewalker/locations/internal/pkg/retrier"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/retrier"
 
-	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/errpack"
 
 	"github.com/sony/gobreaker"
 )

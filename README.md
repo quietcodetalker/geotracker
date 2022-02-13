@@ -1,6 +1,6 @@
-# Locations
+# geotracker
 
-`locations` is a pet project that represents a geo tracking application.
+`geotracker` is a pet project that represents a geo tracker application.
 It's built as a distributes microservice application for academic reasons.
 
 ## Usage

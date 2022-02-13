@@ -4,9 +4,10 @@ package port
 
 import (
 	"context"
-	"gitlab.com/spacewalker/locations/internal/app/history/core/domain"
-	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"time"
+
+	"gitlab.com/spacewalker/geotracker/internal/app/history/core/domain"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/geo"
 )
 
 // HistoryServiceAddRecordRequest represents request object of HistoryService AddRecord method.

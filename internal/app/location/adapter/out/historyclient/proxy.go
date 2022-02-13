@@ -5,13 +5,13 @@ import (
 	"errors"
 	"fmt"
 
-	"gitlab.com/spacewalker/locations/internal/pkg/retrier"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/retrier"
 
-	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/errpack"
 
 	"github.com/sony/gobreaker"
 
-	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
+	"gitlab.com/spacewalker/geotracker/internal/app/location/core/port"
 )
 
 // Proxy wraps history client and applies circuit breaker and retry with backoff patterns.

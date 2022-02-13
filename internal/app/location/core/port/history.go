@@ -5,7 +5,7 @@ import (
 	"context"
 	"time"
 
-	"gitlab.com/spacewalker/locations/internal/pkg/geo"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/geo"
 )
 
 type HistoryClientAddRecordRequest struct {

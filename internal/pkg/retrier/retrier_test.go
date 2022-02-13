@@ -12,7 +12,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/spacewalker/locations/internal/pkg/retrier"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/retrier"
 )
 
 type recorder struct {

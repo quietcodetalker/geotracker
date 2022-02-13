@@ -9,17 +9,17 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/errpack"
 
 	"github.com/gavv/httpexpect"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/spacewalker/locations/internal/app/history/adapter/in/handler"
-	"gitlab.com/spacewalker/locations/internal/app/history/core/port"
-	"gitlab.com/spacewalker/locations/internal/app/history/core/port/mock"
-	mocklog "gitlab.com/spacewalker/locations/internal/pkg/log/mock"
-	"gitlab.com/spacewalker/locations/internal/pkg/util"
+	"gitlab.com/spacewalker/geotracker/internal/app/history/adapter/in/handler"
+	"gitlab.com/spacewalker/geotracker/internal/app/history/core/port"
+	"gitlab.com/spacewalker/geotracker/internal/app/history/core/port/mock"
+	mocklog "gitlab.com/spacewalker/geotracker/internal/pkg/log/mock"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/util"
 )
 
 // HistoryHTTPHandlerTestSuite is a test suite that covers history http handler functionality.

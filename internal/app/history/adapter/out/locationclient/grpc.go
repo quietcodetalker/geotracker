@@ -3,14 +3,15 @@ package locationclient
 import (
 	"context"
 	"fmt"
-	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
-	"gitlab.com/spacewalker/locations/internal/pkg/log"
-	"gitlab.com/spacewalker/locations/internal/pkg/middleware"
-	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/location"
+	log2 "log"
+
+	"gitlab.com/spacewalker/geotracker/internal/pkg/errpack"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/log"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/middleware"
+	pb "gitlab.com/spacewalker/geotracker/pkg/api/proto/v1/location"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	log2 "log"
 )
 
 type GRPCClient struct {

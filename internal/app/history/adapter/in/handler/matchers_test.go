@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
-	"gitlab.com/spacewalker/locations/internal/app/history/core/port"
+	"gitlab.com/spacewalker/geotracker/internal/app/history/core/port"
 )
 
 type eqHistoryServiceGetDistanceByUsernameRequestMatcher struct {

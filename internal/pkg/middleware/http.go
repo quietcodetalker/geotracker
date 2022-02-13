@@ -1,11 +1,12 @@
 package middleware
 
 import (
-	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
-	"gitlab.com/spacewalker/locations/internal/pkg/log"
-	"gitlab.com/spacewalker/locations/internal/pkg/util"
 	"net/http"
 	"time"
+
+	"gitlab.com/spacewalker/geotracker/internal/pkg/errpack"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/log"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/util"
 )
 
 type responseData struct {

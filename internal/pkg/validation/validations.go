@@ -2,11 +2,12 @@ package validation
 
 import (
 	"fmt"
-	"github.com/go-playground/validator/v10"
-	"gitlab.com/spacewalker/locations/internal/app/location/core/port"
-	"gitlab.com/spacewalker/locations/internal/pkg/geo"
-	"gitlab.com/spacewalker/locations/internal/pkg/util/pagination"
 	"regexp"
+
+	"github.com/go-playground/validator/v10"
+	"gitlab.com/spacewalker/geotracker/internal/app/location/core/port"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/geo"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/util/pagination"
 )
 
 var usernameRegexp = regexp.MustCompile("^[a-zA-Z0-9]{4,16}$")

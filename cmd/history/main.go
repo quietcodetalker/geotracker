@@ -9,8 +9,8 @@ import (
 	"runtime"
 	"syscall"
 
-	"gitlab.com/spacewalker/locations/internal/app/history"
-	"gitlab.com/spacewalker/locations/internal/pkg/config"
+	"gitlab.com/spacewalker/geotracker/internal/app/history"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/config"
 )
 
 func main() {

@@ -2,8 +2,9 @@ package port
 
 import (
 	"context"
-	"gitlab.com/spacewalker/locations/internal/app/location/core/domain"
-	"gitlab.com/spacewalker/locations/internal/pkg/geo"
+
+	"gitlab.com/spacewalker/geotracker/internal/app/location/core/domain"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/geo"
 )
 
 // LocationServiceGetUsersInRadiusRequest TODO: add description

@@ -1,9 +1,10 @@
 package pagination_test
 
 import (
-	"github.com/stretchr/testify/require"
-	"gitlab.com/spacewalker/locations/internal/pkg/util/pagination"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/util/pagination"
 )
 
 func TestEncodeCursor(t *testing.T) {

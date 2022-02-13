@@ -3,10 +3,11 @@ package handler
 import (
 	"context"
 	"fmt"
-	"gitlab.com/spacewalker/locations/internal/app/history/core/port"
-	"gitlab.com/spacewalker/locations/internal/pkg/errpack"
-	"gitlab.com/spacewalker/locations/internal/pkg/geo"
-	pb "gitlab.com/spacewalker/locations/pkg/api/proto/v1/history"
+
+	"gitlab.com/spacewalker/geotracker/internal/app/history/core/port"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/errpack"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/geo"
+	pb "gitlab.com/spacewalker/geotracker/pkg/api/proto/v1/history"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"

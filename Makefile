@@ -23,10 +23,10 @@ run_history:
 	go run ./cmd/history
 
 build_history_image:
-	DOCKER_BUILDKIT=0 docker build -t registry.gitlab.com/spacewalker/locations/history:latest --tag history:latest -f ./deployments/history/Dockerfile .
+	DOCKER_BUILDKIT=0 docker build -t registry.gitlab.com/spacewalker/geotracker/history:latest --tag history:latest -f ./deployments/history/Dockerfile .
 
 build_locations_image:
-	DOCKER_BUILDKIT=0 docker build -t registry.gitlab.com/spacewalker/locations/locations:latest --tag locations:latest -f ./deployments/locations/Dockerfile .
+	DOCKER_BUILDKIT=0 docker build -t registry.gitlab.com/spacewalker/geotracker/locations:latest --tag locations:latest -f ./deployments/locations/Dockerfile .
 
 .PHONY: migrate_locations_up \
 		migrate_locations_down \

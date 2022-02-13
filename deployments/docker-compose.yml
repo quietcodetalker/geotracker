@@ -69,7 +69,7 @@ services:
       - "5433:5432"
 
   locations:
-    image: registry.gitlab.com/spacewalker/locations/locations:latest
+    image: registry.gitlab.com/spacewalker/geotracker/locations:latest
     restart: always
     depends_on:
       - db_locations
@@ -87,7 +87,7 @@ services:
       - APP_ENV=development
 
   history:
-    image: registry.gitlab.com/spacewalker/locations/history:latest
+    image: registry.gitlab.com/spacewalker/geotracker/history:latest
     restart: always
     depends_on:
       - db_history

@@ -1,8 +1,9 @@
 package domain
 
 import (
-	"gitlab.com/spacewalker/locations/internal/pkg/geo"
 	"time"
+
+	"gitlab.com/spacewalker/geotracker/internal/pkg/geo"
 )
 
 // Record represents history record of users` movements.
