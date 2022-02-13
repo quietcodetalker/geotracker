@@ -1,93 +1,185 @@
-# locations
+# geotracker
 
-
-
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://gitlab.com/-/experiment/new_project_readme_content:2e87a88fd6a056c592d56476f7034d81?https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://gitlab.com/-/experiment/new_project_readme_content:2e87a88fd6a056c592d56476f7034d81?https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://gitlab.com/-/experiment/new_project_readme_content:2e87a88fd6a056c592d56476f7034d81?https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.com/spacewalker/locations.git
-git branch -M main
-git push -uf origin main
-```
-
-## Integrate with your tools
-
-- [ ] [Set up project integrations](https://gitlab.com/-/experiment/new_project_readme_content:2e87a88fd6a056c592d56476f7034d81?https://gitlab.com/spacewalker/locations/-/settings/integrations)
-
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://gitlab.com/-/experiment/new_project_readme_content:2e87a88fd6a056c592d56476f7034d81?https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://gitlab.com/-/experiment/new_project_readme_content:2e87a88fd6a056c592d56476f7034d81?https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://gitlab.com/-/experiment/new_project_readme_content:2e87a88fd6a056c592d56476f7034d81?https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://gitlab.com/-/experiment/new_project_readme_content:2e87a88fd6a056c592d56476f7034d81?https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://gitlab.com/-/experiment/new_project_readme_content:2e87a88fd6a056c592d56476f7034d81?https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://gitlab.com/-/experiment/new_project_readme_content:2e87a88fd6a056c592d56476f7034d81?https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://gitlab.com/-/experiment/new_project_readme_content:2e87a88fd6a056c592d56476f7034d81?https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://gitlab.com/-/experiment/new_project_readme_content:2e87a88fd6a056c592d56476f7034d81?https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://gitlab.com/-/experiment/new_project_readme_content:2e87a88fd6a056c592d56476f7034d81?https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://gitlab.com/-/experiment/new_project_readme_content:2e87a88fd6a056c592d56476f7034d81?https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!).  Thank you to [makeareadme.com](https://gitlab.com/-/experiment/new_project_readme_content:2e87a88fd6a056c592d56476f7034d81?https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+`geotracker` is a pet project that represents a geo tracker application.
+It's built as a distributes microservice application for academic reasons.
 
 ## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+### Docker
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Run the following command to run a local cluster
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+`docker-compose -f ./deployments/docker-compose.yml up`
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+It will listen for requests on `localhost:10000`.
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+### Without Docker
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+Run following commands in different terminals:
 
-## License
-For open source projects, say how it is licensed.
+- `make run_locations`  
+  Locations microservice will be available on `localhost:8080`
+- `make run_history`  
+  History microservice will be available on `localhost:8081`
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## Structure
 
+### Components
+
+It consists of two microservices:
+- Locations
+- History
+
+Local cluster based on docker uses [Envoy][envoy] as a gateway.
+
+### Endpoints
+
+It serves 3 endpoints:
+- Set location
+- List users in radius
+- Get distance
+
+#### Set Location
+
+It sets a user's location by username.
+
+Request:
+
+`PUT` `/v1/users/{username}/location`
+
+`Content-Type: application/json`
+
+```json
+{
+  "latitude": 0.0,
+  "longitude": 0.0
+}
+```
+
+Response:
+
+`Content-Type: application/json`
+
+```json
+{
+  "latitude": 0.0,
+  "longitude": 0.0
+}
+```
+
+#### List users in radius
+
+It returns a paginated list of users by radius in meters and geo coordinates.
+
+Request:
+
+`GET` `/v1/users/radius`
+
+Query params`radius`, `latitude`, `longitude` are required.  
+Either `page_size` or `page_token` is required as well.
+
+Response:
+
+`Content-Type: application/json`
+
+```json
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "luke",
+      "created_at": "2022-02-13T16:46:43.822482Z",
+      "updated_at": "2022-02-13T16:46:43.822482Z"
+    }
+  ],
+  "next_page_token": "opaque_token"
+}
+```
+
+#### Get distance
+
+Returns distance walked by a user with given `username` in a period of time.
+
+Request:
+
+`GET` `/v1/users/{username}/distance`
+
+Response:
+
+`Content-Type: application/json`
+
+```json
+{
+  "distance": 100.0
+}
+```
+
+#### Possible errors
+
+These are possile errors endpoinds can respond with:
+
+##### Internal Error
+
+HTTP Status: `500`
+
+Response body:
+
+```json
+{
+  "error": {
+    "code": 500,
+    "message": "internal error",
+    "status": "INTERNAL"
+  }
+}
+```
+
+##### Invalid Argument Error
+
+HTTP Status: `400`
+
+Response body:
+
+```json
+{
+  "error": {
+    "code": 400,
+    "message": "invalid argument",
+    "status": "INVALID_ARGUMENT"
+  }
+}
+```
+
+##### Not Found Error
+
+HTTP Status: `404`
+
+Response body:
+
+```json
+{
+  "error": {
+    "code": 404,
+    "message": "not found",
+    "status": "NOT_FOUND"
+  }
+}
+```
+
+##### Failed Precondition Error
+ 
+HTTP Status: `422`
+
+Response body:
+
+```json
+{
+  "error": {
+    "code": 422,
+    "message": "failed precondition",
+    "status": "FAILED_PRECONDITION"
+  }
+}
+```
+ 
+[envoy]: https://www.envoyproxy.io/

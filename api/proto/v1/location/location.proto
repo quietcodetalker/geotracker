@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package proto;
+
+import "user.proto";
+
+option go_package = "pkg/api/proto/v1/location";
+
+service Location {
+  rpc SetUserLocation(SetUserLocationRequest) returns(SetUserLocationResponse);
+  rpc ListUsersInRadius(ListUsersInRadiusRequest) returns(ListUsersInRadiusResponse);
+}
+
+message SetUserLocationRequest {
+  string username = 1;
+  double longitude = 2;
+  double latitude = 3;
+}
+
+message SetUserLocationResponse {
+  double longitude = 1;
+  double latitude = 2;
+}
+
+message ListUsersInRadiusRequest {
+  repeated double point = 1;
+  double radius = 2;
+  string page_token = 3;
+  int32 page_size = 4;
+}
+
+message ListUsersInRadiusResponse {
+  repeated User users = 1;
+  string next_page_token = 2;
+}

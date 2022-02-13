@@ -1,0 +1,109 @@
+version: "3.3"
+
+services:
+  envoy:
+    image: envoyproxy/envoy-dev:7f3f8f0e10543e9b53dca6aaae3afc5b654c826e
+    restart: always
+    ports:
+      - "10000:10000"
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
+
+  db_history:
+    image: postgres:12-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=shadow
+      - POSTGRES_DB=history
+    volumes:
+      - db_history_vol:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U root -d history" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5434:5432"
+
+  db_history_migrate:
+    image: migrate/migrate
+    depends_on:
+      - db_history
+    volumes:
+      - ../db/migrations/history:/migrations
+    command:
+      - "-path=/migrations/"
+      - "-database"
+      - "postgres://root:shadow@db_history:5432/history?sslmode=disable"
+      - "up"
+
+  db_locations_migrate:
+    image: migrate/migrate
+    depends_on:
+      - db_locations
+    volumes:
+      - ../db/migrations/locations:/migrations
+    command:
+      - "-path=/migrations/"
+      - "-database"
+      - "postgres://root:shadow@db_locations:5432/locations?sslmode=disable"
+      - "up"
+
+  db_locations:
+    image: postgres:12-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=shadow
+      - POSTGRES_DB=locations
+    volumes:
+      - ../db/migrations/locations/initdb:/docker-entrypoint-initdb.d
+      - db_locations_vol:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U root -d locations" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5433:5432"
+
+  locations:
+    image: registry.gitlab.com/spacewalker/geotracker/locations:latest
+    restart: always
+    depends_on:
+      - db_locations
+    environment:
+      - DB_DRIVER=postgres
+      - DB_HOST=db_locations
+      - DB_PORT=5432
+      - DB_USER=root
+      - DB_PASSWORD=shadow
+      - DB_NAME=locations
+      - DB_SSLMODE=disable
+      - BIND_ADDR_GRPC=:50051
+      - BIND_ADDR_HTTP=:8080
+      - HISTORY_ADDR=history:50051
+      - APP_ENV=development
+
+  history:
+    image: registry.gitlab.com/spacewalker/geotracker/history:latest
+    restart: always
+    depends_on:
+      - db_history
+    environment:
+      - DB_DRIVER=postgres
+      - DB_HOST=db_history
+      - DB_PORT=5432
+      - DB_USER=root
+      - DB_PASSWORD=shadow
+      - DB_NAME=history
+      - DB_SSLMODE=disable
+      - BIND_ADDR_GRPC=:50051
+      - BIND_ADDR_HTTP=:8080
+      - LOCATION_ADDR=locations:50051
+      - APP_ENV=development
+
+volumes:
+  db_locations_vol:
+  db_history_vol:

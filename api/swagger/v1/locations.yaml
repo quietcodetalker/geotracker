@@ -1,0 +1,256 @@
+openapi: 3.0.3
+info:
+  title: Locations
+  description: Locations
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080'
+  - url: 'http://localhost:8081'
+paths:
+  /v1/users/{username}/distance:
+    get:
+      description: Returns distance a user walks in a period of time.
+      parameters:
+        - name: username
+          in: path
+          description: Username of a user
+          schema:
+            type: string
+        - name: from
+          in: query
+          description: Specifies start of the time interval
+          schema:
+            type: string
+        - name: to
+          in: query
+          description: Specifies end of the time interval
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/GetDistance200OK'
+        '400':
+          $ref: '#/components/responses/400Error'
+        '404':
+          $ref: '#/components/responses/404Error'
+        '500':
+          $ref: '#/components/responses/500Error'
+  /v1/users/{username}/location:
+    put:
+      description: Set a user's location.
+      parameters:
+        - name: username
+          in: path
+          description: Username of a user
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - latitude
+                - longitude
+              properties:
+                latitude:
+                  type: number
+                  format: double
+                  minimum: -90
+                  maximum: 90
+                longitude:
+                  type: number
+                  format: double
+                  minimum: -180
+                  maximum: 180
+      responses:
+        '200':
+          $ref: '#/components/responses/SetUserLocation200OK'
+        '400':
+          $ref: '#/components/responses/400Error'
+        '404':
+          $ref: '#/components/responses/404Error'
+        '500':
+          $ref: '#/components/responses/500Error'
+  /v1/users/radius:
+    get:
+      description: Set a user's location.
+      parameters:
+        - name: radius
+          in: query
+          description: Radius to search by.
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: latitude
+          in: query
+          description: Latitude to search by.
+          required: true
+          schema:
+            type: number
+            format: double
+            minimum: -90
+            maximum: 90
+        - name: longitude
+          in: query
+          description: Longitude to search by.
+          required: true
+          schema:
+            type: number
+            format: double
+            minimum: -180
+            maximum: 180
+        - name: page_token
+          in: query
+          description: Opaque token of the page.
+          required: false
+          schema:
+            type: string
+        - name: page_size
+          in: query
+          description: Size of the requested page.
+          required: false
+          schema:
+            type: number
+            format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - latitude
+                - longitude
+              properties:
+                latitude:
+                  type: number
+                  format: double
+                  minimum: -90
+                  maximum: 90
+                longitude:
+                  type: number
+                  format: double
+                  minimum: -180
+                  maximum: 180
+      responses:
+        '200':
+          $ref: '#/components/responses/ListUsersInRadius200OK'
+        '400':
+          $ref: '#/components/responses/400Error'
+        '404':
+          $ref: '#/components/responses/404Error'
+        '500':
+          $ref: '#/components/responses/500Error'
+
+components:
+  responses:
+    GetDistance200OK:
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              distance:
+                type: number
+                format: double
+                example: 1000.0
+    SetUserLocation200OK:
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              latitude:
+                type: number
+                example: 0.0
+              longitude:
+                type: number
+                example: 0.0
+    ListUsersInRadius200OK:
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              next_page_token:
+                type: string
+              users:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    400Error:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: number
+                example: 400
+              message:
+                type: string
+                example: "invalid argument"
+              status:
+                type: string
+                example: "INVALID_ARGUMENT"
+    404Error:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: number
+                example: 404
+              message:
+                type: string
+                example: "not found"
+              status:
+                type: string
+                example: "NOT_FOUND"
+    500Error:
+      description: Internal error
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - error
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 500
+                  message:
+                    type: string
+                    example: "internal error"
+                  status:
+                    type: string
+                    example: "INTERNAL"
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - username
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: number
+        username:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
