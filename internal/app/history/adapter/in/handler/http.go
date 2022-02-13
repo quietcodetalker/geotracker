@@ -1,6 +1,10 @@
 package handler
 
 import (
+	log2 "log"
+	"net/http"
+	"time"
+
 	"github.com/go-chi/chi/v5"
 	middleware2 "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -10,9 +14,6 @@ import (
 	"gitlab.com/spacewalker/locations/internal/pkg/log"
 	"gitlab.com/spacewalker/locations/internal/pkg/middleware"
 	"gitlab.com/spacewalker/locations/internal/pkg/util"
-	log2 "log"
-	"net/http"
-	"time"
 )
 
 var (
