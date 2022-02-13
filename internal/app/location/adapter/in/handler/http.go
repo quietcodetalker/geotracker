@@ -59,7 +59,7 @@ func (h *HTTPHandler) setupRoutes() {
 		middleware.LoggerMiddleware(h.logger),
 		middleware.RecovererMiddleware(h.logger),
 		cors.Handler(cors.Options{
-			AllowedOrigins:   []string{"https://*", "http://*"},
+			AllowedOrigins:   []string{"*"},
 			AllowedMethods:   []string{"GET", "POST"},
 			AllowedHeaders:   []string{"Accept", "Content-Type"},
 			AllowCredentials: false,
