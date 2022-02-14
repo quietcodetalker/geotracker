@@ -60,7 +60,7 @@ func (h *HTTPHandler) setupRoutes() {
 		middleware.RecovererMiddleware(h.logger),
 		cors.Handler(cors.Options{
 			AllowedOrigins:   []string{"*"},
-			AllowedMethods:   []string{"GET", "POST"},
+			AllowedMethods:   []string{"GET", "PUT"},
 			AllowedHeaders:   []string{"Accept", "Content-Type"},
 			AllowCredentials: false,
 			MaxAge:           300,
