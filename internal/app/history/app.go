@@ -139,14 +139,17 @@ func (a *App) Stop(ctx context.Context) error {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
+	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*30)
+	defer cancel()
+
 	go func() {
-		if err := a.httpServer.Stop(context.Background()); err != nil {
+		if err := a.httpServer.Stop(cancelCtx); err != nil {
 			a.logger.Info(fmt.Sprintf("failed to stop http server :%v", err), nil)
 		}
 		wg.Done()
 	}()
 	go func() {
-		if err := a.grpcServer.Stop(context.Background()); err != nil {
+		if err := a.grpcServer.Stop(cancelCtx); err != nil {
 			a.logger.Info(fmt.Sprintf("failed to stop grpc server :%v", err), nil)
 		}
 		wg.Done()

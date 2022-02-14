@@ -6,6 +6,7 @@ services:
     restart: always
     ports:
       - "10000:10000"
+      - "8080:8080"
     volumes:
       - ./envoy.yaml:/etc/envoy/envoy.yaml
 
@@ -103,6 +104,18 @@ services:
       - BIND_ADDR_HTTP=:8080
       - LOCATION_ADDR=locations:50051
       - APP_ENV=development
+
+  swagger:
+    image: swaggerapi/swagger-ui
+    restart: always
+    depends_on:
+      - locations
+      - history
+      - envoy
+    volumes:
+      - ../api/swagger/v1:/v1
+    environment:
+      - SWAGGER_JSON=/v1/swagger.yaml
 
 volumes:
   db_locations_vol:
