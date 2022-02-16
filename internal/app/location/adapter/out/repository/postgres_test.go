@@ -1,17 +1,19 @@
 package repository_test
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/util/testutil"
 	"path"
 	"runtime"
 	"testing"
+	"time"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/spacewalker/geotracker/internal/pkg/config"
 	"gitlab.com/spacewalker/geotracker/internal/pkg/util"
 
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -20,43 +22,63 @@ import (
 type PostgresTestSuite struct {
 	suite.Suite
 
-	db *sql.DB
-	m  *migrate.Migrate
+	db        *sql.DB
+	m         *migrate.Migrate
+	container *testutil.Container
 }
 
 func (s *PostgresTestSuite) SetupSuite() {
 	var err error
 
+	dbUser := testutil.RandomString(10, 10, testutil.CharacterSetAlphabet)
+	dbPassword := testutil.RandomString(10, 10, testutil.CharacterSetAlphabet)
+	dbName := testutil.RandomString(10, 10, testutil.CharacterSetAlphabet)
+
 	_, filename, _, _ := runtime.Caller(0)
 	rootDir := path.Join(path.Dir(filename), "../../../../../..")
 
-	cfg, err := config.LoadLocationConfig(
-		"locations_test",
-		path.Join(rootDir, "configs"),
-	)
-	require.NoError(s.T(), err)
-	require.NotEmpty(s.T(), cfg)
+	// Setup postgres in a docker container.
+	cancelCtx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+	s.container, err = testutil.SetupPostgres(cancelCtx, testutil.PostgresConfig{
+		User:     dbUser,
+		Password: dbPassword,
+		DBName:   dbName,
+	})
+	if err != nil {
+		s.T().Fatal(err)
+	}
 
-	dbSource := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBSSLMode,
-	)
-
+	// Connect to database.
 	s.db, err = util.OpenDB(
-		cfg.DBDriver,
-		dbSource,
+		"postgres",
+		s.container.URI,
 	)
-	require.NoError(s.T(), err)
+	if err != nil {
+		s.T().Fatal(err)
+	}
 
+	if err := s.db.Ping(); err != nil {
+		s.T().Fatal(err)
+	}
+
+	// Run migrations.
 	migrationsPath := "file://" + path.Join(rootDir, "db/migrations/locations")
 
 	driver, err := postgres.WithInstance(s.db, &postgres.Config{})
-	require.NoError(s.T(), err)
+	if err != nil {
+		s.T().Fatal(err)
+	}
 
 	s.m, err = migrate.NewWithDatabaseInstance(migrationsPath, "postgres", driver)
-	require.NoError(s.T(), err)
-	require.NotNil(s.T(), s.m)
-	require.NoError(s.T(), s.m.Up())
+	if err != nil {
+		s.T().Fatal(err)
+	}
+
+	err = s.m.Up()
+	if err != nil {
+		s.T().Fatal(err)
+	}
 }
 
 func (s *PostgresTestSuite) TearDownTest() {
@@ -86,7 +108,22 @@ func (s *PostgresTestSuite) TearDownTest() {
 }
 
 func (s *PostgresTestSuite) TearDownSuite() {
-	require.NoError(s.T(), s.m.Down())
+	var err error
+
+	err = s.m.Down()
+	if err != nil {
+		// TODO: Log err
+	}
+	err = s.db.Close()
+	if err != nil {
+		// TODO: Log err
+	}
+	cancelCtx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+	err = s.container.Terminate(cancelCtx)
+	if err != nil {
+		s.T().Fatal(err)
+	}
 }
 
 func TestPostgresTestSuite(t *testing.T) {

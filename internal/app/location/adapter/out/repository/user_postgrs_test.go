@@ -2,6 +2,7 @@ package repository_test
 
 import (
 	"context"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/util/testutil"
 	"testing"
 	"time"
 
@@ -11,7 +12,6 @@ import (
 	"gitlab.com/spacewalker/geotracker/internal/app/location/core/port"
 	"gitlab.com/spacewalker/geotracker/internal/pkg/errpack"
 	"gitlab.com/spacewalker/geotracker/internal/pkg/geo"
-	"gitlab.com/spacewalker/geotracker/internal/pkg/util"
 )
 
 func (s *PostgresTestSuite) Test_PostgresQueries_CreateUser() {
@@ -317,78 +317,78 @@ func (s PostgresTestSuite) Test_PostgresQueries_ListUsersInRadius() {
 		{
 			UserID: users[0].ID,
 			Point: geo.Point{
-				0.0 + util.RandomFloat64(-0.01, 0.01),
-				0.0 + util.RandomFloat64(-0.01, 0.01),
+				0.0 + testutil.RandomFloat64(-0.01, 0.01),
+				0.0 + testutil.RandomFloat64(-0.01, 0.01),
 			},
 		},
 		{
 			UserID: users[1].ID,
 			Point: geo.Point{
-				0.0 + util.RandomFloat64(-0.01, 0.01),
-				-90.0 + util.RandomFloat64(0.0, 0.01),
+				0.0 + testutil.RandomFloat64(-0.01, 0.01),
+				-90.0 + testutil.RandomFloat64(0.0, 0.01),
 			},
 		},
 		{
 			UserID: users[2].ID,
 			Point: geo.Point{
-				0.0 + util.RandomFloat64(-0.01, 0.01),
-				90.0 + util.RandomFloat64(-0.01, 0.0),
+				0.0 + testutil.RandomFloat64(-0.01, 0.01),
+				90.0 + testutil.RandomFloat64(-0.01, 0.0),
 			},
 		},
 		{
 			UserID: users[3].ID,
 			Point: geo.Point{
-				180.0 + util.RandomFloat64(-0.01, 0.0),
-				0.0 + util.RandomFloat64(-0.01, 0.01),
+				180.0 + testutil.RandomFloat64(-0.01, 0.0),
+				0.0 + testutil.RandomFloat64(-0.01, 0.01),
 			},
 		},
 		{
 			UserID: users[4].ID,
 			Point: geo.Point{
-				-180.0 + util.RandomFloat64(0.0, 0.01),
-				0.0 + util.RandomFloat64(-0.01, 0.01),
+				-180.0 + testutil.RandomFloat64(0.0, 0.01),
+				0.0 + testutil.RandomFloat64(-0.01, 0.01),
 			},
 		},
 		{
 			UserID: users[5].ID,
 			Point: geo.Point{
-				90.0 + util.RandomFloat64(-0.01, 0.01),
-				0.0 + util.RandomFloat64(-0.01, 0.01),
+				90.0 + testutil.RandomFloat64(-0.01, 0.01),
+				0.0 + testutil.RandomFloat64(-0.01, 0.01),
 			},
 		},
 		{
 			UserID: users[6].ID,
 			Point: geo.Point{
-				-90.0 + util.RandomFloat64(-0.01, 0.01),
-				0.0 + util.RandomFloat64(-0.01, 0.01),
+				-90.0 + testutil.RandomFloat64(-0.01, 0.01),
+				0.0 + testutil.RandomFloat64(-0.01, 0.01),
 			},
 		},
 		{
 			UserID: users[7].ID,
 			Point: geo.Point{
-				180.0 + util.RandomFloat64(-0.01, 0.0),
-				-90.0 + util.RandomFloat64(0.0, 0.01),
+				180.0 + testutil.RandomFloat64(-0.01, 0.0),
+				-90.0 + testutil.RandomFloat64(0.0, 0.01),
 			},
 		},
 		{
 			UserID: users[8].ID,
 			Point: geo.Point{
-				-180.0 + util.RandomFloat64(0.0, 0.01),
-				-90.0 + util.RandomFloat64(0.0, 0.01),
+				-180.0 + testutil.RandomFloat64(0.0, 0.01),
+				-90.0 + testutil.RandomFloat64(0.0, 0.01),
 			},
 		},
 		{
 			UserID: users[9].ID,
 			Point: geo.Point{
-				180.0 + util.RandomFloat64(-0.01, 0.0),
-				90.0 + util.RandomFloat64(-0.01, 0.0),
+				180.0 + testutil.RandomFloat64(-0.01, 0.0),
+				90.0 + testutil.RandomFloat64(-0.01, 0.0),
 			},
 		},
 		{
 			UserID: users[10].ID,
 			Point: geo.Point{
-				180.0 + util.RandomFloat64(-0.01, 0.0),
-				-90.0 + util.RandomFloat64(0.0, 0.01),
+				180.0 + testutil.RandomFloat64(-0.01, 0.0),
+				-90.0 + testutil.RandomFloat64(0.0, 0.01),
 			},
 		},
 	}

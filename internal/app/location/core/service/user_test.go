@@ -3,6 +3,7 @@ package service_test
 import (
 	"context"
 	"errors"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/util/testutil"
 	"testing"
 	"time"
 
@@ -16,7 +17,6 @@ import (
 	"gitlab.com/spacewalker/geotracker/internal/pkg/errpack"
 	"gitlab.com/spacewalker/geotracker/internal/pkg/geo"
 	mocklog "gitlab.com/spacewalker/geotracker/internal/pkg/log/mock"
-	"gitlab.com/spacewalker/geotracker/internal/pkg/util"
 )
 
 type UserSvcTestSuite struct {
@@ -42,8 +42,8 @@ func (s *UserSvcTestSuite) Test_UserService_SetUserLocation() {
 	username := "user1"
 
 	point := geo.Trunc(geo.Point{
-		util.RandomFloat64(-180.0, 180.0),
-		util.RandomFloat64(-90.0, 90.0),
+		testutil.RandomFloat64(-180.0, 180.0),
+		testutil.RandomFloat64(-90.0, 90.0),
 	})
 
 	testCases := []struct {

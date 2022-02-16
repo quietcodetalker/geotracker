@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gitlab.com/spacewalker/geotracker/internal/pkg/util/testutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -19,7 +20,6 @@ import (
 	"gitlab.com/spacewalker/geotracker/internal/app/history/core/port"
 	"gitlab.com/spacewalker/geotracker/internal/app/history/core/port/mock"
 	mocklog "gitlab.com/spacewalker/geotracker/internal/pkg/log/mock"
-	"gitlab.com/spacewalker/geotracker/internal/pkg/util"
 )
 
 // HistoryHTTPHandlerTestSuite is a test suite that covers history http handler functionality.
@@ -43,14 +43,14 @@ func TestUserHTTPHandlerTestSuite(t *testing.T) {
 func (s *HistoryHTTPHandlerTestSuite) Test_GetDistance() {
 	invalidUsernameCharacterSet := "!@#$%^&*()_+=-'\""
 	getUserDistancePath := "/users/{validUsername}/distance"
-	validUsername := util.RandomUsername()
-	util.RandomString(1, 1, invalidUsernameCharacterSet)
-	from, to := util.RandomTimeInterval()
+	validUsername := testutil.RandomUsername()
+	testutil.RandomString(1, 1, invalidUsernameCharacterSet)
+	from, to := testutil.RandomTimeInterval()
 	validFromStr := from.Format("2006-01-02T15:04:05-07:00")
 	validToStr := to.Format("2006-01-02T15:04:05-07:00")
-	distance := util.RandomFloat64(0.0, 1000.0)
+	distance := testutil.RandomFloat64(0.0, 1000.0)
 	invaildTimestampStr := "invalid"
-	customErrMsg := util.RandomString(4, 10, util.CharacterSetAlphanumeric)
+	customErrMsg := testutil.RandomString(4, 10, testutil.CharacterSetAlphanumeric)
 
 	testCases := []struct {
 		name             string
