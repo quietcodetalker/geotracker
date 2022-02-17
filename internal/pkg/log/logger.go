@@ -5,6 +5,26 @@ package log
 // Level represents a logging priority.
 type Level int32
 
+func (l Level) String() string {
+	switch l {
+	case DebugLevel:
+		return "debug"
+	case WarnLevel:
+		return "warn"
+	case ErrorLevel:
+		return "error"
+	case PanicLevel:
+		return "panic"
+	case FatalLevel:
+		return "fatal"
+
+	case InfoLevel:
+		fallthrough
+	default:
+		return "info"
+	}
+}
+
 const (
 	// DebugLevel TODO: add description
 	DebugLevel = iota - 1
