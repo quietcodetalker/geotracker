@@ -59,7 +59,6 @@ services:
       - POSTGRES_PASSWORD=shadow
       - POSTGRES_DB=locations
     volumes:
-      - ../db/migrations/locations/initdb:/docker-entrypoint-initdb.d
       - db_locations_vol:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U root -d locations" ]
@@ -74,9 +73,6 @@ services:
     restart: always
     depends_on:
       - db_locations
-      - fluentd
-    links:
-      - "fluentd"
     environment:
       - DB_DRIVER=postgres
       - DB_HOST=db_locations
@@ -89,20 +85,12 @@ services:
       - BIND_ADDR_HTTP=:8080
       - HISTORY_ADDR=history:50051
       - APP_ENV=production
-    logging:
-      driver: "fluentd"
-      options:
-        fluentd-address: localhost:24224
-        tag: locations.access
 
   history:
     image: registry.gitlab.com/spacewalker/geotracker/history:latest
     restart: always
     depends_on:
       - db_history
-      - fluentd
-    links:
-      - "fluentd"
     environment:
       - DB_DRIVER=postgres
       - DB_HOST=db_history
@@ -115,11 +103,6 @@ services:
       - BIND_ADDR_HTTP=:8080
       - LOCATION_ADDR=locations:50051
       - APP_ENV=production
-    logging:
-      driver: "fluentd"
-      options:
-        fluentd-address: localhost:24224
-        tag: history.access
 
   swagger:
     image: swaggerapi/swagger-ui
@@ -133,36 +116,6 @@ services:
     environment:
       - SWAGGER_JSON=/v1/swagger.yaml
 
-  fluentd:
-    build: ./fluentd
-    volumes:
-      - ./fluentd/conf:/fluentd/etc
-    links:
-      - "elasticsearch"
-    depends_on:
-      - elasticsearch
-    ports:
-      - "24224:24224"
-      - "24224:24224/udp"
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.1
-    container_name: elasticsearch
-    environment:
-      - "discovery.type=single-node"
-    expose:
-      - "9200"
-    ports:
-      - "9200:9200"
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.13.1
-    links:
-      - "elasticsearch"
-    depends_on:
-      - elasticsearch
-    ports:
-      - "5601:5601"
 volumes:
   db_locations_vol:
   db_history_vol:
