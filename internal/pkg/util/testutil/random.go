@@ -15,6 +15,16 @@ func RandomFloat64(min, max float64) float64 {
 	return min + rand.Float64()*(max-min)
 }
 
+// RandomLatitude returns a random number from interval [-90.0, 90.0].
+func RandomLatitude() float64 {
+	return RandomFloat64(-90.0, 90.0)
+}
+
+// RandomLongitude returns a random number from interval [-180.0, 180.0].
+func RandomLongitude() float64 {
+	return RandomFloat64(-180.0, 180.0)
+}
+
 // RandomInt returns a random number in the interval [min, max].
 func RandomInt(min, max int) int {
 	if min > max {
@@ -68,8 +78,8 @@ func RandomUsername() string {
 // RandomTimeInterval returns two random timestamps where the first one is before the second one.
 func RandomTimeInterval() (time.Time, time.Time) {
 	hours := RandomInt(-24, 0)
-	from := time.Now().Add(time.Hour * time.Duration(hours))
-	to := from.Add(time.Second * time.Duration(RandomInt(1, 1000)))
+	from := time.Now().Add(time.Hour * time.Duration(hours)).UTC()
+	to := from.Add(time.Second * time.Duration(RandomInt(1, 1000))).UTC()
 
 	return from, to
 }
