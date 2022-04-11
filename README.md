@@ -4,6 +4,7 @@
 It's built as a distributes microservice application for academic reasons.
 
 ## Usage
+
 Load dependencies
 ```bash
 go mod tidy
@@ -32,19 +33,15 @@ make migrate_history_up
 
 ## Structure
 
-### Components
-
 It consists of two microservices:
 - Locations
 - History
 
 Local cluster based on docker uses [Envoy][envoy] as a gateway.
 
-### Documentation
+## Documentation
 
 To see documentation open `http://localhost:8080/` in your browser to open [swagger][swagger]
-
-
  
 [envoy]: https://www.envoyproxy.io/
 [swagger]: https://swagger.io/
