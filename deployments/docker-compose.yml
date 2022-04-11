@@ -27,30 +27,6 @@ services:
     ports:
       - "5434:5432"
 
-  db_history_migrate:
-    image: migrate/migrate
-    depends_on:
-      - db_history
-    volumes:
-      - ../db/migrations/history:/migrations
-    command:
-      - "-path=/migrations/"
-      - "-database"
-      - "postgres://root:shadow@db_history:5432/history?sslmode=disable"
-      - "up"
-
-  db_locations_migrate:
-    image: migrate/migrate
-    depends_on:
-      - db_locations
-    volumes:
-      - ../db/migrations/locations:/migrations
-    command:
-      - "-path=/migrations/"
-      - "-database"
-      - "postgres://root:shadow@db_locations:5432/locations?sslmode=disable"
-      - "up"
-
   db_locations:
     image: postgres:12-alpine
     restart: always
