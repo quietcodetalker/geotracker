@@ -1,44 +1,44 @@
 package util
 
 import (
-  "encoding/json"
-  "io"
-  "net/http"
+	"encoding/json"
+	"io"
+	"net/http"
 )
 
 // DecodeBody decodes request body.
 func DecodeBody(r *http.Request, v interface{}) error {
-  defer r.Body.Close()
+	defer r.Body.Close()
 
-  b, err := io.ReadAll(r.Body)
-  if err != nil {
-    return err
-  }
+	b, err := io.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
 
-  return json.Unmarshal(b, &v)
+	return json.Unmarshal(b, &v)
 }
 
 // EncodeBody encodes response body.
 func EncodeBody(w http.ResponseWriter, v interface{}) error {
-  return json.NewEncoder(w).Encode(v)
+	return json.NewEncoder(w).Encode(v)
 }
 
 // Respond set response header and encodes response body.
 func Respond(w http.ResponseWriter, status int, data interface{}) error {
-  w.WriteHeader(status)
-  if data != nil {
-    return EncodeBody(w, data)
-  }
-  return nil
+	w.WriteHeader(status)
+	if data != nil {
+		return EncodeBody(w, data)
+	}
+	return nil
 }
 
 // RespondErr builds response body with provided error and responds.
 func RespondErr(w http.ResponseWriter, status int, err error) error {
-  w.WriteHeader(status)
-  return EncodeBody(
-    w,
-    map[string]interface{}{
-      "error": err,
-    },
-  )
+	w.WriteHeader(status)
+	return EncodeBody(
+		w,
+		map[string]interface{}{
+			"error": err,
+		},
+	)
 }
