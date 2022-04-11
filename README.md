@@ -4,6 +4,10 @@
 It's built as a distributes microservice application for academic reasons.
 
 ## Usage
+Load dependencies
+```bash
+go mod tidy
+```
 
 Build images
 ```bash
