@@ -56,6 +56,13 @@ func (a *App) Start() error {
 	if err != nil {
 		log2.Panic()
 	}
+	//a.logger, err = log.NewFluentdLogger("locations.access", fluent.Config{
+	//  FluentPort: 24224,
+	//  FluentHost: "fluentd",
+	//})
+	//if err != nil {
+	//  log2.Panic(err)
+	//}
 
 	cb := gobreaker.NewCircuitBreaker(gobreaker.Settings{
 		Name:        "historyclient",
@@ -141,14 +148,17 @@ func (a *App) Stop(ctx context.Context) error {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
+	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*30)
+	defer cancel()
+
 	go func() {
-		if err := a.httpServer.Stop(context.Background()); err != nil {
+		if err := a.httpServer.Stop(cancelCtx); err != nil {
 			a.logger.Error(fmt.Sprintf("failed to stop HTTP server :%v", err), nil)
 		}
 		wg.Done()
 	}()
 	go func() {
-		if err := a.grpcServer.Stop(context.Background()); err != nil {
+		if err := a.grpcServer.Stop(cancelCtx); err != nil {
 			a.logger.Error(fmt.Sprintf("failed to gRPC http server :%v", err), nil)
 		}
 		wg.Done()

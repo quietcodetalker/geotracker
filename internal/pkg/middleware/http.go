@@ -64,7 +64,7 @@ func LoggerMiddleware(logger log.Logger) func(handler http.Handler) http.Handler
 			logger.Info("incoming http request complete", log.Fields{
 				"uri":           uri,
 				"method":        method,
-				"duration":      duration,
+				"duration":      duration.Milliseconds(),
 				"status":        responseData.status,
 				"size":          responseData.size,
 				"trace-traceID": traceID,

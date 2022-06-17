@@ -6,6 +6,7 @@ services:
     restart: always
     ports:
       - "10000:10000"
+      - "8080:8080"
     volumes:
       - ./envoy.yaml:/etc/envoy/envoy.yaml
 
@@ -26,30 +27,6 @@ services:
     ports:
       - "5434:5432"
 
-  db_history_migrate:
-    image: migrate/migrate
-    depends_on:
-      - db_history
-    volumes:
-      - ../db/migrations/history:/migrations
-    command:
-      - "-path=/migrations/"
-      - "-database"
-      - "postgres://root:shadow@db_history:5432/history?sslmode=disable"
-      - "up"
-
-  db_locations_migrate:
-    image: migrate/migrate
-    depends_on:
-      - db_locations
-    volumes:
-      - ../db/migrations/locations:/migrations
-    command:
-      - "-path=/migrations/"
-      - "-database"
-      - "postgres://root:shadow@db_locations:5432/locations?sslmode=disable"
-      - "up"
-
   db_locations:
     image: postgres:12-alpine
     restart: always
@@ -58,7 +35,6 @@ services:
       - POSTGRES_PASSWORD=shadow
       - POSTGRES_DB=locations
     volumes:
-      - ../db/migrations/locations/initdb:/docker-entrypoint-initdb.d
       - db_locations_vol:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U root -d locations" ]
@@ -84,7 +60,7 @@ services:
       - BIND_ADDR_GRPC=:50051
       - BIND_ADDR_HTTP=:8080
       - HISTORY_ADDR=history:50051
-      - APP_ENV=development
+      - APP_ENV=production
 
   history:
     image: registry.gitlab.com/spacewalker/geotracker/history:latest
@@ -102,7 +78,19 @@ services:
       - BIND_ADDR_GRPC=:50051
       - BIND_ADDR_HTTP=:8080
       - LOCATION_ADDR=locations:50051
-      - APP_ENV=development
+      - APP_ENV=production
+
+  swagger:
+    image: swaggerapi/swagger-ui
+    restart: always
+    depends_on:
+      - locations
+      - history
+      - envoy
+    volumes:
+      - ../api/swagger/v1:/v1
+    environment:
+      - SWAGGER_JSON=/v1/swagger.yaml
 
 volumes:
   db_locations_vol:

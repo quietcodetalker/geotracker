@@ -70,24 +70,24 @@ type HistoryConfig struct {
 
 // LoadConfig parses configuration and stores the result in
 // the value pointed to by config.
-func LoadConfig(name string, path string, keys []string, config interface{}) error {
+func LoadConfig(v *viper.Viper, name string, path string, config interface{}) error {
 	var err error
 	validate := validator.New()
 
 	if path != "" {
-		viper.AddConfigPath(path)
+		v.AddConfigPath(path)
 	}
 
 	if name != "" {
-		viper.SetConfigName(name)
+		v.SetConfigName(name)
 	}
-	viper.SetConfigType("env")
+	v.SetConfigType("env")
 
-	viper.AutomaticEnv()
+	v.AutomaticEnv()
 
-	viper.SetDefault("AppEnv", "development")
+	v.SetDefault("AppEnv", "development")
 
-	err = viper.ReadInConfig()
+	err = v.ReadInConfig()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			log.Println("config file not found")
@@ -97,14 +97,7 @@ func LoadConfig(name string, path string, keys []string, config interface{}) err
 		}
 	}
 
-	for _, k := range keys {
-		err = viper.BindEnv(k)
-		if err != nil {
-			return fmt.Errorf("failed to bind keys: %v", err)
-		}
-	}
-
-	err = viper.Unmarshal(config)
+	err = v.Unmarshal(config)
 	if err != nil {
 		return err
 	}
@@ -117,11 +110,31 @@ func LoadConfig(name string, path string, keys []string, config interface{}) err
 	return nil
 }
 
+func bindEnv(v *viper.Viper, keys []string) error {
+	var err error
+
+	for _, k := range keys {
+		err = v.BindEnv(k)
+		if err != nil {
+			return fmt.Errorf("failed to bind keys: %v", err)
+		}
+	}
+
+	return nil
+}
+
 // LoadLocationConfig TODO: add description
 func LoadLocationConfig(name string, path string) (LocationConfig, error) {
+	var err error
 	var cfg LocationConfig
+	v := viper.New()
 
-	err := LoadConfig(name, path, locationConfigKeys, &cfg)
+	err = bindEnv(v, locationConfigKeys)
+	if err != nil {
+		return LocationConfig{}, err
+	}
+
+	err = LoadConfig(v, name, path, &cfg)
 	if err != nil {
 		return LocationConfig{}, err
 	}
@@ -131,9 +144,16 @@ func LoadLocationConfig(name string, path string) (LocationConfig, error) {
 
 // LoadHistoryConfig TODO: add description
 func LoadHistoryConfig(name string, path string) (HistoryConfig, error) {
+	var err error
 	var cfg HistoryConfig
+	v := viper.New()
 
-	err := LoadConfig(name, path, historyConfigKeys, &cfg)
+	err = bindEnv(v, historyConfigKeys)
+	if err != nil {
+		return HistoryConfig{}, err
+	}
+
+	err = LoadConfig(v, name, path, &cfg)
 	if err != nil {
 		return HistoryConfig{}, err
 	}

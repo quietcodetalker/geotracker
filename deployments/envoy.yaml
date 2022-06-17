@@ -1,5 +1,28 @@
 static_resources:
   listeners:
+    - name: listener_1
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 8080
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: hello_world_service
+                http_filters:
+                  - name: envoy.filters.http.router
+                route_config:
+                  name: my_first_route
+                  virtual_hosts:
+                    - name: swagger
+                      domains: ["*"]
+                      routes:
+                        - match:
+                            prefix: "/"
+                          route:
+                            cluster: swagger
     - name: listener_0
       address:
         socket_address:
@@ -50,11 +73,22 @@ static_resources:
     - name: history
       type: STRICT_DNS
       load_assignment:
-        cluster_name: locations
+        cluster_name: history
         endpoints:
           - lb_endpoints:
               - endpoint:
                   address:
                     socket_address:
                       address: history
+                      port_value: 8080
+    - name: swagger
+      type: STRICT_DNS
+      load_assignment:
+        cluster_name: swagger
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: swagger
                       port_value: 8080

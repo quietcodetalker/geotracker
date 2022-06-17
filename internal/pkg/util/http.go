@@ -2,13 +2,20 @@ package util
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 )
 
 // DecodeBody decodes request body.
 func DecodeBody(r *http.Request, v interface{}) error {
 	defer r.Body.Close()
-	return json.NewDecoder(r.Body).Decode(v)
+
+	b, err := io.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(b, &v)
 }
 
 // EncodeBody encodes response body.

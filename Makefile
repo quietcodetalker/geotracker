@@ -1,5 +1,5 @@
-LOCATIONS_DB_URL := postgres://root:shadow@localhost:5432/locations?sslmode=disable
-HISTORY_DB_URL := postgres://root:shadow@localhost:5432/history?sslmode=disable
+LOCATIONS_DB_URL := postgres://root:shadow@localhost:5433/locations?sslmode=disable
+HISTORY_DB_URL := postgres://root:shadow@localhost:5434/history?sslmode=disable
 
 migrate_locations_up:
 	migrate -database ${LOCATIONS_DB_URL} -path db/migrations/locations up
